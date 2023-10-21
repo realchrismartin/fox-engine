@@ -1,0 +1,4 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-3.23/Modules/CMakeParseArguments.cmake
+C:/repositories/custom-hobo/SFML/cmake/Macros.cmake
+C:/repositories/custom-hobo/SFML/src/SFML/CMakeLists.txt

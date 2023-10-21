@@ -1,0 +1,15 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-3.23/Modules/BasicConfigVersion-SameMajorVersion.cmake.in
+C:/Program Files/CMake/share/cmake-3.23/Modules/CMakePackageConfigHelpers.cmake
+C:/Program Files/CMake/share/cmake-3.23/Modules/CheckIncludeFile.c.in
+C:/Program Files/CMake/share/cmake-3.23/Modules/CheckIncludeFile.cmake
+C:/Program Files/CMake/share/cmake-3.23/Modules/CheckIncludeFileCXX.cmake
+C:/Program Files/CMake/share/cmake-3.23/Modules/CheckTypeSize.c.in
+C:/Program Files/CMake/share/cmake-3.23/Modules/CheckTypeSize.cmake
+C:/Program Files/CMake/share/cmake-3.23/Modules/GNUInstallDirs.cmake
+C:/Program Files/CMake/share/cmake-3.23/Modules/WriteBasicConfigVersionFile.cmake
+C:/repositories/custom-hobo/CMakeFiles/CheckTypeSize/SIZEOF_VOID_PTR.c
+C:/repositories/custom-hobo/SFML/CMakeLists.txt
+C:/repositories/custom-hobo/SFML/cmake/Config.cmake
+C:/repositories/custom-hobo/SFML/cmake/SFMLConfig.cmake.in
+C:/repositories/custom-hobo/SFML/cmake/SFMLConfigDependencies.cmake.in
