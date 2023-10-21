@@ -23,14 +23,17 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/SFML)
 
 
 file(GLOB_RECURSE GAME_SOURCE src/*.cpp) 
-#file(GLOB_RECURSE INCLUDE_HPP src/*.hpp) 
+file(GLOB_RECURSE GAME_HEADERS src/*.hpp) 
 
-set(GAME_SOURCE
+set(GAME_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/main.cpp"
     ${GAME_SOURCE}
+    ${GAME_HEADERS}
 )
 
-add_executable(Game "${CMAKE_SOURCE_DIR}/src/main.cpp") 
+add_executable(Game "${GAME_SOURCES}")
+
+target_include_directories(Game PUBLIC "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/src")
 
 set(DEPEND_LIBRARIES
 	sfml-system
