@@ -12,13 +12,13 @@ class Game
 public:
 	Game();
 	void play();
-	~Game();
 protected:
 	void initTestEntities();
 private:
 	std::unique_ptr<sf::View> m_camera;
 	std::shared_ptr<sf::RenderWindow> m_window;
 	std::unique_ptr<Scene> m_scene;
+	std::vector<sf::Event> m_events;
 };
 
 #endif

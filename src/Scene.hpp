@@ -4,12 +4,33 @@
 #include <vector>
 #include <cassert>
 
+#include "SFML/Window/Event.hpp"
+
 #include "src/GameEntity.hpp"
 #include "src/components/ComponentPool.hpp"
+
+#include "src/systems/System.hpp"
+#include "src/systems/GiantMainSystem.hpp"
+#include "src/systems/ProcessWindowEventsSystem.hpp"
 
 class Scene
 {
 public:
+	Scene()
+	{
+		//TODO: right now we just manually add the systems we care about when we create a scene. They are pretty coupled.
+		m_systems.push_back(std::make_shared<GiantMainSystem>());
+		m_systems.push_back(std::make_shared<ProcessWindowEventsSystem>());
+	};
+
+	void update(std::shared_ptr<sf::RenderWindow> window, std::vector<sf::Event>& events)
+	{
+		for (auto const& system : m_systems)
+		{
+			system->update(*this, window, events);
+		}
+	}
+
 	int createEntity()
 	{
 		//TODO: this will be problematic if we want to remove entities later.
@@ -110,6 +131,7 @@ private:
 	int m_maxEntities = 10;
 	std::vector<GameEntity> m_gameEntities;
 	std::vector<ComponentPool*> m_componentPools = {};
+	std::vector<std::shared_ptr<System>> m_systems;
 };
 
 #endif

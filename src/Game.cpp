@@ -25,7 +25,6 @@ Game::Game()
 
 void Game::initTestEntities()
 {
-
 	int playerEntityUID = m_scene->createEntity();
 	m_scene->addComponent<InputComponent>(playerEntityUID);
 	m_scene->addComponent<TransformComponent>(playerEntityUID);
@@ -42,19 +41,7 @@ void Game::play()
 {
 	 while (m_window->isOpen())
 	 {
-		 //TODO: move the systems
-		 for (auto const& entity : m_scene->getEntities())
-		 {
-			InputComponent* input = m_scene->getComponent<InputComponent>(entity.getUID());
-
-			if (input != nullptr)
-			{
-				input->clearEvents();
-			}
-		 }
-
 		 sf::Event event;
-
 		 while (m_window->pollEvent(event))
 		 {
 			 if (event.type == sf::Event::Closed)
@@ -62,47 +49,12 @@ void Game::play()
 				m_window->close();
 			 }
 
-			 //TODO: move the systems
-			 for (auto const& entity : m_scene->getEntities())
-			 {
-				InputComponent* input = m_scene->getComponent<InputComponent>(entity.getUID());
-
-				if (input != nullptr)
-				{
-					input->informOfWindowEvent(event);
-				}
-			 }
+			 m_events.push_back(event);
 		 }
 
 		 m_window->clear();
-
-
-		 //TODO: move the systems
-		 for (auto const& entity : m_scene->getEntities())
-		 {
-		 	 InputComponent* input = m_scene->getComponent<InputComponent>(entity.getUID());
-			 TransformComponent* transform = m_scene->getComponent<TransformComponent>(entity.getUID());
-			 GraphicsComponent* graphics = m_scene->getComponent<GraphicsComponent>(entity.getUID());
-			 
-			 if (input != nullptr && transform != nullptr)
-			 {
-				 transform->updateWithInput(input);
-			 }
-
-			 if (transform != nullptr && graphics != nullptr)
-			 {
-				 graphics->updateWithTransform(transform);
-			 }
-
-			 if (graphics != nullptr)
-			 {
-				 graphics->draw(m_window);
-			 }
-		 }
+		 m_scene->update(m_window, m_events);
+		 m_events.clear();
 		 m_window->display();
 	}
-}
-
-Game::~Game()
-{
 }
