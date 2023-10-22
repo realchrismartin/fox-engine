@@ -5,7 +5,8 @@
 
 void ProcessWindowEventsSystem::update(Scene& scene, std::shared_ptr<sf::RenderWindow> window, std::vector<sf::Event>& events) 
 {
-	for (auto const& entity : scene.getEntities())
+	//TODO: gotta make this iterator parameterized! :) 
+	for (auto const& entity : scene)
 	{
 		InputComponent* input = scene.getComponent<InputComponent>(entity.getUID());
 

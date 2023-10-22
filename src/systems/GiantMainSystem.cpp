@@ -4,11 +4,14 @@
 #include "src/components/GraphicsComponent.hpp"
 #include "src/components/InputComponent.hpp"
 #include "src/components/TransformComponent.hpp"
+#include "src/GameEntity.hpp"
+#include <iostream>
 
 //TODO: this system is a fuckin monolith, fix it later
 void GiantMainSystem::update(Scene& scene, std::shared_ptr<sf::RenderWindow> window, std::vector<sf::Event>& events)
 {
-	 for (auto const& entity : scene.getEntities())
+	//TODO: gotta make this iterator parameterized! :) 
+	 for (auto const& entity : scene)
 	 {
 		 InputComponent* input = scene.getComponent<InputComponent>(entity.getUID());
 		 TransformComponent* transform = scene.getComponent<TransformComponent>(entity.getUID());

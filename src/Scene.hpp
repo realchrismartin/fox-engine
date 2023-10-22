@@ -5,47 +5,21 @@
 #include <cassert>
 
 #include "SFML/Window/Event.hpp"
-
 #include "src/GameEntity.hpp"
 #include "src/components/ComponentPool.hpp"
-
 #include "src/systems/System.hpp"
-#include "src/systems/GiantMainSystem.hpp"
-#include "src/systems/ProcessWindowEventsSystem.hpp"
+#include "src/EntityIterator.hpp"
 
 class Scene
 {
 public:
-	Scene()
-	{
-		//TODO: right now we just manually add the systems we care about when we create a scene. They are pretty coupled.
-		m_systems.push_back(std::make_shared<GiantMainSystem>());
-		m_systems.push_back(std::make_shared<ProcessWindowEventsSystem>());
-	};
+	Scene();
 
-	void update(std::shared_ptr<sf::RenderWindow> window, std::vector<sf::Event>& events)
-	{
-		for (auto const& system : m_systems)
-		{
-			system->update(*this, window, events);
-		}
-	}
-
-	int createEntity()
-	{
-		//TODO: this will be problematic if we want to remove entities later.
-		int uid = (int)m_gameEntities.size();
-
-		GameEntity entity(uid);
-		m_gameEntities.push_back(entity);
-
-		return uid;
-	}
-
-	std::vector<GameEntity>& getEntities()
-	{
-		return m_gameEntities;
-	}
+	void update(std::shared_ptr<sf::RenderWindow> window, std::vector<sf::Event>& events);
+	int createEntity();
+	EntityIterator begin();
+	EntityIterator end();
+	std::vector<GameEntity>& getEntities();
 
 	//Add a component to the entity specified by the ID
 	//This involves assigning an existing component from our component pools, or allocating a new one.
