@@ -1,24 +1,52 @@
 #include "Game.hpp"
 
-#include "SFML/Graphics.hpp"
-#include "SFML/Graphics/RectangleShape.hpp"
+#include "src/GameEntity.hpp"
+
+#include <iostream>
 
 Game::Game()
 {
-	m_window = std::make_unique<sf::RenderWindow>(sf::VideoMode(800, 600), "Chris and J's Game");
+	m_window = std::make_shared<sf::RenderWindow>(sf::VideoMode(800, 600), "Chris and J's Game");
 	m_window->setFramerateLimit(60);
+
+	m_camera = std::make_unique<sf::View>(sf::Vector2f(400, 300), sf::Vector2f(800, 600));
+	//m_camera->rotate(50.f);
+	m_window->setView(*m_camera);
+
+	initTestEntities();
+}
+
+void Game::initTestEntities()
+{
+	int entity1ID = m_gameEntityManager.createEntity();
+	m_graphicsComponentManager.addComponent(entity1ID);
+	m_transformComponentManager.addComponent(entity1ID);
+	m_inputComponentManager.addComponent(entity1ID);
+
+	int entity2ID = m_gameEntityManager.createEntity();
+	m_graphicsComponentManager.addComponent(entity2ID);
+	m_transformComponentManager.addComponent(entity2ID);
+	m_inputComponentManager.addComponent(entity2ID);
+
+	m_transformComponentManager.getComponentForEntityWithID(entity2ID).setPosition(sf::Vector2f(0.f, 150.f));
+
+	int entity3ID = m_gameEntityManager.createEntity();
+	m_graphicsComponentManager.addComponent(entity3ID);
+	m_transformComponentManager.addComponent(entity3ID);
+	m_inputComponentManager.addComponent(entity3ID);
+
+	m_transformComponentManager.getComponentForEntityWithID(entity3ID).setPosition(sf::Vector2f(150.f,0.f));
 }
 
 void Game::play()
 {
-	 sf::RectangleShape shape;
-	 shape.setSize(sf::Vector2f(100, 101));
-	 shape.setFillColor(sf::Color::Red);
-	 shape.setPosition(sf::Vector2f(400.f,300.f));
-
 	 while (m_window->isOpen())
 	 {
 		 sf::Event event;
+
+		 m_inputComponentManager.updateComponents();
+		 m_transformComponentManager.updateComponents();
+		 m_graphicsComponentManager.updateComponents();
 
 		 while (m_window->pollEvent(event))
 		 {
@@ -27,10 +55,37 @@ void Game::play()
 			 {
 				m_window->close();
 			 }
+
+			 m_inputComponentManager.informComponentsOfWindowEvent(event);
 		 }
 
 		 m_window->clear();
-		 m_window->draw(shape);
+
+
+		 for (auto const& entity : m_gameEntityManager.getGameEntities())
+		 {
+			 int uid = entity.getUID();
+
+			 if (m_inputComponentManager.hasComponentForEntityWithID(uid) && m_transformComponentManager.hasComponentForEntityWithID(uid))
+			 {
+				 InputComponent& inputComponent = m_inputComponentManager.getComponentForEntityWithID(entity.getUID());
+				 m_transformComponentManager.getComponentForEntityWithID(entity.getUID()).updateWithInput(inputComponent);
+			 }
+
+			 //System 2: transform > graphics
+			 if (m_transformComponentManager.hasComponentForEntityWithID(uid) && m_graphicsComponentManager.hasComponentForEntityWithID(uid))
+			 {
+				 TransformComponent& transformComponent = m_transformComponentManager.getComponentForEntityWithID(entity.getUID());
+				 m_graphicsComponentManager.getComponentForEntityWithID(entity.getUID()).updateWithTransform(transformComponent);
+			 }
+
+			 //System 3: draw graphics!
+			 if (m_graphicsComponentManager.hasComponentForEntityWithID(uid))
+			 {
+				 m_graphicsComponentManager.getComponentForEntityWithID(entity.getUID()).draw(m_window);
+			 }
+		 }
+
 		 m_window->display();
 	}
 }

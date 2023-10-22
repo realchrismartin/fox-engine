@@ -42,5 +42,4 @@ set(DEPEND_LIBRARIES
 	sfml-audio
 )
 
-target_link_options(Game PRIVATE "/SUBSYSTEM:WINDOWS" "/ENTRY:mainCRTStartup")
 target_link_libraries(Game PRIVATE ${DEPEND_LIBRARIES})
