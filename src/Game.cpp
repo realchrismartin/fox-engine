@@ -1,4 +1,5 @@
 #include "Game.hpp"
+#include <optional>
 
 #include "src/Logger.hpp"
 
@@ -23,18 +24,23 @@ Game::Game()
 	Logger::log("Welcome to Chris n' J's game, you freak!");
 }
 
-void Game::initTestEntities()
+ void Game::initTestEntities()
 {
-	int playerEntityUID = m_scene->createEntity();
-	m_scene->addComponent<InputComponent>(playerEntityUID);
-	m_scene->addComponent<TransformComponent>(playerEntityUID);
-	m_scene->addComponent<GraphicsComponent>(playerEntityUID);
+	std::optional<int> playerEntityUID = m_scene->createEntity();
+	if (playerEntityUID.has_value()) {
+		m_scene->addComponent<InputComponent>(playerEntityUID.value());
+		m_scene->addComponent<TransformComponent>(playerEntityUID.value());
+		m_scene->addComponent<GraphicsComponent>(playerEntityUID.value());
+	}
+	
 
-	int obstacleEntityUID = m_scene->createEntity();
-	m_scene->addComponent<GraphicsComponent>(obstacleEntityUID);
-	m_scene->getComponent<GraphicsComponent>(obstacleEntityUID)->setColor(sf::Color::Red);
-	m_scene->addComponent<TransformComponent>(obstacleEntityUID);
-	m_scene->getComponent<TransformComponent>(obstacleEntityUID)->setPosition(sf::Vector2f(100.f, 100.f));
+	std::optional<int> obstacleEntityUID = m_scene->createEntity();
+	if (obstacleEntityUID.has_value()) {
+		m_scene->addComponent<GraphicsComponent>(obstacleEntityUID.value());
+		m_scene->getComponent<GraphicsComponent>(obstacleEntityUID.value())->setColor(sf::Color::Red);
+		m_scene->addComponent<TransformComponent>(obstacleEntityUID.value());
+		m_scene->getComponent<TransformComponent>(obstacleEntityUID.value())->setPosition(sf::Vector2f(100.f, 100.f));
+	}
 }
 
 void Game::play()

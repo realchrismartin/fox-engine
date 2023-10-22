@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cassert>
+#include <optional>
 
 #include "SFML/Window/Event.hpp"
 #include "src/GameEntity.hpp"
@@ -16,7 +17,7 @@ public:
 	Scene();
 
 	void update(std::shared_ptr<sf::RenderWindow> window, std::vector<sf::Event>& events);
-	int createEntity();
+	std::optional<int> createEntity();
 	EntityIterator begin();
 	EntityIterator end();
 	std::vector<GameEntity>& getEntities();

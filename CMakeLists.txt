@@ -22,6 +22,7 @@ add_definitions(-DSFML_STATIC)
 add_subdirectory(${CMAKE_SOURCE_DIR}/SFML)
 
 
+
 file(GLOB_RECURSE GAME_SOURCE src/*.cpp) 
 file(GLOB_RECURSE GAME_HEADERS src/*.hpp) 
 
