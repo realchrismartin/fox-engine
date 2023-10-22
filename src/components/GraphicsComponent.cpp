@@ -1,4 +1,4 @@
-#include "src/GraphicsComponent.hpp"
+#include "src/components/GraphicsComponent.hpp"
 
 GraphicsComponent::GraphicsComponent()
 {
@@ -9,18 +9,14 @@ GraphicsComponent::GraphicsComponent()
 	 m_shape = shape;
 }
 
-void GraphicsComponent::update()
-{
-}
-
 void GraphicsComponent::setColor(sf::Color color)
 {
 	m_shape.setFillColor(color);
 }
 
-void GraphicsComponent::updateWithTransform(TransformComponent& component)
+void GraphicsComponent::updateWithTransform(TransformComponent* component)
 {
-	m_shape.setPosition(component.getPosition());
+	m_shape.setPosition(component->getPosition());
 }
 
 void GraphicsComponent::draw(std::shared_ptr<sf::RenderWindow> window) const

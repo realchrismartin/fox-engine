@@ -1,10 +1,6 @@
 #include "InputComponent.hpp"
 
-InputComponent::InputComponent()
-{
-}
-
-void InputComponent::update()
+void InputComponent::clearEvents()
 {
 	m_actionSinceLastUpdate.clear();
 }
@@ -12,11 +8,6 @@ void InputComponent::update()
 std::vector<UserInputActionsEnum>& InputComponent::getActionsSinceLastUpdate()
 {
 	return m_actionSinceLastUpdate;
-}
-
-bool InputComponent::caresAboutWindowEvents() const
-{
-	return true;
 }
 
 void InputComponent::informOfWindowEvent(sf::Event e)

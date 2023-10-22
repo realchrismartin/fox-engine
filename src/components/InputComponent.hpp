@@ -2,7 +2,7 @@
 #define INPUTCOMPONENT_HPP
 
 #include <vector>
-#include "src/Component.hpp"
+#include "SFML/Window/Event.hpp"
 
 enum class UserInputActionsEnum
 {
@@ -12,13 +12,11 @@ enum class UserInputActionsEnum
 	PRESSED_D
 };
 
-class InputComponent : public Component
+class InputComponent
 {
 public:
-	InputComponent();
-	void update() override;
-	void informOfWindowEvent(sf::Event event) override;
-	bool caresAboutWindowEvents() const;
+	void clearEvents();
+	void informOfWindowEvent(sf::Event event);
 	std::vector<UserInputActionsEnum>& getActionsSinceLastUpdate();
 private:
 	std::vector<UserInputActionsEnum> m_actionSinceLastUpdate;

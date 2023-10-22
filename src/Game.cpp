@@ -1,8 +1,11 @@
 #include "Game.hpp"
 
-#include "src/GameEntity.hpp"
+#include "src/Logger.hpp"
 
-#include <iostream>
+#include "src/GameEntity.hpp"
+#include "src/components/GraphicsComponent.hpp"
+#include "src/components/InputComponent.hpp"
+#include "src/components/TransformComponent.hpp"
 
 Game::Game()
 {
@@ -13,79 +16,89 @@ Game::Game()
 	//m_camera->rotate(50.f);
 	m_window->setView(*m_camera);
 
+	m_scene = std::make_unique<Scene>();
+
 	initTestEntities();
+
+	Logger::log("Welcome to Chris n' J's game, you freak!");
 }
 
 void Game::initTestEntities()
 {
-	//The Player!
-	int entity1ID = m_gameEntityManager.createEntity();
-	m_inputComponentManager.addComponent(entity1ID);
-	m_transformComponentManager.addComponent(entity1ID);
-	m_graphicsComponentManager.addComponent(entity1ID);
 
-	//Some other stuff.
-	int entity2ID = m_gameEntityManager.createEntity();
-	m_graphicsComponentManager.addComponent(entity2ID);
-	m_graphicsComponentManager.getComponentForEntityWithID(entity2ID).setColor(sf::Color::Red);
-	m_transformComponentManager.addComponent(entity2ID);
-	m_transformComponentManager.getComponentForEntityWithID(entity2ID).setPosition(sf::Vector2f(0.f, 150.f));
+	int playerEntityUID = m_scene->createEntity();
+	m_scene->addComponent<InputComponent>(playerEntityUID);
+	m_scene->addComponent<TransformComponent>(playerEntityUID);
+	m_scene->addComponent<GraphicsComponent>(playerEntityUID);
 
-	int entity3ID = m_gameEntityManager.createEntity();
-	m_graphicsComponentManager.addComponent(entity3ID);
-	m_graphicsComponentManager.getComponentForEntityWithID(entity3ID).setColor(sf::Color::Red);
-	m_transformComponentManager.addComponent(entity3ID);
-	m_transformComponentManager.getComponentForEntityWithID(entity3ID).setPosition(sf::Vector2f(150.f,0.f));
+	int obstacleEntityUID = m_scene->createEntity();
+	m_scene->addComponent<GraphicsComponent>(obstacleEntityUID);
+	m_scene->getComponent<GraphicsComponent>(obstacleEntityUID)->setColor(sf::Color::Red);
+	m_scene->addComponent<TransformComponent>(obstacleEntityUID);
+	m_scene->getComponent<TransformComponent>(obstacleEntityUID)->setPosition(sf::Vector2f(100.f, 100.f));
 }
 
 void Game::play()
 {
 	 while (m_window->isOpen())
 	 {
-		 sf::Event event;
+		 //TODO: move the systems
+		 for (auto const& entity : m_scene->getEntities())
+		 {
+			InputComponent* input = m_scene->getComponent<InputComponent>(entity.getUID());
 
-		 m_inputComponentManager.updateComponents();
-		 m_transformComponentManager.updateComponents();
-		 m_graphicsComponentManager.updateComponents();
+			if (input != nullptr)
+			{
+				input->clearEvents();
+			}
+		 }
+
+		 sf::Event event;
 
 		 while (m_window->pollEvent(event))
 		 {
-			 // Request for closing the window
 			 if (event.type == sf::Event::Closed)
 			 {
 				m_window->close();
 			 }
 
-			 m_inputComponentManager.informComponentsOfWindowEvent(event);
+			 //TODO: move the systems
+			 for (auto const& entity : m_scene->getEntities())
+			 {
+				InputComponent* input = m_scene->getComponent<InputComponent>(entity.getUID());
+
+				if (input != nullptr)
+				{
+					input->informOfWindowEvent(event);
+				}
+			 }
 		 }
 
 		 m_window->clear();
 
-		 //For each of our game enti
-		 for (auto const& entity : m_gameEntityManager.getGameEntities())
+
+		 //TODO: move the systems
+		 for (auto const& entity : m_scene->getEntities())
 		 {
-			 int uid = entity.getUID();
-
-			 if (m_inputComponentManager.hasComponentForEntityWithID(uid) && m_transformComponentManager.hasComponentForEntityWithID(uid))
+		 	 InputComponent* input = m_scene->getComponent<InputComponent>(entity.getUID());
+			 TransformComponent* transform = m_scene->getComponent<TransformComponent>(entity.getUID());
+			 GraphicsComponent* graphics = m_scene->getComponent<GraphicsComponent>(entity.getUID());
+			 
+			 if (input != nullptr && transform != nullptr)
 			 {
-				 InputComponent& inputComponent = m_inputComponentManager.getComponentForEntityWithID(entity.getUID());
-				 m_transformComponentManager.getComponentForEntityWithID(entity.getUID()).updateWithInput(inputComponent);
+				 transform->updateWithInput(input);
 			 }
 
-			 //System 2: transform > graphics
-			 if (m_transformComponentManager.hasComponentForEntityWithID(uid) && m_graphicsComponentManager.hasComponentForEntityWithID(uid))
+			 if (transform != nullptr && graphics != nullptr)
 			 {
-				 TransformComponent& transformComponent = m_transformComponentManager.getComponentForEntityWithID(entity.getUID());
-				 m_graphicsComponentManager.getComponentForEntityWithID(entity.getUID()).updateWithTransform(transformComponent);
+				 graphics->updateWithTransform(transform);
 			 }
 
-			 //System 3: draw graphics!
-			 if (m_graphicsComponentManager.hasComponentForEntityWithID(uid))
+			 if (graphics != nullptr)
 			 {
-				 m_graphicsComponentManager.getComponentForEntityWithID(entity.getUID()).draw(m_window);
+				 graphics->draw(m_window);
 			 }
 		 }
-
 		 m_window->display();
 	}
 }

@@ -1,17 +1,8 @@
-#include "src/TransformComponent.hpp"
-#include <vector>
-#include <iostream>
-TransformComponent::TransformComponent()
-{
-}
+#include "src/components/TransformComponent.hpp"
 
-void TransformComponent::update()
+void TransformComponent::updateWithInput(InputComponent* inputComponent)
 {
-}
-
-void TransformComponent::updateWithInput(InputComponent& inputComponent)
-{
-	std::vector<UserInputActionsEnum> userInputs =  inputComponent.getActionsSinceLastUpdate();
+	std::vector<UserInputActionsEnum> userInputs =  inputComponent->getActionsSinceLastUpdate();
 	
 	sf::Vector2f addition = sf::Vector2f(0.f, 0.f);
 
