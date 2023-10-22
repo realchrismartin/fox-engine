@@ -18,23 +18,23 @@ Game::Game()
 
 void Game::initTestEntities()
 {
+	//The Player!
 	int entity1ID = m_gameEntityManager.createEntity();
-	m_graphicsComponentManager.addComponent(entity1ID);
-	m_transformComponentManager.addComponent(entity1ID);
 	m_inputComponentManager.addComponent(entity1ID);
+	m_transformComponentManager.addComponent(entity1ID);
+	m_graphicsComponentManager.addComponent(entity1ID);
 
+	//Some other stuff.
 	int entity2ID = m_gameEntityManager.createEntity();
 	m_graphicsComponentManager.addComponent(entity2ID);
+	m_graphicsComponentManager.getComponentForEntityWithID(entity2ID).setColor(sf::Color::Red);
 	m_transformComponentManager.addComponent(entity2ID);
-	m_inputComponentManager.addComponent(entity2ID);
-
 	m_transformComponentManager.getComponentForEntityWithID(entity2ID).setPosition(sf::Vector2f(0.f, 150.f));
 
 	int entity3ID = m_gameEntityManager.createEntity();
 	m_graphicsComponentManager.addComponent(entity3ID);
+	m_graphicsComponentManager.getComponentForEntityWithID(entity3ID).setColor(sf::Color::Red);
 	m_transformComponentManager.addComponent(entity3ID);
-	m_inputComponentManager.addComponent(entity3ID);
-
 	m_transformComponentManager.getComponentForEntityWithID(entity3ID).setPosition(sf::Vector2f(150.f,0.f));
 }
 
@@ -61,7 +61,7 @@ void Game::play()
 
 		 m_window->clear();
 
-
+		 //For each of our game enti
 		 for (auto const& entity : m_gameEntityManager.getGameEntities())
 		 {
 			 int uid = entity.getUID();

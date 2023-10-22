@@ -12,6 +12,7 @@ public:
 	GraphicsComponent();
 	virtual void update() override;
 	void updateWithTransform(TransformComponent& component);
+	void setColor(sf::Color color);
 	void draw(std::shared_ptr<sf::RenderWindow> window) const;
 private:
 	sf::RectangleShape m_shape;

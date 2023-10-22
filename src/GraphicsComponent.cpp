@@ -13,6 +13,11 @@ void GraphicsComponent::update()
 {
 }
 
+void GraphicsComponent::setColor(sf::Color color)
+{
+	m_shape.setFillColor(color);
+}
+
 void GraphicsComponent::updateWithTransform(TransformComponent& component)
 {
 	m_shape.setPosition(component.getPosition());
