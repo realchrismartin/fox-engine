@@ -12,8 +12,6 @@ class Game
 public:
 	Game();
 	void play();
-protected:
-	void initTestEntities();
 private:
 	std::unique_ptr<sf::View> m_camera;
 	std::shared_ptr<sf::RenderWindow> m_window;

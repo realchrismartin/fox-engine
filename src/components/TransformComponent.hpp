@@ -8,7 +8,7 @@
 class TransformComponent
 {
 public:
-	void updateWithInput(InputComponent* inputComponent);
+	void updateWithInput(InputComponent& inputComponent);
 	sf::Vector2f getPosition() const;
 	void setPosition(sf::Vector2f position);
 private:

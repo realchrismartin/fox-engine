@@ -10,9 +10,17 @@ int GameEntity::getUID() const
 	return m_uid;
 }
 
-bool GameEntity::hasComponent(int componentTypeUID) const
+bool GameEntity::hasAllComponents(std::vector<int>& components) const
 {
-	return m_componentTypeUIDs.count(componentTypeUID);
+	for (auto const& componentId : components)
+	{
+		if (!m_componentTypeUIDs.count(componentId))
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 void GameEntity::registerComponent(int componentTypeUID)

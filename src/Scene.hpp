@@ -5,22 +5,20 @@
 #include <cassert>
 #include <optional>
 
+#include "SFML/Graphics/RenderWindow.hpp"
 #include "SFML/Window/Event.hpp"
-#include "src/GameEntity.hpp"
+#include "src/entities/GameEntity.hpp"
 #include "src/components/ComponentPool.hpp"
-#include "src/systems/System.hpp"
-#include "src/EntityIterator.hpp"
+
+class System;
 
 class Scene
 {
 public:
-	Scene();
-
 	void update(std::shared_ptr<sf::RenderWindow> window, std::vector<sf::Event>& events);
 	std::optional<int> createEntity();
-	EntityIterator begin();
-	EntityIterator end();
 	std::vector<GameEntity>& getEntities();
+	void addSystem(std::shared_ptr<System> system);
 
 	//Add a component to the entity specified by the ID
 	//This involves assigning an existing component from our component pools, or allocating a new one.
@@ -61,36 +59,28 @@ public:
 		m_gameEntities[entityUID].registerComponent(componentTypeId);
 	};
 
+
+	//TODO: later bushwhack these asserts
 	template<typename T>
-	bool hasComponent(int entityUID) const
+	T& getComponent(int entityUID)
 	{
 		//Handle case where we don't have an entity yet
 		if (entityUID >= m_gameEntities.size())
 		{
-			return false;
+			assert(false);
 		}
 
 		//Grab the id for the type of component we are getting.
 		int componentTypeId = GetComponentTypeId<T>();
 
+		//TODO: inefficiencies ho!
+		std::vector<int> components = { componentTypeId };
+
 		//Handle case where we don't have a registered component of this type for this entity
-		if (!m_gameEntities[entityUID].hasComponent(componentTypeId))
+		if (!m_gameEntities[entityUID].hasAllComponents(components))
 		{
-			return false;
+			assert(false);
 		}
-
-		return true;
-	}
-
-	template<typename T>
-	T* getComponent(int entityUID)
-	{
-		if (!hasComponent<T>(entityUID))
-		{
-			return nullptr;
-		}
-
-		int componentTypeId = GetComponentTypeId<T>();
 
 		//Handle case that there is no component pool for this component type, which is definitely an error. Just choke on it.
 		if (m_componentPools.size() < (componentTypeId + 1))
@@ -99,13 +89,15 @@ public:
 		}
 
 		//If we have a component in the specified pool for this entity, return a pointer to it.
-		return static_cast<T*>(m_componentPools[componentTypeId]->get(entityUID));
+		T* pointer =  static_cast<T*>(m_componentPools[componentTypeId]->get(entityUID));
+
+		return *pointer;
 	}
 
 private:
 	int m_maxEntities = 10;
 	std::vector<GameEntity> m_gameEntities;
-	std::vector<ComponentPool*> m_componentPools = {};
+	std::vector<ComponentPool*> m_componentPools;
 	std::vector<std::shared_ptr<System>> m_systems;
 };
 

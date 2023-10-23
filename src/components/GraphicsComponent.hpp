@@ -10,7 +10,7 @@ class GraphicsComponent
 {
 public:
 	GraphicsComponent();
-	void updateWithTransform(TransformComponent* component);
+	void updateWithTransform(TransformComponent& component);
 	void setColor(sf::Color color);
 	void draw(std::shared_ptr<sf::RenderWindow> window) const;
 private:

@@ -1,9 +1,9 @@
-#ifndef PROCESSWINDOWEVENTSSYSTEM_HPP 
-#define PROCESSWINDOWEVENTSSYSTEM_HPP 
+#ifndef RENDERSYSTEM_HPP 
+#define RENDERSYSTEM_HPP
 
 #include "src/systems/System.hpp"
 
-class ProcessWindowEventsSystem: public System
+class RenderSystem : public System
 {
 	virtual void update(Scene& scene, std::shared_ptr<sf::RenderWindow> window, std::vector<sf::Event>& events) override;
 };

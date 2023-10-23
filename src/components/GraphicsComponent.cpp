@@ -14,9 +14,9 @@ void GraphicsComponent::setColor(sf::Color color)
 	m_shape.setFillColor(color);
 }
 
-void GraphicsComponent::updateWithTransform(TransformComponent* component)
+void GraphicsComponent::updateWithTransform(TransformComponent& component)
 {
-	m_shape.setPosition(component->getPosition());
+	m_shape.setPosition(component.getPosition());
 }
 
 void GraphicsComponent::draw(std::shared_ptr<sf::RenderWindow> window) const
