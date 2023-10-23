@@ -5,7 +5,7 @@ void InputComponent::clearEvents()
 	m_actionSinceLastUpdate.clear();
 }
 
-std::vector<UserInputActionsEnum>& InputComponent::getActionsSinceLastUpdate()
+const std::vector<UserInputActionsEnum>& InputComponent::getActionsSinceLastUpdate() const
 {
 	return m_actionSinceLastUpdate;
 }

@@ -1,8 +1,6 @@
 #ifndef ENTITYITERATOR_HPP
 #define ENTITYITERATOR_HPP
 
-#include <vector>
-
 class Scene;
 class GameEntity;
 

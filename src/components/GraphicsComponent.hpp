@@ -1,18 +1,17 @@
 #ifndef GRAPHICSCOMPONENT_HPP
 #define GRAPHICSCOMPONENT_HPP
 
-#include "src/components/TransformComponent.hpp"
-
-#include "SFML/Graphics/RectangleShape.hpp"
-#include "SFML/Graphics/RenderWindow.hpp"
+class PhysicsComponent;
 
 class GraphicsComponent
 {
 public:
 	GraphicsComponent();
-	void updateWithTransform(TransformComponent& component);
+	void updateWithPhysics(const PhysicsComponent& component);
+	void setPosition(sf::Vector2f position);
 	void setColor(sf::Color color);
-	void draw(std::shared_ptr<sf::RenderWindow> window) const;
+	void setSize(sf::Vector2f size);
+	void draw(sf::RenderWindow& window) const;
 private:
 	sf::RectangleShape m_shape;
 };

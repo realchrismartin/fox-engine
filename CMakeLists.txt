@@ -43,3 +43,5 @@ set(DEPEND_LIBRARIES
 )
 
 target_link_libraries(Game PRIVATE ${DEPEND_LIBRARIES})
+
+target_precompile_headers(Game PRIVATE "${CMAKE_SOURCE_DIR}/pch.hpp")

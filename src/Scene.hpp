@@ -1,12 +1,6 @@
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
-#include <vector>
-#include <cassert>
-#include <optional>
-
-#include "SFML/Graphics/RenderWindow.hpp"
-#include "SFML/Window/Event.hpp"
 #include "src/entities/GameEntity.hpp"
 #include "src/components/ComponentPool.hpp"
 
@@ -15,18 +9,14 @@ class System;
 class Scene
 {
 public:
-	void update(std::shared_ptr<sf::RenderWindow> window, std::vector<sf::Event>& events);
 	std::optional<int> createEntity();
 	std::vector<GameEntity>& getEntities();
-	void addSystem(std::shared_ptr<System> system);
 
 	//Add a component to the entity specified by the ID
 	//This involves assigning an existing component from our component pools, or allocating a new one.
 	template<typename T>
 	void addComponent(int entityUID)
 	{
-		//We assume we're assigning a component to an entity.
-
 		//Handle case where we don't have an entity with this ID yet
 		if (entityUID >= m_gameEntities.size())
 		{
@@ -59,10 +49,9 @@ public:
 		m_gameEntities[entityUID].registerComponent(componentTypeId);
 	};
 
-
 	//TODO: later bushwhack these asserts
 	template<typename T>
-	T& getComponent(int entityUID)
+	T& getComponent(const int entityUID)
 	{
 		//Handle case where we don't have an entity yet
 		if (entityUID >= m_gameEntities.size())
@@ -94,11 +83,16 @@ public:
 		return *pointer;
 	}
 
+	template<typename T>
+	T& getComponent(const GameEntity& entity)
+	{
+		return getComponent<T>(entity.getUID());
+	}
+
 private:
 	int m_maxEntities = 10;
 	std::vector<GameEntity> m_gameEntities;
 	std::vector<ComponentPool*> m_componentPools;
-	std::vector<std::shared_ptr<System>> m_systems;
 };
 
 #endif

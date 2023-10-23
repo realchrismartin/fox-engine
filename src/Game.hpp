@@ -1,10 +1,6 @@
 #ifndef GAME_HPP 
 #define GAME_HPP
 
-#include "SFML/Graphics.hpp"
-#include "SFML/Graphics/RenderWindow.hpp"
-#include "SFML/Graphics/View.hpp"
-
 #include "src/Scene.hpp"
 
 class Game
@@ -14,7 +10,7 @@ public:
 	void play();
 private:
 	std::unique_ptr<sf::View> m_camera;
-	std::shared_ptr<sf::RenderWindow> m_window;
+	std::unique_ptr<sf::RenderWindow> m_window;
 	std::unique_ptr<Scene> m_scene;
 	std::vector<sf::Event> m_events;
 };

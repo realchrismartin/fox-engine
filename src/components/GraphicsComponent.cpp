@@ -1,5 +1,7 @@
 #include "src/components/GraphicsComponent.hpp"
 
+#include "src/components/PhysicsComponent.hpp"
+
 GraphicsComponent::GraphicsComponent()
 {
 	 sf::RectangleShape shape;
@@ -14,13 +16,23 @@ void GraphicsComponent::setColor(sf::Color color)
 	m_shape.setFillColor(color);
 }
 
-void GraphicsComponent::updateWithTransform(TransformComponent& component)
+void GraphicsComponent::setSize(sf::Vector2f size)
 {
-	m_shape.setPosition(component.getPosition());
+	m_shape.setSize(size);
 }
 
-void GraphicsComponent::draw(std::shared_ptr<sf::RenderWindow> window) const
+void GraphicsComponent::updateWithPhysics(const PhysicsComponent& component)
 {
-	window->draw(m_shape);
+	//TODO: make this more nuanced, it is physics after all!
+	setPosition(component.getPosition());
 }
 
+void GraphicsComponent::setPosition(sf::Vector2f position)
+{
+	m_shape.setPosition(position);
+}
+
+void GraphicsComponent::draw(sf::RenderWindow& window) const
+{
+	window.draw(m_shape);
+}

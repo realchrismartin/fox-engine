@@ -1,9 +1,9 @@
-#include "src/components/TransformComponent.hpp"
+#include "src/components/PhysicsComponent.hpp"
 
-void TransformComponent::updateWithInput(InputComponent& inputComponent)
+#include "src/components/InputComponent.hpp"
+
+void PhysicsComponent::updateWithInput(const InputComponent& inputComponent)
 {
-	//TODO: someday soon, please please stop modifying the transforms directly via input. Use a physics intermediary component instead!!
-
 	std::vector<UserInputActionsEnum> userInputs =  inputComponent.getActionsSinceLastUpdate();
 	
 	sf::Vector2f addition = sf::Vector2f(0.f, 0.f);
@@ -39,15 +39,16 @@ void TransformComponent::updateWithInput(InputComponent& inputComponent)
 		}
 	}
 
+	//TODO: make this velocity or some shit instead of position.
 	m_position = m_position + addition;
 }
 
-sf::Vector2f TransformComponent::getPosition() const
+sf::Vector2f PhysicsComponent::getPosition() const
 {
 	return m_position;
 }
 
-void TransformComponent::setPosition(sf::Vector2f position)
+void PhysicsComponent::setPosition(sf::Vector2f position)
 {
 	m_position = position;
 }

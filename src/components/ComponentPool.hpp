@@ -1,7 +1,6 @@
 #ifndef COMPONENTPOOL_HPP
 #define COMPONENTPOOL_HPP
 
-#include <unordered_map>
 #include <typeindex>
 
 //TODO: protect this better later
@@ -33,7 +32,7 @@ public:
 		m_componentSize = componentSize;
 
 		//Allocate enough memory to store n components of size elementSize, where n = capacity
-		m_data = new char[componentSize * capacity];
+		m_data = new int[componentSize * capacity];
 	}
 
 	/// @brief Get the component at index. We can do this because we know how big each one is.
@@ -48,7 +47,7 @@ public:
 	}
 
 private:
-	char* m_data = nullptr;
+	int* m_data = nullptr;
 	size_t m_componentSize = 0;
 };
 

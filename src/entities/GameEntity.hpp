@@ -1,9 +1,6 @@
 #ifndef GAMEENTITY_HPP
 #define GAMEENTITY_HPP
 
-#include <set>
-#include <vector>
-
 class GameEntity
 {
 public:
