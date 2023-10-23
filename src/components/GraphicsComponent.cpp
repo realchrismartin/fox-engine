@@ -23,7 +23,7 @@ void GraphicsComponent::setSize(sf::Vector2f size)
 
 void GraphicsComponent::updateWithPhysics(const PhysicsComponent& component)
 {
-	//TODO: make this more nuanced, it is physics after all!
+	//Wherever the physics body is now, update the graphic to match.
 	setPosition(component.getPosition());
 }
 

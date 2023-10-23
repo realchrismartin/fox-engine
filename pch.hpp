@@ -6,6 +6,7 @@
 #include <vector>
 #include <cassert>
 #include <optional>
+#include <cmath>
 
 //SFML stuff
 #include "SFML/System/Vector2.hpp"
@@ -14,3 +15,6 @@
 #include "SFML/Graphics/RectangleShape.hpp"
 #include "SFML/Graphics/RenderWindow.hpp"
 #include "SFML/Graphics/View.hpp"
+
+//Utility stuff
+#include "src/util/Logger.hpp"

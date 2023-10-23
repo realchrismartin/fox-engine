@@ -6,11 +6,25 @@ class InputComponent;
 class PhysicsComponent
 {
 public:
-	void updateWithInput(const InputComponent& inputComponent);
+	void update(float elapsedTime);
+	void updateCollision(const PhysicsComponent& otherPhysicsComponent, float elapsedTime);
+	void updateWithInput(const InputComponent& inputComponent, float elapsedTime);
+
 	sf::Vector2f getPosition() const;
-	void setPosition(sf::Vector2f position);
+	sf::Vector2f getCenterPoint() const;
+	sf::Vector2f getSize() const;
+
+	void setSize(sf::Vector2f size);
+	void setMass(float mass);
+	void setIsStaticBody(bool isStatic);
+	void setStartingPosition(sf::Vector2f position);
 private:
-	sf::Vector2f m_position = sf::Vector2f(0.f,0.f);
+	std::optional<sf::Vector2f> getCenterPointOfOverlap(const PhysicsComponent& otherPhysicsComponent);
+	sf::Vector2f m_position = sf::Vector2f(0.f, 0.f);
+	sf::Vector2f m_size = sf::Vector2f(0.f, 0.f);
+	sf::Vector2f m_force = sf::Vector2f(0.f, 0.f);
+	float m_mass = 1.f;
+	bool m_staticBody = true;
 };
 
 #endif
