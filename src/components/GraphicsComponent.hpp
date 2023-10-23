@@ -3,6 +3,8 @@
 
 class PhysicsComponent;
 
+#include "SFML/Graphics/RectangleShape.hpp"
+
 class GraphicsComponent
 {
 public:
@@ -11,7 +13,7 @@ public:
 	void setPosition(sf::Vector2f position);
 	void setColor(sf::Color color);
 	void setSize(sf::Vector2f size);
-	void draw(sf::RenderWindow& window) const;
+	const sf::RectangleShape& getGraphic() const;
 private:
 	sf::RectangleShape m_shape;
 };

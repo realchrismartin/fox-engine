@@ -21,6 +21,11 @@ void GraphicsComponent::setSize(sf::Vector2f size)
 	m_shape.setSize(size);
 }
 
+const sf::RectangleShape& GraphicsComponent::getGraphic() const
+{
+	return m_shape;
+}
+
 void GraphicsComponent::updateWithPhysics(const PhysicsComponent& component)
 {
 	//Wherever the physics body is now, update the graphic to match.
@@ -30,9 +35,4 @@ void GraphicsComponent::updateWithPhysics(const PhysicsComponent& component)
 void GraphicsComponent::setPosition(sf::Vector2f position)
 {
 	m_shape.setPosition(position);
-}
-
-void GraphicsComponent::draw(sf::RenderWindow& window) const
-{
-	window.draw(m_shape);
 }

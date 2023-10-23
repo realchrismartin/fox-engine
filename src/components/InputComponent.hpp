@@ -1,22 +1,22 @@
 #ifndef INPUTCOMPONENT_HPP
 #define INPUTCOMPONENT_HPP
 
+#include "SFML/Window/Event.hpp"
+
 enum class UserInputActionsEnum
 {
-	PRESSED_W,
-	PRESSED_S,
-	PRESSED_A,
-	PRESSED_D
+	PRESSING_A,
+	PRESSING_D,
+	PRESSING_SPACEBAR
 };
 
 class InputComponent
 {
 public:
-	void clearEvents();
 	void informOfWindowEvent(sf::Event event);
-	const std::vector<UserInputActionsEnum>& getActionsSinceLastUpdate() const;
+	const std::set<UserInputActionsEnum>& getActiveInputs() const;
 private:
-	std::vector<UserInputActionsEnum> m_actionSinceLastUpdate;
+	std::set<UserInputActionsEnum> m_activeInputs;
 };
 
 #endif

@@ -1,4 +1,4 @@
-#include "src/Scene.hpp"
+#include "src/scenes/Scene.hpp"
 #include "src/util/Logger.hpp"
 
 std::optional<int> Scene::createEntity()

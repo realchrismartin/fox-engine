@@ -1,7 +1,7 @@
 #include "src/entities/EntityIterator.hpp"
 
 #include "src/entities/GameEntity.hpp"
-#include "src/Scene.hpp"
+#include "src/scenes/Scene.hpp"
 
 EntityIterator::EntityIterator(Scene& scene, std::vector<int>& componentIds, int entityIndex) : m_scene(scene), m_componentIds(componentIds)
 {

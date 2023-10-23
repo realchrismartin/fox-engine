@@ -5,30 +5,31 @@
 
 void PhysicsComponent::updateWithInput(const InputComponent& inputComponent, float elapsedTime)
 {
-	std::vector<UserInputActionsEnum> userInputs =  inputComponent.getActionsSinceLastUpdate();
-	
+	std::set<UserInputActionsEnum> userInputs =  inputComponent.getActiveInputs();
+
+	//TODO: make this less, uh, arbitrary
+	float forceFactor = elapsedTime * .0005f * m_mass;
+
 	for (auto const& enumValue : userInputs)
 	{
 		switch (enumValue)
 		{
-			case(UserInputActionsEnum::PRESSED_W):
+			case(UserInputActionsEnum::PRESSING_A):
 			{
-				m_force += elapsedTime * sf::Vector2f(0.f, -.1f);
+				m_force += elapsedTime * sf::Vector2f(-1.f * forceFactor,0.f);
 				break;
 			}
-			case(UserInputActionsEnum::PRESSED_S):
+			case(UserInputActionsEnum::PRESSING_D):
 			{
-				m_force += elapsedTime * sf::Vector2f(0.f, .1f);
+				m_force += elapsedTime * sf::Vector2f(forceFactor, 0.f);
 				break;
 			}
-			case(UserInputActionsEnum::PRESSED_A):
+			case(UserInputActionsEnum::PRESSING_SPACEBAR):
 			{
-				m_force += elapsedTime * sf::Vector2f(-.1f,0.f);
-				break;
-			}
-			case(UserInputActionsEnum::PRESSED_D):
-			{
-				m_force += elapsedTime * sf::Vector2f(.1f, 0.f);
+				if (m_touchingStaticBody)
+				{
+					m_force += elapsedTime * sf::Vector2f(0.f,-forceFactor * 10.f);
+				}
 				break;
 			}
 			default:
@@ -46,20 +47,40 @@ void PhysicsComponent::updateCollision(const PhysicsComponent& otherPhysicsCompo
 		return;
 	}
 
-	std::optional<sf::Vector2f> centerOfOverlap = getCenterPointOfOverlap(otherPhysicsComponent);
+	std::optional<Overlap> overlap = getOverlap(otherPhysicsComponent);
 
-	if (!centerOfOverlap.has_value())
+	if (!overlap.has_value())
 	{
 		//No collision
 		return;
 	}
+	
+	//If the thing we're overlapping is static and it's below us, turn gravity off and skip pushing back on that thing.
+	if (otherPhysicsComponent.hasStaticBody() && otherPhysicsComponent.getPosition().y > m_position.y)
+	{
+		m_touchingStaticBody = true;
+		return;
+	}
 
-	//TODO: there's something wrong with this calculation - the x value should be 0
-	sf::Vector2f directionVector = centerOfOverlap.value() - getCenterPoint();
+	sf::Vector2f overlapCenterPoint = sf::Vector2f(overlap.value().position.x + (overlap.value().size.x * .5f), overlap.value().position.y + (overlap.value().size.y * .5f));
+	sf::Vector2f centerPoint = getCenterPoint();
+	sf::Vector2f directionVector = centerPoint - overlapCenterPoint;
+
 	Utils::normalize(directionVector);
+	//Return the center point of the rectangle created by the intersection
 
-	//TODO: calculate some kind of mass value to derive how much force to apply
-	m_force += elapsedTime * directionVector;
+	//If we're already touching a static body below us this tick, remove the Y component of the directional force for this collision so we don't get pooshed through a floor.
+	if (m_touchingStaticBody)
+	{
+		directionVector.y = 0.f;
+	}
+
+	//This thing is what is getting moved. Calculate some displacement force based on how much its overlapping based on its mass (rudimentary!)
+	//Determine what fraction of the overall mass of this thing is in play.
+	float massFactorToApply = m_mass * ((overlap.value().size.x * overlap.value().size.y) / (m_size.x * m_size.y));
+
+	//Apply that force!
+	m_force += massFactorToApply * elapsedTime * directionVector;
 }
 
 void PhysicsComponent::update(float elapsedTime)
@@ -75,9 +96,12 @@ void PhysicsComponent::update(float elapsedTime)
 		return; //Doesn't update its position, etc
 	}
 
-	//Add the force of gravity
-	//TODO
-	//m_force += sf::Vector2f(0.f, 9.8f);
+	//Add the force of gravity if not touching something static
+	//TODO: this is very wrong.
+	if(!m_touchingStaticBody)
+	{
+		m_force += sf::Vector2f(0.f, .2f * m_mass);
+	}
 
 	//Calculate the velocity of the body
 	//Velocity = force / mass
@@ -89,8 +113,8 @@ void PhysicsComponent::update(float elapsedTime)
 	//Update the position based on the velocity
 	m_position += distance;
 
-	//Reset the force that was applied so it can be accumulated next tick.
-	m_force = sf::Vector2f(0.f, 0.f);
+	//Reset collision check
+	m_touchingStaticBody = false;
 }
 
 sf::Vector2f PhysicsComponent::getSize() const
@@ -118,9 +142,14 @@ void PhysicsComponent::setMass(float mass)
 	m_mass = mass;
 }
 
-void PhysicsComponent::setIsStaticBody(bool isStatic)
+void PhysicsComponent::setHasStaticBody(bool isStatic)
 {
 	m_staticBody = isStatic;
+}
+
+bool PhysicsComponent::hasStaticBody() const
+{
+	return m_staticBody;
 }
 
 //TODO: lose thsi later
@@ -129,7 +158,7 @@ void PhysicsComponent::setStartingPosition(sf::Vector2f position)
 	m_position = position;
 }
 
-std::optional<sf::Vector2f> PhysicsComponent::getCenterPointOfOverlap(const PhysicsComponent& otherPhysicsComponent)
+std::optional<Overlap> PhysicsComponent::getOverlap(const PhysicsComponent& otherPhysicsComponent)
 {
 	//We assume both components are un-rotated rectangles
 	sf::Vector2f topLeft = sf::Vector2f(std::max(m_position.x, otherPhysicsComponent.getPosition().x), std::max(m_position.y, otherPhysicsComponent.getPosition().y));
@@ -140,7 +169,10 @@ std::optional<sf::Vector2f> PhysicsComponent::getCenterPointOfOverlap(const Phys
 		//There is no intersection
 		return std::nullopt;
 	}
+	
+	Overlap overlap;
+	overlap.position = topLeft;
+	overlap.size = sf::Vector2f(bottomRight.x - topLeft.x,bottomRight.y - topLeft.y);
 
-	//Return the center point of the rectangle created by the intersection
-	return sf::Vector2f((bottomRight.x - topLeft.x) * .5f, (bottomRight.y - topLeft.y) * .5f);
+	return overlap;
 }

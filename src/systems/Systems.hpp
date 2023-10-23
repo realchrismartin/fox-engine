@@ -1,7 +1,8 @@
 #ifndef SYSTEMS_HPP
 #define SYSTEMS_HPP
 
-#include "src/Scene.hpp"
+#include "src/Window.hpp"
+#include "src/scenes/Scene.hpp"
 
 #include "src/entities/GameEntity.hpp"
 #include "src/entities/EntityFilter.hpp"
@@ -14,51 +15,36 @@ class Systems
 {
 public:
 	//Run all of the game systems that pertain to updating
-	static const void update(Scene& scene, sf::RenderWindow& window, float elapsedTime)
+	static const void update(Scene& scene, Window& window, float elapsedTime)
 	{
 		runWindowEventSystem(scene, window);
 		runInputProcessingSystem(scene, elapsedTime);
 		runPhysicsSystem(scene, elapsedTime);
-		runRenderSystem(scene, window);
 	};
 
 	//Run all of the game systems that pertain to rendering
 	//Assumes we called update first.
-	static const void render(Scene& scene, sf::RenderWindow& window)
+	static const void render(Scene& scene, Window& window)
 	{
 		//Clear the window.
 		window.clear();
 
-		//Draw stuf to the screen
+		//Draw stuff to the window
 		runRenderSystem(scene, window);
 
 		//Display whatever has been drawn to the window since the clear happened, i.e. all of the stuff that was drawn during update.
 		window.display();
 	};
 private:
-	static const void runWindowEventSystem(Scene& scene, sf::RenderWindow& window)
+	static const void runWindowEventSystem(Scene& scene, Window& window)
 	{
-		std::vector<sf::Event> events;
-
-		sf::Event event;
-
-		while (window.pollEvent(event))
-		{
-			if (event.type == sf::Event::Closed)
-			{
-				window.close(); //TODO: mayb move this later? IDK!
-			}
-
-			events.push_back(event);
-		}
+		window.pollForEvents();
 
 		for (auto const& entity : EntityFilter<InputComponent>(scene))
 		{
 			InputComponent& input = scene.getComponent<InputComponent>(entity.getUID());
 
-			input.clearEvents();
-
-			for (auto const& event : events)
+			for (auto const& event : window.getEvents())
 			{
 				input.informOfWindowEvent(event);
 			}
@@ -81,12 +67,10 @@ private:
 			scene.getComponent<PhysicsComponent>(entity).updateWithInput(scene.getComponent<InputComponent>(entity), elapsedTime);
 		}
 
+		//Update collisions for all entities
 		for (auto const& entity : EntityFilter<PhysicsComponent>(scene))
 		{
 			PhysicsComponent& physicsComponent = scene.getComponent<PhysicsComponent>(entity);
-
-			//Update each physics component to pass time, update itself based on time passed
-			physicsComponent.update(elapsedTime);
 
 			for (auto const& otherEntity : EntityFilter<PhysicsComponent>(scene))
 			{
@@ -99,6 +83,10 @@ private:
 					otherPhysicsComponent.updateCollision(physicsComponent, elapsedTime);
 				}
 			}
+
+			//Update each physics component to pass time, update itself based on time passed
+		    //NB: has to run after collision updates.
+			physicsComponent.update(elapsedTime);
 		}
 
 		//Update each graphics component associated with a physics component to relocate it, if needed.
@@ -108,11 +96,11 @@ private:
 		}
 	}
 
-	static const void runRenderSystem(Scene& scene, sf::RenderWindow& window)
+	static const void runRenderSystem(Scene& scene, Window& window)
 	{
 		for (auto const& entity : EntityFilter<GraphicsComponent>(scene))
 		{
-			scene.getComponent<GraphicsComponent>(entity.getUID()).draw(window);
+			window.draw(scene.getComponent<GraphicsComponent>(entity.getUID()));
 		}
 	}
 };

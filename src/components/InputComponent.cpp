@@ -1,47 +1,79 @@
 #include "InputComponent.hpp"
 
-void InputComponent::clearEvents()
-{
-	m_actionSinceLastUpdate.clear();
-}
-
-const std::vector<UserInputActionsEnum>& InputComponent::getActionsSinceLastUpdate() const
-{
-	return m_actionSinceLastUpdate;
-}
 
 void InputComponent::informOfWindowEvent(sf::Event e)
 {
-	if (e.type != sf::Event::KeyPressed)
+	if (e.type != sf::Event::KeyPressed && e.type != sf::Event::KeyReleased)
 	{
 		return;
 	}
 
-	switch (e.key.code)
+	switch (e.type)
 	{
-		case(sf::Keyboard::W):
+		case(sf::Event::KeyPressed):
 		{
-			m_actionSinceLastUpdate.push_back(UserInputActionsEnum::PRESSED_W);
+			switch (e.key.code)
+			{
+				case(sf::Keyboard::A):
+				{
+					m_activeInputs.insert(UserInputActionsEnum::PRESSING_A);
+					break;
+				}
+				case(sf::Keyboard::D):
+				{
+					m_activeInputs.insert(UserInputActionsEnum::PRESSING_D);
+					break;
+				}
+				case(sf::Keyboard::Space):
+				{
+					m_activeInputs.insert(UserInputActionsEnum::PRESSING_SPACEBAR);
+					break;
+				}
+				default:
+				{
+					//Other keys unhandled for now
+					break;
+				}
+			}
 			break;
 		}
-		case(sf::Keyboard::S):
+		case(sf::Event::KeyReleased):
 		{
-			m_actionSinceLastUpdate.push_back(UserInputActionsEnum::PRESSED_S);
-			break;
-		}
-		case(sf::Keyboard::A):
-		{
-			m_actionSinceLastUpdate.push_back(UserInputActionsEnum::PRESSED_A);
-			break;
-		}
-		case(sf::Keyboard::D):
-		{
-			m_actionSinceLastUpdate.push_back(UserInputActionsEnum::PRESSED_D);
+			switch (e.key.code)
+			{
+				case(sf::Keyboard::A):
+				{
+					m_activeInputs.erase(UserInputActionsEnum::PRESSING_A);
+					break;
+				}
+				case(sf::Keyboard::D):
+				{
+					m_activeInputs.erase(UserInputActionsEnum::PRESSING_D);
+					break;
+				}
+				case(sf::Keyboard::Space):
+				{
+					m_activeInputs.erase(UserInputActionsEnum::PRESSING_SPACEBAR);
+					break;
+				}
+				default:
+				{
+					//Other keys unhandled for now
+					break;
+				}
+			}
+
 			break;
 		}
 		default:
 		{
+			//We only care about press and release events. Just return here.
 			break;
 		}
 	}
+}
+
+const std::set<UserInputActionsEnum>& InputComponent::getActiveInputs() const
+{
+	return m_activeInputs;
 }

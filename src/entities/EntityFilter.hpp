@@ -2,7 +2,7 @@
 #define ENTITYFILTER_HPP
 
 #include "src/components/ComponentPool.hpp"
-#include "src/Scene.hpp"
+#include "src/scenes/Scene.hpp"
 #include "src/entities/EntityIterator.hpp"
 
 template <typename... T> 
