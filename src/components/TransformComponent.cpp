@@ -2,6 +2,8 @@
 
 void TransformComponent::updateWithInput(InputComponent& inputComponent)
 {
+	//TODO: someday soon, please please stop modifying the transforms directly via input. Use a physics intermediary component instead!!
+
 	std::vector<UserInputActionsEnum> userInputs =  inputComponent.getActionsSinceLastUpdate();
 	
 	sf::Vector2f addition = sf::Vector2f(0.f, 0.f);
