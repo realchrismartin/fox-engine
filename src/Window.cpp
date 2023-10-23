@@ -25,7 +25,15 @@ void Window::display()
 
 void Window::draw(GraphicsComponent& graphicsComponent)
 {
-	m_renderWindow->draw(graphicsComponent.getGraphic());
+	if (graphicsComponent.hasShape())
+	{
+		m_renderWindow->draw(graphicsComponent.getShape());
+	}
+
+	if (graphicsComponent.hasSprite())
+	{
+		m_renderWindow->draw(graphicsComponent.getSprite());
+	}
 }
 
 void Window::pollForEvents()

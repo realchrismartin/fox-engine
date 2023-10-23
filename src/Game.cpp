@@ -5,12 +5,6 @@
 
 Game::Game()
 {
-	//Set up the game window.
-	m_window = Window();
-
-	//Set up the game clock, which will track elapsed time between each update occurring.
-	m_clock = sf::Clock();
-
 	//Say hi!
 	Logger::log("Welcome to Chris n' J's game, you freak!");
 }

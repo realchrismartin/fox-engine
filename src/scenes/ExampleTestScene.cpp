@@ -19,7 +19,7 @@ ExampleTestScene::ExampleTestScene()
 		addComponent<InputComponent>(uid);
 
 		addComponent<GraphicsComponent>(uid);
-		getComponent<GraphicsComponent>(uid).setColor(sf::Color::Blue);
+		getComponent<GraphicsComponent>(uid).setSprite("../../img/character.png");
 		getComponent<GraphicsComponent>(uid).setSize(sf::Vector2f(50.f, 50.f));
 
 		addComponent<PhysicsComponent>(uid);
@@ -37,7 +37,7 @@ ExampleTestScene::ExampleTestScene()
 		int uid = obstacleEntity.value();
 
 		addComponent<GraphicsComponent>(uid);
-		getComponent<GraphicsComponent>(uid).setColor(sf::Color::Green);
+		getComponent<GraphicsComponent>(uid).setShape(sf::Color::Green);
 		getComponent<GraphicsComponent>(uid).setSize(sf::Vector2f(40.f, 40.f));
 
 		addComponent<PhysicsComponent>(uid);
@@ -55,7 +55,7 @@ ExampleTestScene::ExampleTestScene()
 		int uid = obstacle2Entity.value();
 
 		addComponent<GraphicsComponent>(uid);
-		getComponent<GraphicsComponent>(uid).setColor(sf::Color::Cyan);
+		getComponent<GraphicsComponent>(uid).setShape(sf::Color::Cyan);
 		getComponent<GraphicsComponent>(uid).setSize(sf::Vector2f(70.f, 75.f));
 
 		addComponent<PhysicsComponent>(uid);
@@ -71,7 +71,7 @@ ExampleTestScene::ExampleTestScene()
 	{
 		int uid = floorEntity.value();
 		addComponent<GraphicsComponent>(uid);
-		getComponent<GraphicsComponent>(uid).setColor(sf::Color::Red);
+		getComponent<GraphicsComponent>(uid).setShape(sf::Color::Red);
 		getComponent<GraphicsComponent>(uid).setSize(sf::Vector2f(800.f, 50.f));
 
 		addComponent<PhysicsComponent>(uid);
@@ -86,7 +86,7 @@ ExampleTestScene::ExampleTestScene()
 	{
 		int uid = ceilingEntity.value();
 		addComponent<GraphicsComponent>(uid);
-		getComponent<GraphicsComponent>(uid).setColor(sf::Color::Red);
+		getComponent<GraphicsComponent>(uid).setShape(sf::Color::Red);
 		getComponent<GraphicsComponent>(uid).setSize(sf::Vector2f(800.f, 50.f));
 
 		addComponent<PhysicsComponent>(uid);
@@ -101,7 +101,7 @@ ExampleTestScene::ExampleTestScene()
 	{
 		int uid = leftWallEntity.value();
 		addComponent<GraphicsComponent>(uid);
-		getComponent<GraphicsComponent>(uid).setColor(sf::Color::Red);
+		getComponent<GraphicsComponent>(uid).setShape(sf::Color::Red);
 		getComponent<GraphicsComponent>(uid).setSize(sf::Vector2f(50.f, 600.f));
 
 		addComponent<PhysicsComponent>(uid);
