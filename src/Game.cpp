@@ -18,7 +18,7 @@ void Game::play()
      //TODO: we need some semblance of a constant time tick per update here.
 	 while (m_window.isOpen())
 	 {
-		 Systems::update(scene, m_window, m_clock.restart().asMilliseconds());
+		 Systems::update(scene, m_window, (float)m_clock.restart().asMilliseconds());
 		 Systems::render(scene, m_window);
 	 }
 }

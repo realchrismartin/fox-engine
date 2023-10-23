@@ -12,13 +12,20 @@ public:
 	Window();
 	void clear();
 	void display();
-	void draw(GraphicsComponent& graphicsComponent);
 	void pollForEvents();
 	bool isOpen() const;
 	const std::vector<sf::Event>& getEvents() const;
+
+	template<typename T>
+	void draw(T drawableComponent)
+	{
+		m_renderWindow->draw(drawableComponent.getDrawable());
+	}
+
 private:
 	std::unique_ptr<sf::RenderWindow> m_renderWindow;
 	std::vector<sf::Event> m_events;
 
 };
 #endif
+

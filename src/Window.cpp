@@ -1,6 +1,5 @@
 #include "src/Window.hpp"
 #include "SFML/Graphics/View.hpp"
-#include "src/components/GraphicsComponent.hpp"
 
 Window::Window()
 {
@@ -8,7 +7,7 @@ Window::Window()
 	m_renderWindow->setFramerateLimit(60);
 
 	//Make a "camera" that's a view of the window.
-	sf::View camera = sf::View(sf::Vector2f(400, 300), sf::Vector2f(1600,1200));
+	sf::View camera = sf::View(sf::Vector2f(800.f,600.f), sf::Vector2f(1600.f,1200.f));
 	//camera.rotate(50.f);
 	m_renderWindow->setView(camera);
 }
@@ -21,19 +20,6 @@ void Window::clear()
 void Window::display()
 {
 	m_renderWindow->display();
-}
-
-void Window::draw(GraphicsComponent& graphicsComponent)
-{
-	if (graphicsComponent.hasShape())
-	{
-		m_renderWindow->draw(graphicsComponent.getShape());
-	}
-
-	if (graphicsComponent.hasSprite())
-	{
-		m_renderWindow->draw(graphicsComponent.getSprite());
-	}
 }
 
 void Window::pollForEvents()

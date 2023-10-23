@@ -9,7 +9,8 @@
 
 #include "src/components/InputComponent.hpp"
 #include "src/components/PhysicsComponent.hpp"
-#include "src/components/GraphicsComponent.hpp"
+#include "src/components/RectangleShapeComponent.hpp"
+#include "src/components/SpriteComponent.hpp"
 
 class Systems
 {
@@ -89,18 +90,33 @@ private:
 			physicsComponent.update(elapsedTime);
 		}
 
-		//Update each graphics component associated with a physics component to relocate it, if needed.
-		for (auto const& entity : EntityFilter<PhysicsComponent, GraphicsComponent>(scene))
+		//Update each graphics component associated with a physics component to relocate/resize it
+		for (auto const& entity : EntityFilter<PhysicsComponent, SpriteComponent>(scene))
 		{
-			scene.getComponent<GraphicsComponent>(entity).updateWithPhysics(scene.getComponent<PhysicsComponent>(entity));
+			scene.getComponent<SpriteComponent>(entity).updateWithPhysics(scene.getComponent<PhysicsComponent>(entity));
+		}
+
+		for (auto const& entity : EntityFilter<PhysicsComponent, RectangleShapeComponent>(scene))
+		{
+			scene.getComponent<RectangleShapeComponent>(entity).updateWithPhysics(scene.getComponent<PhysicsComponent>(entity));
 		}
 	}
 
 	static const void runRenderSystem(Scene& scene, Window& window)
 	{
-		for (auto const& entity : EntityFilter<GraphicsComponent>(scene))
+		//lol what is z indexing
+		//TODO
+
+		//Draw all the sprites 
+		for (auto const& entity : EntityFilter<SpriteComponent>(scene))
 		{
-			window.draw(scene.getComponent<GraphicsComponent>(entity.getUID()));
+			window.draw(scene.getComponent<SpriteComponent>(entity.getUID()));
+		}
+
+		//Draw all the rectangles
+		for (auto const& entity : EntityFilter<RectangleShapeComponent>(scene))
+		{
+			window.draw(scene.getComponent<RectangleShapeComponent>(entity.getUID()));
 		}
 	}
 };

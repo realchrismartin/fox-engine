@@ -1,14 +1,30 @@
 #include "src/scenes/ExampleTestScene.hpp"
 
 #include "src/entities/GameEntity.hpp"
-#include "src/components/GraphicsComponent.hpp"
+
 #include "src/components/InputComponent.hpp"
 #include "src/components/PhysicsComponent.hpp"
+#include "src/components/RectangleShapeComponent.hpp"
+#include "src/components/SpriteComponent.hpp"
 
 ExampleTestScene::ExampleTestScene()
 {
 	//Set up some test entities in the scene, for now
 	//TODO: later, move these entities and their compnents to some concept of a "level" or something - or make an easier way to bootstrap a scene!
+
+	//Create a background
+
+	std::optional<int> backgroundEntity = createEntity();
+
+	if (backgroundEntity.has_value()) 
+	{
+		int uid = backgroundEntity.value();
+
+		addComponent<SpriteComponent>(uid);
+		getComponent<SpriteComponent>(uid).setTexturePath("../../img/background.png");
+		getComponent<SpriteComponent>(uid).setSize(sf::Vector2f(1600.f, 1200.f));
+		getComponent<SpriteComponent>(uid).setPosition(sf::Vector2f(0.f, 0.f));
+	}
 
 	//Create a "player" that responds to inputs
 	std::optional<int> playerEntity = createEntity();
@@ -18,9 +34,8 @@ ExampleTestScene::ExampleTestScene()
 		int uid = playerEntity.value();
 		addComponent<InputComponent>(uid);
 
-		addComponent<GraphicsComponent>(uid);
-		getComponent<GraphicsComponent>(uid).setSprite("../../img/character.png");
-		getComponent<GraphicsComponent>(uid).setSize(sf::Vector2f(50.f, 50.f));
+		addComponent<SpriteComponent>(uid);
+		getComponent<SpriteComponent>(uid).setTexturePath("../../img/character.png");
 
 		addComponent<PhysicsComponent>(uid);
 		getComponent<PhysicsComponent>(uid).setMass(10.f);
@@ -36,9 +51,8 @@ ExampleTestScene::ExampleTestScene()
 	{
 		int uid = obstacleEntity.value();
 
-		addComponent<GraphicsComponent>(uid);
-		getComponent<GraphicsComponent>(uid).setShape(sf::Color::Green);
-		getComponent<GraphicsComponent>(uid).setSize(sf::Vector2f(40.f, 40.f));
+		addComponent<RectangleShapeComponent>(uid);
+		getComponent<RectangleShapeComponent>(uid).setFillColor(sf::Color::Red);
 
 		addComponent<PhysicsComponent>(uid);
 		getComponent<PhysicsComponent>(uid).setMass(5.f);
@@ -54,9 +68,8 @@ ExampleTestScene::ExampleTestScene()
 	{
 		int uid = obstacle2Entity.value();
 
-		addComponent<GraphicsComponent>(uid);
-		getComponent<GraphicsComponent>(uid).setShape(sf::Color::Cyan);
-		getComponent<GraphicsComponent>(uid).setSize(sf::Vector2f(70.f, 75.f));
+		addComponent<RectangleShapeComponent>(uid);
+		getComponent<RectangleShapeComponent>(uid).setFillColor(sf::Color::Cyan);
 
 		addComponent<PhysicsComponent>(uid);
 		getComponent<PhysicsComponent>(uid).setMass(90.f);
@@ -70,29 +83,13 @@ ExampleTestScene::ExampleTestScene()
 	if (floorEntity.has_value()) 
 	{
 		int uid = floorEntity.value();
-		addComponent<GraphicsComponent>(uid);
-		getComponent<GraphicsComponent>(uid).setShape(sf::Color::Red);
-		getComponent<GraphicsComponent>(uid).setSize(sf::Vector2f(800.f, 50.f));
+		addComponent<RectangleShapeComponent>(uid);
+		getComponent<RectangleShapeComponent>(uid).setFillColor(sf::Color::Green);
 
 		addComponent<PhysicsComponent>(uid);
 		getComponent<PhysicsComponent>(uid).setMass(20.f);
-		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(800.f, 50.f));
-		getComponent<PhysicsComponent>(uid).setStartingPosition(sf::Vector2f(0.f, 550.f));
-	}
-
-	std::optional<int> ceilingEntity = createEntity();
-
-	if (ceilingEntity.has_value()) 
-	{
-		int uid = ceilingEntity.value();
-		addComponent<GraphicsComponent>(uid);
-		getComponent<GraphicsComponent>(uid).setShape(sf::Color::Red);
-		getComponent<GraphicsComponent>(uid).setSize(sf::Vector2f(800.f, 50.f));
-
-		addComponent<PhysicsComponent>(uid);
-		getComponent<PhysicsComponent>(uid).setMass(20.f);
-		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(800.f, 50.f));
-		getComponent<PhysicsComponent>(uid).setStartingPosition(sf::Vector2f(0.f, 0.f));
+		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(1600.f, 50.f));
+		getComponent<PhysicsComponent>(uid).setStartingPosition(sf::Vector2f(0.f, 1150.f));
 	}
 
 	std::optional<int> leftWallEntity = createEntity();
@@ -100,13 +97,12 @@ ExampleTestScene::ExampleTestScene()
 	if (leftWallEntity.has_value()) 
 	{
 		int uid = leftWallEntity.value();
-		addComponent<GraphicsComponent>(uid);
-		getComponent<GraphicsComponent>(uid).setShape(sf::Color::Red);
-		getComponent<GraphicsComponent>(uid).setSize(sf::Vector2f(50.f, 600.f));
+		addComponent<RectangleShapeComponent>(uid);
+		getComponent<RectangleShapeComponent>(uid).setFillColor(sf::Color::Red);
 
 		addComponent<PhysicsComponent>(uid);
 		getComponent<PhysicsComponent>(uid).setMass(20.f);
-		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(50.f, 600.f));
-		getComponent<PhysicsComponent>(uid).setStartingPosition(sf::Vector2f(0.f, 0.f));
+		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(50.f, 100.f));
+		getComponent<PhysicsComponent>(uid).setStartingPosition(sf::Vector2f(0.f, 1100.f));
 	}
 }
