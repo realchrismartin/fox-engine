@@ -15,7 +15,7 @@ int EntityIterator::getEntityIndex() const
 
 GameEntity EntityIterator::operator*() const
 {
-	return m_scene.getEntities()[m_entityIndex];
+	return m_scene.getEntity(m_entityIndex);
 }
 
 bool EntityIterator::operator==(const EntityIterator& other) const
@@ -30,7 +30,7 @@ bool EntityIterator::operator!=(const EntityIterator& other) const
 
 EntityIterator& EntityIterator::operator++()
 {
-	int size = (int)m_scene.getEntities().size();
+	int size = m_scene.getEntityCount();
 
 	m_entityIndex++;
 
@@ -47,7 +47,7 @@ const EntityIterator EntityIterator::begin() const
 {
 	int index = 0;
 
-	int size = (int)m_scene.getEntities().size();
+	int size = m_scene.getEntityCount();
 
 	//Skip all of the entities that don't match at the beginning
 	while (index < size && !m_scene.entityHasComponents(index,m_componentIds))
@@ -61,5 +61,5 @@ const EntityIterator EntityIterator::begin() const
 const EntityIterator EntityIterator::end() const
 {
 	//Return an iterator to the end, regardless
-	return EntityIterator(m_scene,m_componentIds, (int)m_scene.getEntities().size());
+	return EntityIterator(m_scene,m_componentIds, m_scene.getEntityCount());
 }

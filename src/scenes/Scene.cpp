@@ -1,6 +1,20 @@
 #include "src/scenes/Scene.hpp"
 #include "src/util/Logger.hpp"
 
+GameEntity& Scene::getEntity(int entityIndex)
+{
+	if (m_gameEntities.size() <= (size_t)entityIndex)
+	{
+		throw std::out_of_range("Asked for an entity that is out of range!");
+	}
+	
+	return m_gameEntities[entityIndex];
+}
+
+int Scene::getEntityCount() const
+{
+	return (int)m_gameEntityMap.size();
+}
 
 std::optional<int> Scene::createEntity()
 {
@@ -72,11 +86,6 @@ void Scene::removeEntity(int uid)
 	m_gameEntityMap.erase(uid); //Remove the original entity from the map
 }
 
-std::vector<GameEntity>& Scene::getEntities()
-{
-	return m_gameEntities;
-}
-
 bool Scene::entityHasComponents(int entityIndex, std::vector<int>& componentTypeIds) const
 {
 	if (componentTypeIds.empty())
@@ -110,4 +119,3 @@ bool Scene::entityHasComponents(int entityIndex, std::vector<int>& componentType
 
 	return true;
 }
-

@@ -11,16 +11,18 @@ class System;
 class Scene
 {
 public:
-	std::vector<GameEntity>& getEntities();
 
-	//TODO: later bushwhack these asserts. Right now we have them because T& return type means this method HAS to return something.
+	/// @brief Get the component of the specified type T that is associated with the entity with the UID entityUID
+	/// @tparam T The type of component we are asking for
+	/// @param entityUID The entity we want to get a component for
+	/// @return A reference to the component of the type specified.
 	template<typename T>
 	T& getComponent(const int entityUID)
 	{
 		//Handle case where we don't have an entity yet
 		if (!m_gameEntityMap.count(entityUID))
 		{
-			assert(false); //There is no entity with this ID.
+			throw std::out_of_range("There is no entity with this UID.");
 		}
 		
 		//Grab the id for the type of component we are getting.
@@ -29,13 +31,13 @@ public:
 		//Handle case that there is no component pool for this component type, which is definitely an error. Just choke on it.
 		if (!m_componentTypeToPoolMap.count(componentTypeId))
 		{
-			assert(false);
+			throw std::out_of_range("There is no component pool for this component type");
 		}
 
 		//Handle case where we don't have a registered component of this type for this entity
 		if (!m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)]->hasRegisteredEntity(entityUID))
 		{
-			assert(false);
+			throw std::out_of_range("There is no registered component of this type for this entity");
 		}
 
 		//Get the component data that is associated with this entity UID
@@ -45,7 +47,7 @@ public:
 		//If this happens, choke on it.
 		if (componentData == nullptr)
 		{
-			assert(false);
+			throw std::runtime_error("Getting the component for this entity from the pool returned nullptr");
 		}
 
 		//If we have a component in the specified pool for this entity, return a pointer to it.
@@ -54,14 +56,24 @@ public:
 		return *pointer;
 	}
 
+	/// @brief Get the component of type T associated with this GameEntity.
+	/// @tparam T The component type we want to get
+	/// @param entity The entity we are getting a component for
+	/// @return 
 	template<typename T>
 	T& getComponent(const GameEntity& entity)
 	{
 		return getComponent<T>(entity.getUID());
 	}
 
+	/// @brief Return true if the entity at this index in the entity list has registered components with the specified IDs. 
+	/// @param entityIndex  The index of the entity. This is not the entity UID.
+	/// @param componentTypeIds 
+	/// @return 
 	bool entityHasComponents(int entityIndex, std::vector<int>& componentTypeIds) const;
 
+	GameEntity& getEntity(int entityIndex);
+	int getEntityCount() const;
 
 protected:
 	std::optional<int> createEntity();
@@ -97,7 +109,7 @@ protected:
 
 private:
 	size_t m_maxEntities = 10; //The max number of entities we can have, mostly dictated by the size of the component pools for now
-	std::unordered_map<int, int> m_gameEntityMap; //Map of entity UIDs to the entity placement in the entity vector
+	std::map<int, int> m_gameEntityMap; //Map of entity UIDs to the entity placement in the entity vector
 	std::unordered_map<int, int> m_componentTypeToPoolMap; //Map of component types to the pool placement in the pool vector
 	std::vector<GameEntity> m_gameEntities; //Worth noting: entity destructors get called a lot because we store them directly in the vector here.
 	std::vector<std::unique_ptr<ComponentPool>> m_componentPools;

@@ -1,6 +1,7 @@
 //This is our precompiled header!
 
 //STL stuff
+#include <map>
 #include <unordered_map>
 #include <set>
 #include <vector>
