@@ -6,6 +6,7 @@ class PhysicsComponent;
 #include "SFML/Graphics/Texture.hpp"
 #include "SFML/Graphics/Sprite.hpp"
 
+/// @brief A simple graphical Sprite component that renders a Sprite wherever the entity's physics body is
 class SpriteComponent
 {
 public:

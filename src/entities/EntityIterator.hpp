@@ -4,6 +4,7 @@
 class Scene;
 class GameEntity;
 
+/// @brief An iterator that is used by EntityFilter, will iterate over the entities in a scene but only iterate over entities with the specified componentIds.
 class EntityIterator
 {
 public:

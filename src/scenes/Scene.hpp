@@ -6,6 +6,8 @@
 
 class System;
 
+/// @brief An association of Entities with their Components.
+/// @brief Represents the game world and holds all entities and their components that are in the world.
 class Scene
 {
 public:

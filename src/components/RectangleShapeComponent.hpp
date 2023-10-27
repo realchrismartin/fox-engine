@@ -5,6 +5,7 @@ class PhysicsComponent;
 
 #include "SFML/Graphics/RectangleShape.hpp"
 
+/// @brief A simple graphical component that renders a Rectangle wherever the entity's physics body is.
 class RectangleShapeComponent
 {
 public:

@@ -5,6 +5,8 @@
 #include "src/scenes/Scene.hpp"
 #include "src/entities/EntityIterator.hpp"
 
+/// @brief A wrapper that creates a "view" of a Scene, i.e. access to a subset of the Entities in the scene, based on which components are specified in the variadic templating.
+/// @tparam ...T 
 template <typename... T> 
 class EntityFilter
 {

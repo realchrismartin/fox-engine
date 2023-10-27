@@ -12,6 +12,8 @@
 #include "src/components/RectangleShapeComponent.hpp"
 #include "src/components/SpriteComponent.hpp"
 
+/// @brief A collection of static functions that are "systems", functions that operate on specific associations of components in a scene to update them.
+/// @brief The update and render meta-systems are the core of the game. 
 class Systems
 {
 public:

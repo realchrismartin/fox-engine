@@ -1,6 +1,7 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
+/// @brief Put reusable functions here!
 namespace Utils
 {
 	void normalize(sf::Vector2f& vec2)

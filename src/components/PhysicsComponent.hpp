@@ -9,6 +9,7 @@ struct Overlap
 
 class InputComponent;
 
+/// @brief A component which tracks state related to the physics properties of an entity and manages changes such as how it moves with input, and how it collides with things.
 class PhysicsComponent
 {
 public:

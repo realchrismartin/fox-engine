@@ -6,6 +6,7 @@
 
 class GraphicsComponent;
 
+/// @brief A nice wrapper for a sf::RenderWindow that provides clean interfaces to Systems that need Window access.
 class Window
 {
 public:

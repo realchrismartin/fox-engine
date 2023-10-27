@@ -10,6 +10,7 @@ enum class UserInputActionsEnum
 	PRESSING_SPACEBAR
 };
 
+/// @brief A component which stores events coming from sf::RenderWindow and filters out the ones we don't care about. In the end, it tracks the events that are actively occurring that are "input" related
 class InputComponent
 {
 public:

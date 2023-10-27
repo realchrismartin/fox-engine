@@ -7,6 +7,10 @@
 static std::unordered_map<std::type_index, int> s_componentTypeIdMap;
 static int s_componentTypeId = 0;
 
+/// @brief A static method that modifies global state in order to allow us to create unique ids for component types at runtime.
+/// @brief This allows us to make component pools which have IDs.
+/// @tparam T 
+/// @return 
 template <typename T>
 int GetComponentTypeId()
 {
@@ -23,6 +27,11 @@ int GetComponentTypeId()
 	return s_componentTypeIdMap.at(type);
 }
 
+/// @brief A chunk of memory that contains enough space to store components.
+/// @brief It also handles knowing which GameEntities "own" the components in that memory pool.
+/// @brief A Scene owns a number of these (one per Component type), and handles registering/deregistering entities with each pool.
+/// @brief Each pool has a fixed size determined by the Scene. Right now this equals the maximum number of entities, because we assume we might want one of each component for each entity.
+//TODO: That's a bit wasteful now isn't it?
 class ComponentPool
 {
 public:
@@ -35,29 +44,6 @@ public:
 		m_data = new int[componentSize * capacity];
 
 		m_capacity = capacity;
-	}
-
-	inline void copyComponent(size_t fromIndex, size_t toIndex)
-	{
-		int* src = m_data + (fromIndex * m_componentSize);
-		int* dest = m_data + (toIndex * m_componentSize);
-
-		std::memcpy(dest, src, m_componentSize);
-	}
-
-	inline void deregisterEntity(int entityUID)
-	{
-		//NB: this does NOT clean up pool memory or anything. If we register an entity again, we assume we are going to either overwrite the memory immediately OR use whatever's there arleady.
-
-		if (!hasRegisteredEntity(entityUID))
-		{
-			return; //This entity can't be deregistered since it's not registered
-		}
-
-		//Free up a slot here.
-		m_freeSlots.push_back(m_entityToComponentMap.at(entityUID));
-
-		m_entityToComponentMap.erase(entityUID);
 	}
 
 	inline void registerEntity(int entityUID)
@@ -92,6 +78,21 @@ public:
 	inline bool hasRegisteredEntity(int entityUID)
 	{
 		return m_entityToComponentMap.count(entityUID);
+	}
+
+	inline void deregisterEntity(int entityUID)
+	{
+		//NB: this does NOT clean up pool memory or anything. If we register an entity again, we assume we are going to either overwrite the memory immediately OR use whatever's there arleady.
+
+		if (!hasRegisteredEntity(entityUID))
+		{
+			return; //This entity can't be deregistered since it's not registered
+		}
+
+		//Free up a slot here.
+		m_freeSlots.push_back(m_entityToComponentMap.at(entityUID));
+
+		m_entityToComponentMap.erase(entityUID);
 	}
 
 	/// @brief Get the component at the specified entity uid's index.

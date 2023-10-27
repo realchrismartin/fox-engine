@@ -4,6 +4,7 @@
 #include "SFML/System/Clock.hpp"
 #include "src/Window.hpp"
 
+/// @brief The core game class. Main.cpp instantiates this and calls play(), play will run until the game says to stop!
 class Game
 {
 public:
