@@ -28,7 +28,7 @@ public:
 private:
 	std::optional<Overlap> getOverlap(const PhysicsComponent& otherPhysicsComponent);
 	sf::Vector2f m_position = sf::Vector2f(0.f, 0.f);
-	sf::Vector2f m_size = sf::Vector2f(0.f, 0.f);
+	sf::Vector2f m_size = sf::Vector2f(10.f, 10.f);
 	sf::Vector2f m_force = sf::Vector2f(0.f, 0.f);
 	float m_mass = 1.f;
 	bool m_staticBody = true;

@@ -38,9 +38,17 @@ public:
 		{
 			assert(false);
 		}
+		
+		void* componentData = m_componentPools[componentTypeId]->getComponent(entityUID);
+
+		if (componentData == nullptr)
+		{
+			//This miiight be nullptr and shit itself if hasComponent is out of sync, above
+			assert(false);
+		}
 
 		//If we have a component in the specified pool for this entity, return a pointer to it.
-		T* pointer =  static_cast<T*>(m_componentPools[componentTypeId]->getComponent(entityIndex));
+		T* pointer = static_cast<T*>(componentData);
 
 		return *pointer;
 	}
@@ -54,7 +62,6 @@ public:
 protected:
 	std::optional<int> createEntity();
 	void removeEntity(int uid);
-	int getNextAvailableUID() const;
 
 	//Add a component to the entity specified by the ID
 	//This involves assigning an existing component from our component pools, or allocating a new one.
@@ -85,18 +92,25 @@ protected:
 			//We need to add a new pool for this component type
 			//The new pool's elements need to be the size of T so that it can contain them.
 			//The new pool has a capacity equivalent to the max number of entities the scene can have.
+			//NB: we can't exceed the max m_maxEntities because there's not enough room in each component pool to support those entities!
 			m_componentPools[componentTypeId] = new ComponentPool(sizeof(T), m_maxEntities);
+			m_componentPoolCount++;
 		}
 
-		//Use placement new operator to allocate our component at the index associated with the entity.
-		//NB: we can't exceed the max m_maxEntities because there's not enough room in each component pool to support those entities!
-		//NB: if we already had a component in this slot (i.e. because we erased an entity that had the component), this should overwrite that component now.
-
-		//TODO: dont use entity index here, use the UID instead
-		T* unused = new (m_componentPools[componentTypeId]->getComponent(entityIndex)) T();
-
 		//Tell the pool that the entity with the given UID is using a given component memory chunk
-		//TODO
+		//This has to happen just prior to assigning component memory, be careful - if the memory doesn't get assigned, something might try to get it, which will assert (see getComponent)
+		m_componentPools[componentTypeId]->registerEntity(entityUID);
+
+		void* componentMemoryPointer = m_componentPools[componentTypeId]->getComponent(entityUID);
+
+		if (componentMemoryPointer == nullptr)
+		{
+			return; //Somehow, there is no component in this pool registered for this entity. This ain't good.
+		}
+
+		//Assign the memory using placement new at the specified location (where the component pool has a spot registered for the entity)
+		//NB: if we already had a component in this slot (i.e. because we erased an entity that had the component), this should overwrite that component now.
+		T* unused = new (componentMemoryPointer) T();
 
 		//Tell the entity it has a component of this type now
 		m_gameEntities[entityIndex].registerComponent(componentTypeId);
@@ -104,9 +118,11 @@ protected:
 
 private:
 	int m_maxEntities = 10;
+	int m_componentPoolCount = 0;
 	std::unordered_map<int, int> m_gameEntityMap;
 	std::vector<GameEntity> m_gameEntities;
 	std::vector<ComponentPool*> m_componentPools;
+	int m_availableEntityUID = 0;
 };
 
 #endif

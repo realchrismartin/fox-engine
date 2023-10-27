@@ -106,8 +106,6 @@ ExampleTestScene::ExampleTestScene()
 		getComponent<PhysicsComponent>(uid).setStartingPosition(sf::Vector2f(0.f, 1100.f));
 	}
 
-	removeEntity(floorEntity.value());
-
 	std::optional<int> postRemovalEntity = createEntity();
 
 	if (postRemovalEntity.has_value()) 
@@ -121,5 +119,25 @@ ExampleTestScene::ExampleTestScene()
 		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(50.f, 78.f));
 		getComponent<PhysicsComponent>(uid).setStartingPosition(sf::Vector2f(100.f, 500.f));
 	}
+
+	//Create a "player 2" that responds to inputs
+	std::optional<int> secondPlayerEntity = createEntity();
+
+	if (secondPlayerEntity.has_value())
+	{
+		int uid = secondPlayerEntity.value();
+		addComponent<InputComponent>(uid);
+
+		addComponent<SpriteComponent>(uid);
+		getComponent<SpriteComponent>(uid).setTexturePath("../../img/character.png");
+
+		//This should be a new component, have the new size and not the old one, etc.
+		addComponent<PhysicsComponent>(uid);
+		getComponent<PhysicsComponent>(uid).setMass(30.f);
+		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(100.f, 100.f));
+		getComponent<PhysicsComponent>(uid).setHasStaticBody(false);
+		getComponent<PhysicsComponent>(uid).setStartingPosition(sf::Vector2f(500.f, 800.f));
+	}
+
 
 }
