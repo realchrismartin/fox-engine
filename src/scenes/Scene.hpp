@@ -13,7 +13,7 @@ class Scene
 public:
 	std::vector<GameEntity>& getEntities();
 
-	//TODO: later bushwhack these asserts
+	//TODO: later bushwhack these asserts. Right now we have them because T& return type means this method HAS to return something.
 	template<typename T>
 	T& getComponent(const int entityUID)
 	{
@@ -33,14 +33,16 @@ public:
 		}
 
 		//Handle case where we don't have a registered component of this type for this entity
-		//NB: sometimes we may have memory allocated in the right slot due to a prior entity owning a component in this slot. we dont want to return that
 		if (!m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)]->hasRegisteredEntity(entityUID))
 		{
 			assert(false);
 		}
 
+		//Get the component data that is associated with this entity UID
 		void* componentData = m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)]->getComponent(entityUID);
 
+		//If the pool can't find a component for this entity (unlikely, because we checked that it was registered first), it may return nullptr for the data.
+		//If this happens, choke on it.
 		if (componentData == nullptr)
 		{
 			assert(false);
@@ -85,11 +87,11 @@ protected:
 			//The pool for this component type isn't set up yet. Gotta set it up!
 			m_componentPools.push_back(std::move(std::make_unique<ComponentPool>(sizeof(T), m_maxEntities)));
 
-			//Assign a pool index for this component ID.
+			//Assign a pool index for this component pool we just added.
 			m_componentTypeToPoolMap[componentTypeId] = (int)m_componentPools.size() - 1;
 		}
 
-		//Tell the pool that the entity with the given UID is using a given component memory chunk
+		//Tell the pool that the entity with the given UID is using a given component memory chunk now.
 		m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)]->registerEntity<T>(entityUID);
 	};
 
