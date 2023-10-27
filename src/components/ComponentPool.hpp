@@ -35,8 +35,16 @@ public:
 		m_data = new int[componentSize * capacity];
 	}
 
+	inline void copyComponent(size_t fromIndex, size_t toIndex)
+	{
+		int* src = m_data + (fromIndex * m_componentSize);
+		int* dest = m_data + (toIndex * m_componentSize);
+
+		std::memcpy(dest, src, m_componentSize);
+	}
+
 	/// @brief Get the component at index. We can do this because we know how big each one is.
-	inline void* get(size_t index)
+	inline void* getComponent(size_t index)
 	{
 		return m_data + (index * m_componentSize);
 	}
@@ -49,6 +57,7 @@ public:
 private:
 	int* m_data = nullptr;
 	size_t m_componentSize = 0;
+	std::unordered_map<int, int> m_entityToComponentMap;
 };
 
 #endif

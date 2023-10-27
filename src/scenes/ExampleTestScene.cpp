@@ -105,4 +105,21 @@ ExampleTestScene::ExampleTestScene()
 		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(50.f, 100.f));
 		getComponent<PhysicsComponent>(uid).setStartingPosition(sf::Vector2f(0.f, 1100.f));
 	}
+
+	removeEntity(floorEntity.value());
+
+	std::optional<int> postRemovalEntity = createEntity();
+
+	if (postRemovalEntity.has_value()) 
+	{
+		int uid = postRemovalEntity.value();
+		addComponent<RectangleShapeComponent>(uid);
+		getComponent<RectangleShapeComponent>(uid).setFillColor(sf::Color::Blue);
+
+		addComponent<PhysicsComponent>(uid);
+		getComponent<PhysicsComponent>(uid).setMass(20.f);
+		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(50.f, 78.f));
+		getComponent<PhysicsComponent>(uid).setStartingPosition(sf::Vector2f(100.f, 500.f));
+	}
+
 }

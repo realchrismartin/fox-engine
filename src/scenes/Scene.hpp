@@ -16,19 +16,19 @@ public:
 	T& getComponent(const int entityUID)
 	{
 		//Handle case where we don't have an entity yet
-		if (entityUID >= m_gameEntities.size())
+		if (!m_gameEntityMap.count(entityUID))
 		{
-			assert(false);
+			assert(false); //There is no entity with this ID.
 		}
+		
+		int entityIndex = m_gameEntityMap.at(entityUID);
 
 		//Grab the id for the type of component we are getting.
 		int componentTypeId = GetComponentTypeId<T>();
 
-		//TODO: inefficiencies ho!
-		std::vector<int> components = { componentTypeId };
-
 		//Handle case where we don't have a registered component of this type for this entity
-		if (!m_gameEntities[entityUID].hasAllComponents(components))
+		//NB: sometimes we may have memory allocated in the right slot due to a prior entity owning a component in this slot. we dont want to return that
+		if (!m_gameEntities[entityIndex].hasComponent(componentTypeId))
 		{
 			assert(false);
 		}
@@ -40,7 +40,7 @@ public:
 		}
 
 		//If we have a component in the specified pool for this entity, return a pointer to it.
-		T* pointer =  static_cast<T*>(m_componentPools[componentTypeId]->get(entityUID));
+		T* pointer =  static_cast<T*>(m_componentPools[componentTypeId]->getComponent(entityIndex));
 
 		return *pointer;
 	}
@@ -53,6 +53,8 @@ public:
 
 protected:
 	std::optional<int> createEntity();
+	void removeEntity(int uid);
+	int getNextAvailableUID() const;
 
 	//Add a component to the entity specified by the ID
 	//This involves assigning an existing component from our component pools, or allocating a new one.
@@ -60,10 +62,13 @@ protected:
 	void addComponent(int entityUID)
 	{
 		//Handle case where we don't have an entity with this ID yet
-		if (entityUID >= m_gameEntities.size())
+		if (!m_gameEntityMap.count(entityUID))
 		{
-			return;
+			Logger::log("There is no entity with this UID. Skipping adding a component to it.");
+			return; //Return having done nothing
 		}
+		
+		int entityIndex = m_gameEntityMap.at(entityUID);
 
 		//Grab the id for the type of component we are adding
 		int componentTypeId = GetComponentTypeId<T>();
@@ -85,14 +90,21 @@ protected:
 
 		//Use placement new operator to allocate our component at the index associated with the entity.
 		//NB: we can't exceed the max m_maxEntities because there's not enough room in each component pool to support those entities!
-		T* unused = new (m_componentPools[componentTypeId]->get(entityUID)) T();
+		//NB: if we already had a component in this slot (i.e. because we erased an entity that had the component), this should overwrite that component now.
+
+		//TODO: dont use entity index here, use the UID instead
+		T* unused = new (m_componentPools[componentTypeId]->getComponent(entityIndex)) T();
+
+		//Tell the pool that the entity with the given UID is using a given component memory chunk
+		//TODO
 
 		//Tell the entity it has a component of this type now
-		m_gameEntities[entityUID].registerComponent(componentTypeId);
+		m_gameEntities[entityIndex].registerComponent(componentTypeId);
 	};
 
 private:
 	int m_maxEntities = 10;
+	std::unordered_map<int, int> m_gameEntityMap;
 	std::vector<GameEntity> m_gameEntities;
 	std::vector<ComponentPool*> m_componentPools;
 };
