@@ -49,9 +49,9 @@ public:
 	{
 		//NB: this does NOT clean up pool memory or anything. If we register an entity again, we assume we are going to either overwrite the memory immediately OR use whatever's there arleady.
 
-		if (!m_entityToComponentMap.count(entityUID))
+		if (!hasRegisteredEntity(entityUID))
 		{
-			return; //Slot empty
+			return; //This entity can't be deregistered since it's not registered
 		}
 
 		//Free up a slot here.
@@ -62,9 +62,9 @@ public:
 
 	inline void registerEntity(int entityUID)
 	{
-		if (m_entityToComponentMap.count(entityUID))
+		if (hasRegisteredEntity(entityUID))
 		{
-			return; //This entity is already registered
+			return; //Already registered
 		}
 
 		if (m_freeSlots.empty() && m_componentsUsedCount >= m_capacity)
@@ -83,16 +83,22 @@ public:
 		else 
 		{
 			//Use a new slot
+			//Once we use up all the slots, we can only use freed slots.
 			m_entityToComponentMap[entityUID] = m_componentsUsedCount;
 			m_componentsUsedCount++;
 		}
+	}
+
+	inline bool hasRegisteredEntity(int entityUID)
+	{
+		return m_entityToComponentMap.count(entityUID);
 	}
 
 	/// @brief Get the component at the specified entity uid's index.
 	///. We can do this because we know how big each one is.
 	inline void* getComponent(int entityUID)
 	{
-		if(!m_entityToComponentMap.count(entityUID))
+		if(!hasRegisteredEntity(entityUID))
 		{
 			return nullptr; //There is no component of this type registered for this entity.
 		}

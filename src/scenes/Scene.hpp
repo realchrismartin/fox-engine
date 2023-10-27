@@ -21,29 +21,26 @@ public:
 			assert(false); //There is no entity with this ID.
 		}
 		
-		int entityIndex = m_gameEntityMap.at(entityUID);
-
 		//Grab the id for the type of component we are getting.
 		int componentTypeId = GetComponentTypeId<T>();
-
-		//Handle case where we don't have a registered component of this type for this entity
-		//NB: sometimes we may have memory allocated in the right slot due to a prior entity owning a component in this slot. we dont want to return that
-		if (!m_gameEntities[entityIndex].hasComponent(componentTypeId))
-		{
-			assert(false);
-		}
 
 		//Handle case that there is no component pool for this component type, which is definitely an error. Just choke on it.
 		if (m_componentPools.size() < (componentTypeId + 1))
 		{
 			assert(false);
 		}
-		
+
+		//Handle case where we don't have a registered component of this type for this entity
+		//NB: sometimes we may have memory allocated in the right slot due to a prior entity owning a component in this slot. we dont want to return that
+		if (!m_componentPools[componentTypeId]->hasRegisteredEntity(entityUID))
+		{
+			assert(false);
+		}
+
 		void* componentData = m_componentPools[componentTypeId]->getComponent(entityUID);
 
 		if (componentData == nullptr)
 		{
-			//This miiight be nullptr and shit itself if hasComponent is out of sync, above
 			assert(false);
 		}
 
@@ -58,6 +55,9 @@ public:
 	{
 		return getComponent<T>(entity.getUID());
 	}
+
+	bool entityHasComponents(int entityIndex, std::vector<int>& componentTypeIds) const;
+
 
 protected:
 	std::optional<int> createEntity();
@@ -111,9 +111,6 @@ protected:
 		//Assign the memory using placement new at the specified location (where the component pool has a spot registered for the entity)
 		//NB: if we already had a component in this slot (i.e. because we erased an entity that had the component), this should overwrite that component now.
 		T* unused = new (componentMemoryPointer) T();
-
-		//Tell the entity it has a component of this type now
-		m_gameEntities[entityIndex].registerComponent(componentTypeId);
 	};
 
 private:

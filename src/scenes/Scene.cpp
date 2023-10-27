@@ -1,6 +1,39 @@
 #include "src/scenes/Scene.hpp"
 #include "src/util/Logger.hpp"
 
+bool Scene::entityHasComponents(int entityIndex, std::vector<int>& componentTypeIds) const
+{
+	if (componentTypeIds.empty())
+	{
+		return false; //Illogical, but failsafe condition
+	}
+
+	if (entityIndex < 0 || entityIndex >= m_gameEntities.size())
+	{
+		return false; //Entity index out of bounds failsafe
+	}
+
+	int uid = m_gameEntities[entityIndex].getUID();
+
+	for (auto const& id : componentTypeIds)
+	{
+		if (id > m_componentPools.size())
+		{
+			return false; //Something is wrong
+		}
+
+		auto pool = m_componentPools[id];
+
+		//If any specified component pool hasn't registered this entity, return false
+		if (!pool->hasRegisteredEntity(uid))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 std::optional<int> Scene::createEntity()
 {
 	if (m_gameEntities.size() + 1 > m_maxEntities) //TODO: is the +1 off by one? ;3

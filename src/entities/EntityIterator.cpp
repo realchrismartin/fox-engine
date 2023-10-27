@@ -35,7 +35,7 @@ EntityIterator& EntityIterator::operator++()
 	m_entityIndex++;
 
 	//Keep advancing if the now-current entry is invalid and there's more items in the entity list
-	while (m_entityIndex < size && !m_scene.getEntities()[m_entityIndex].hasAllComponents(m_componentIds))
+	while (m_entityIndex < size && !m_scene.entityHasComponents(m_entityIndex,m_componentIds))
 	{
 		m_entityIndex++;
 	}
@@ -50,7 +50,7 @@ const EntityIterator EntityIterator::begin() const
 	int size = (int)m_scene.getEntities().size();
 
 	//Skip all of the entities that don't match at the beginning
-	while (index < size && !m_scene.getEntities()[index].hasAllComponents(m_componentIds))
+	while (index < size && !m_scene.entityHasComponents(index,m_componentIds))
 	{
 		index++;
 	}
