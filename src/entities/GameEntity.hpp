@@ -9,7 +9,6 @@ class GameEntity
 public:
 	GameEntity(int uid);
 	int getUID() const;
-	~GameEntity();
 private:
 	int m_uid = 0;
 };

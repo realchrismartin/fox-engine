@@ -94,10 +94,10 @@ protected:
 	};
 
 private:
-	size_t m_maxEntities = 10;
-	std::unordered_map<int, int> m_gameEntityMap;
-	std::unordered_map<int, int> m_componentTypeToPoolMap;
-	std::vector<GameEntity> m_gameEntities;
+	size_t m_maxEntities = 10; //The max number of entities we can have, mostly dictated by the size of the component pools for now
+	std::unordered_map<int, int> m_gameEntityMap; //Map of entity UIDs to the entity placement in the entity vector
+	std::unordered_map<int, int> m_componentTypeToPoolMap; //Map of component types to the pool placement in the pool vector
+	std::vector<GameEntity> m_gameEntities; //Worth noting: entity destructors get called a lot because we store them directly in the vector here.
 	std::vector<std::unique_ptr<ComponentPool>> m_componentPools;
 	int m_availableEntityUID = 0;
 };

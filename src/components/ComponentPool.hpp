@@ -42,7 +42,7 @@ public:
 		m_componentSize = componentSize;
 
 		//Allocate enough memory to store n components of size elementSize, where n = capacity
-		m_data = new int[componentSize * capacity];
+		m_data = new char[componentSize * capacity];
 
 		m_capacity = capacity;
 	}
@@ -154,11 +154,11 @@ public:
 	}
 
 private:
-	int* m_data = nullptr;
-	size_t m_componentSize = 0;
-	size_t m_capacity = 0;
-	int m_componentsUsedCount = 0;
-	std::unordered_map<int, int> m_entityToComponentMap;
+	char* m_data = nullptr; //The component pool of data. It's char type because chars are 1 byte (usually), so it can fit ANYTHING.
+	size_t m_componentSize = 0; //How big a single component is in bytes in the component pool
+	size_t m_capacity = 0; //How many components we can hold.
+	int m_componentsUsedCount = 0; //How many components we ARE holding currently. This can't exceed the capacity.
+	std::unordered_map<int, int> m_entityToComponentMap; //Map of entity UID to component index. Used to keep that m_data array tightly packed!
 };
 
 #endif
