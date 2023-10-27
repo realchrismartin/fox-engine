@@ -35,6 +35,7 @@ int GetComponentTypeId()
 class ComponentPool
 {
 public:
+
 	ComponentPool(size_t componentSize, size_t capacity)
 	{
 		//Store info on how big the component is that we're storing in this pool
@@ -46,6 +47,7 @@ public:
 		m_capacity = capacity;
 	}
 
+	template <typename T>
 	inline void registerEntity(int entityUID)
 	{
 		if (hasRegisteredEntity(entityUID))
@@ -53,29 +55,24 @@ public:
 			return; //Already registered
 		}
 
-		if (m_freeSlots.empty() && m_componentsUsedCount >= m_capacity)
+		if (m_componentsUsedCount >= m_capacity)
 		{
 			return; //We're at capacity, can't hold any more components. Dont register
 		}
 
 		//Save a mapping indicating that the entity with this UID will be using the component at the specified index.
+		//We always register new components at the end of the usable list, so the memory will be at the end of the list too 
+		m_entityToComponentMap[entityUID] = m_componentsUsedCount;
 
-		//Use a free slot if we can
-		if (!m_freeSlots.empty())
-		{
-			m_entityToComponentMap[entityUID] = m_freeSlots.back();
-			m_freeSlots.pop_back();
-		}
-		else 
-		{
-			//Use a new slot
-			//Once we use up all the slots, we can only use freed slots.
-			m_entityToComponentMap[entityUID] = m_componentsUsedCount;
-			m_componentsUsedCount++;
-		}
+		//Increment the component count - the next registered component will use this index.
+		m_componentsUsedCount++;
+
+		//Assign the memory using placement new at the specified location (where the component pool has a spot registered for the entity)
+		//NB: if we already had a component in this slot (i.e. because we erased an entity that had the component), this should overwrite that component now.
+		T* unused = new (getComponent(entityUID)) T();
 	}
 
-	inline bool hasRegisteredEntity(int entityUID)
+	inline bool hasRegisteredEntity(int entityUID) const
 	{
 		return m_entityToComponentMap.count(entityUID);
 	}
@@ -89,9 +86,53 @@ public:
 			return; //This entity can't be deregistered since it's not registered
 		}
 
-		//Free up a slot here.
-		m_freeSlots.push_back(m_entityToComponentMap.at(entityUID));
+		//This is where the component is now.
+		int componentIndex = m_entityToComponentMap[entityUID];
+		int lastComponentIndex = m_componentsUsedCount - 1;
 
+		//Trivial case - the component is at the end of the in-use list
+		if (componentIndex == lastComponentIndex)
+		{
+			//Reduce the component count - we just ignore that memory. We will overwrite it in registerEntity later, maybe, but it wont be used.
+			m_componentsUsedCount--;
+			m_entityToComponentMap.erase(entityUID);
+			return;
+		}
+
+		//Less-trivial case - the component is somewhere in the middle of the list
+		//We gotta swap the last element of the component list INTO this spot.
+		//TODO: do the swap of the last element.
+
+		bool foundComponentUID = false;
+		int lastEntityUID = 0;
+
+		//TODO: make this more efficient :(
+		for (auto const& [entityUID, componentIndex] : m_entityToComponentMap)
+		{
+			if (componentIndex == lastComponentIndex)
+			{
+				//This entityUID is using the last component index.
+				foundComponentUID = true;
+				lastEntityUID = entityUID;
+				break;
+			}
+		}
+
+		if (!foundComponentUID)
+		{
+			//Something is wrong.
+			assert(false);
+		}
+
+		//Now we have the entity UID that is using the last component index.
+		//Copy that entity's component and overwrite the one at our index.
+		std::memcpy(getComponent(entityUID), getComponent(lastEntityUID), m_componentSize);
+
+		//Add that entity at our index, since it is using this index now.
+		m_entityToComponentMap[lastEntityUID] = componentIndex;
+
+		//Now that we have swapped, we can remove the entity we are trying to remove.
+		m_componentsUsedCount--;
 		m_entityToComponentMap.erase(entityUID);
 	}
 
@@ -118,7 +159,6 @@ private:
 	size_t m_capacity = 0;
 	int m_componentsUsedCount = 0;
 	std::unordered_map<int, int> m_entityToComponentMap;
-	std::vector<int> m_freeSlots;
 };
 
 #endif
