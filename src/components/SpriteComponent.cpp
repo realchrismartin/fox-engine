@@ -4,7 +4,7 @@
 
 void SpriteComponent::setSizeAndCenterPoint(sf::Vector2f size, sf::Vector2f centerPos)
 {
-	//m_textureCoordinates = sf::Vector2(25, 25);
+	//m_textureCoordinates = sf::Vector2(15, 15);
 
 	//Assume the window is 1600 x 1200
 	//TODO: don't assume this, you peon!
@@ -23,10 +23,10 @@ void SpriteComponent::setSizeAndCenterPoint(sf::Vector2f size, sf::Vector2f cent
 
 	//Create the equivalent of two triangles taped together (a thing commonly known as a rectangle)
 	m_vertices = {
-		normalizedCenterPos.x + normalizedHalfSize.x, normalizedCenterPos.y + normalizedHalfSize.y, 0.f, normalizedTextureCoordinates.x + normalizedSpriteSize.x, normalizedTextureCoordinates.y + normalizedSpriteSize.y,
+		normalizedCenterPos.x + normalizedHalfSize.x, normalizedCenterPos.y + normalizedHalfSize.y, 0.f, normalizedTextureCoordinates.x + normalizedSpriteSize.x, normalizedTextureCoordinates.y - normalizedSpriteSize.y,
 		normalizedCenterPos.x + normalizedHalfSize.x, normalizedCenterPos.y - normalizedHalfSize.y, 0.f, normalizedTextureCoordinates.x + normalizedSpriteSize.x, normalizedTextureCoordinates.y,
 		normalizedCenterPos.x - normalizedHalfSize.x, normalizedCenterPos.y - normalizedHalfSize.y, 0.f, normalizedTextureCoordinates.x, normalizedTextureCoordinates.y,
-		normalizedCenterPos.x - normalizedHalfSize.x, normalizedCenterPos.y + normalizedHalfSize.y, 0.f, normalizedTextureCoordinates.x,normalizedTextureCoordinates.y + normalizedSpriteSize.y 
+		normalizedCenterPos.x - normalizedHalfSize.x, normalizedCenterPos.y + normalizedHalfSize.y, 0.f, normalizedTextureCoordinates.x,normalizedTextureCoordinates.y - normalizedSpriteSize.y 
 	};
 
 	m_indices = { 0,1,3 , 1, 2, 3 };
