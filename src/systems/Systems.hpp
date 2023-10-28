@@ -11,6 +11,7 @@
 #include "src/components/PhysicsComponent.hpp"
 #include "src/components/RectangleShapeComponent.hpp"
 #include "src/components/SpriteComponent.hpp"
+#include "src/components/GLSpriteComponent.hpp"
 
 /// @brief A collection of static functions that are "systems", functions that operate on specific associations of components in a scene to update them.
 /// @brief The update and render meta-systems are the core of the game. 
@@ -98,6 +99,11 @@ private:
 			scene.getComponent<SpriteComponent>(entity).updateWithPhysics(scene.getComponent<PhysicsComponent>(entity));
 		}
 
+		for (auto const& entity : EntityFilter<PhysicsComponent, GLSpriteComponent>(scene))
+		{
+			scene.getComponent<GLSpriteComponent>(entity).updateWithPhysics(scene.getComponent<PhysicsComponent>(entity));
+		}
+
 		for (auto const& entity : EntityFilter<PhysicsComponent, RectangleShapeComponent>(scene))
 		{
 			scene.getComponent<RectangleShapeComponent>(entity).updateWithPhysics(scene.getComponent<PhysicsComponent>(entity));
@@ -120,6 +126,13 @@ private:
 		{
 			window.draw(scene.getComponent<RectangleShapeComponent>(entity.getUID()));
 		}
+
+		//Draw all the GL stuff
+		for (auto const& entity : EntityFilter<GLSpriteComponent>(scene))
+		{
+			window.drawGL(scene.getComponent<GLSpriteComponent>(entity.getUID()));
+		}
+
 	}
 };
 

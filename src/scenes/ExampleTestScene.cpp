@@ -6,6 +6,7 @@
 #include "src/components/PhysicsComponent.hpp"
 #include "src/components/RectangleShapeComponent.hpp"
 #include "src/components/SpriteComponent.hpp"
+#include "src/components/GLSpriteComponent.hpp"
 
 ExampleTestScene::ExampleTestScene()
 {
@@ -57,6 +58,8 @@ void ExampleTestScene::createPlayer()
 		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(50.f, 50.f));
 		getComponent<PhysicsComponent>(uid).setHasStaticBody(false);
 		getComponent<PhysicsComponent>(uid).setStartingPosition(sf::Vector2f(400.f, 300.f));
+
+		addComponent<GLSpriteComponent>(uid);
 	}
 }
 
