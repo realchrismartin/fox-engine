@@ -2,16 +2,12 @@
 
 #include "src/components/PhysicsComponent.hpp"
 
-void SpriteComponent::updateWithPhysics(const PhysicsComponent& component)
+void SpriteComponent::setSizeAndCenterPoint(sf::Vector2f size, sf::Vector2f centerPos)
 {
 	//Assume the window is 1600 x 1200
 	//TODO: don't assume this, you peon!
 	float windowHeight = 1200.f;
 	float windowWidth = 1600.f;
-
-	//Wherever the physics body is now, update the graphic to match.
-	sf::Vector2f size = component.getSize(); 
-	sf::Vector2f centerPos = component.getCenterPoint();
 
 	//TODO: make these actual coordinates on the sprite sheet based on the texture size
 	//We probably need to know how big the sprite is vs the size of the thing in order to do this properly.
@@ -32,6 +28,11 @@ void SpriteComponent::updateWithPhysics(const PhysicsComponent& component)
 	};
 
 	m_indices = { 0,1,3 , 1, 2, 3 };
+}
+
+void SpriteComponent::updateWithPhysics(const PhysicsComponent& component)
+{
+	setSizeAndCenterPoint(component.getSize(), component.getCenterPoint());
 }
 
 const std::vector<GLfloat>& SpriteComponent::getVertices() const

@@ -8,9 +8,10 @@
 
 ExampleTestScene::ExampleTestScene()
 {
+	createBackground();
+	createFloor();
 	createObstacles();
 	createPlayer();
-	createFloor();
 }
 
 void ExampleTestScene::createPlayer()
@@ -57,6 +58,24 @@ void ExampleTestScene::createFloor()
 		getComponent<PhysicsComponent>(uid).setMass(20.f);
 		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(1600.f, 50.f));
 		getComponent<PhysicsComponent>(uid).setStartingPosition(sf::Vector2f(0.f, 1150.f));
+	}
+}
+
+void ExampleTestScene::createBackground()
+{
+	if (m_backgroundUID.has_value())
+	{
+		removeEntity(m_backgroundUID.value());
+	}
+
+	m_backgroundUID = createEntity();
+
+	if (m_backgroundUID.has_value()) 
+	{
+		int uid = m_backgroundUID.value();
+
+		addComponent<SpriteComponent>(uid);
+		getComponent<SpriteComponent>(uid).setSizeAndCenterPoint(sf::Vector2f(1600.f, 1200.f), sf::Vector2f(800.f, 600.f));
 	}
 }
 

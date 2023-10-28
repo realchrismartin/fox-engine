@@ -6,6 +6,7 @@ class PhysicsComponent;
 class SpriteComponent
 {
 public:
+	void setSizeAndCenterPoint(sf::Vector2f size, sf::Vector2f centerPoint);
 	void updateWithPhysics(const PhysicsComponent& component);
 	const std::vector<GLfloat>& getVertices() const;
 	const std::vector<GLuint>& getIndices() const;
