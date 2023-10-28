@@ -14,3 +14,5 @@
 
 //Utility stuff
 #include "src/util/Logger.hpp"
+
+#include "src/extern/glew/glew.h"

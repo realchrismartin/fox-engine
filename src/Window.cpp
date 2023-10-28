@@ -1,20 +1,11 @@
 #include "src/Window.hpp"
 #include "SFML/Graphics/View.hpp"
 
-Window::Window()
-{
-	m_renderWindow = std::make_unique<sf::RenderWindow>(sf::VideoMode(1600, 1200), "Chris and J's Game");
-	m_renderWindow->setFramerateLimit(60);
-
-	//Make a "camera" that's a view of the window.
-	sf::View camera = sf::View(sf::Vector2f(800.f,600.f), sf::Vector2f(1600.f,1200.f));
-	//camera.rotate(50.f);
-	m_renderWindow->setView(camera);
-}
 
 void Window::clear()
 {
-	m_renderWindow->clear();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//m_renderWindow->clear();
 }
 
 void Window::display()

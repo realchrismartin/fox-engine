@@ -21,6 +21,14 @@ endif()
 add_definitions(-DSFML_STATIC)
 add_subdirectory(${CMAKE_SOURCE_DIR}/SFML)
 
+add_definitions(-DGLEW_STATIC)
+add_subdirectory("${CMAKE_SOURCE_DIR}/GLEW/build/cmake" "${CMAKE_CURRENT_BINARY_DIR}/GLEW")
+add_compile_definitions(
+    GLM_FORCE_EXPLICIT_CTOR
+    GLM_FORCE_XYZW_ONLY
+    GLM_FORCE_SIZE_T_LENGTH
+)
+add_subdirectory("${CMAKE_SOURCE_DIR}/glm")
 
 file(GLOB_RECURSE GAME_SOURCE src/*.cpp) 
 file(GLOB_RECURSE GAME_HEADERS src/*.hpp) 
@@ -40,6 +48,9 @@ set(DEPEND_LIBRARIES
 	sfml-graphics
 	sfml-window
 	sfml-audio
+    gdi32
+    opengl32
+    glew_s
 )
 
 target_link_libraries(Game PRIVATE ${DEPEND_LIBRARIES})
