@@ -102,6 +102,7 @@ private:
 	static const void runRenderSystem(Scene& scene, Window& window)
 	{
 		//Draw all the GL stuff
+		//TODO: some day, copy this entire chonker of data in one bufferSubData to be fancy.
 		for (auto const& entity : EntityFilter<SpriteComponent>(scene))
 		{
 			window.draw(scene.getComponent<SpriteComponent>(entity.getUID()));
