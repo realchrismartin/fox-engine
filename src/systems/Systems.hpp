@@ -104,7 +104,7 @@ private:
 		//Draw all the GL stuff
 		for (auto const& entity : EntityFilter<SpriteComponent>(scene))
 		{
-			window.drawGL(scene.getComponent<SpriteComponent>(entity.getUID()));
+			window.draw(scene.getComponent<SpriteComponent>(entity.getUID()));
 		}
 	}
 };

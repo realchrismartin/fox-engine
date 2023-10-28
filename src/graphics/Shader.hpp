@@ -7,17 +7,29 @@ class Shader
 {
 public:
 
+	Shader()
+	{
+	}
+
+	~Shader()
+	{
+		unbind();
+	}
+
 	GLuint getShaderProgramId()
 	{
 		return m_shaderProgramId;
 	}
 
-	void activateShader()
+	void activate()
 	{
 		std::string vertexShader = loadShader("../../shaders/vert.glsl");
 		std::string fragmentShader = loadShader("../../shaders/frag.glsl");
 		m_shaderProgramId = createShader(vertexShader, fragmentShader);
+	}
 
+	void bind()
+	{
 		if (m_shaderProgramId == 0)
 		{
 			return;
@@ -26,7 +38,7 @@ public:
 		glUseProgram(m_shaderProgramId);
 	}
 
-	void deactivateShader()
+	void unbind()
 	{
 		glUseProgram(0);
 	}

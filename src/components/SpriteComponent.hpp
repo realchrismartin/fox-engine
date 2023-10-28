@@ -15,6 +15,7 @@ public:
 private:
 	std::vector<GLfloat> m_vertices;
 	std::vector<GLuint> m_indices;
+	sf::Vector2i m_textureCoordinates = sf::Vector2i(0, 0);
 };
 
 #endif

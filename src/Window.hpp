@@ -3,8 +3,8 @@
 
 #include "SFML/Graphics/RenderWindow.hpp"
 #include "SFML/Window/Event.hpp"
-#include "src/extern/stb_image.h"
 #include "src/graphics/Shader.hpp"
+#include "src/graphics/Texture.hpp"
 
 class GraphicsComponent;
 
@@ -25,112 +25,36 @@ public:
 
 		setupOpenGL();
 	}
-	~Window()
-	{
-		if (m_textureID < 0)
-		{
-			glDeleteTextures(1, &m_textureID);
-		}
-	}
-
-
-	template<typename T>
-	void drawGL(T drawableComponent)
-	{
-		if (drawableComponent.getVertexCount() <= (size_t)0 || drawableComponent.getIndexCount() <= (size_t)0)
-		{
-			return;
-		}
-
-		glBindTexture(GL_TEXTURE_2D, m_textureID);
-		
-		glBufferData(GL_ARRAY_BUFFER, drawableComponent.getVertexCount() * sizeof(GLfloat), &drawableComponent.getVertices()[0], GL_STATIC_DRAW);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, drawableComponent.getIndexCount() * sizeof(GLuint), &drawableComponent.getIndices()[0], GL_STATIC_DRAW);
-
-		glDrawElements(GL_TRIANGLES,drawableComponent.getIndexCount(), GL_UNSIGNED_INT, nullptr);
-	}
 
 	void clear();
 	void display();
 	void pollForEvents();
 	bool isOpen() const;
+
 	const std::vector<sf::Event>& getEvents() const;
 
+	template<typename T>
+	void draw(T drawableComponent)
+	{
+		draw(drawableComponent.getVertexCount(), drawableComponent.getIndexCount(), drawableComponent.getVertices(), drawableComponent.getIndices());
+	}
 private:
 
-	void setupOpenGL()
-	{
-		GLenum err = glewInit();
-
-		if (GLEW_OK != err)
-		{
-			std::cout << glewGetErrorString(err) << std::endl;
-			return;
-		}
-
-		std::cout << "Using OpenGL " << glGetString(GL_VERSION) << std::endl;
-		std::cout << "Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
-
-		//Create buffer objects
-		glGenVertexArrays(1, &m_VAOId);
-		glBindVertexArray(m_VAOId);
-
-		//Create and init VBO
-		glGenBuffers(1, &m_vertexBufferObject);
-		glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferObject);
-
-		//Create and init EBO
-		glGenBuffers(2, &m_elementArrayBufferObject);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementArrayBufferObject);
-
-		GLint vertexPosLocation = 0;
-		GLint texCoordLocation = 1;
-
-		glVertexAttribPointer(vertexPosLocation, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
-		glVertexAttribPointer(texCoordLocation, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-
-		glEnableVertexAttribArray(vertexPosLocation);
-		glEnableVertexAttribArray(texCoordLocation);
-
-		// Create a texture object
-		glGenTextures(1, &m_textureID);
-		glBindTexture(GL_TEXTURE_2D, m_textureID);
-
-		// Set texture parameters 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		stbi_set_flip_vertically_on_load(true);
-
-		int width, height, nrChannels;
-		unsigned char* imageData = stbi_load("../../img/sprite_sheet.png", &width, &height, &nrChannels, 0);
-
-		// Load texture data into the bound texture
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
-
-		// Unbind the texture once it is loaded. We rebind it just before drawing using it.
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		stbi_image_free(imageData);
-
-		shader.activateShader();
-		shader.updateIntUniform("textureSampler", 0);
-
-		m_glActive = true;
-
-	}
+	void draw(size_t vertexCount, size_t indexCount, const std::vector<GLfloat>& vertices, const std::vector<GLuint>& indices);
+	void setupOpenGL();
 
 	std::unique_ptr<sf::RenderWindow> m_renderWindow;
 	std::vector<sf::Event> m_events;
 
+	Texture texture;
 	Shader shader;
 
-	bool m_glActive = false;
 	GLuint m_VAOId;
 	GLuint m_vertexBufferObject;
 	GLuint m_elementArrayBufferObject;
-	GLuint m_textureID = 0;
 
+	GLuint m_maxVertices;
+	GLuint m_maxIndices;
 };
 #endif
 
