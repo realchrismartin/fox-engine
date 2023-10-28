@@ -105,7 +105,7 @@ private:
 		std::vector<GLfloat> vertices;
 		std::vector<GLuint> indices;
 
-		//Collect all the vertices and indices.
+		//Collect all the vertices and indices
 		for (auto const& entity : EntityFilter<SpriteComponent>(scene))
 		{
 			auto sprite = scene.getComponent<SpriteComponent>(entity.getUID());
