@@ -4,7 +4,7 @@
 
 void SpriteComponent::setSizeAndCenterPoint(sf::Vector2f size, sf::Vector2f centerPos)
 {
-	//m_textureCoordinates = sf::Vector2(15, 15);
+	//m_textureCoordinates = sf::Vector2(50, 0);
 
 	//Assume the window is 1600 x 1200
 	//TODO: don't assume this, you peon!
