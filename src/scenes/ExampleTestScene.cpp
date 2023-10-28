@@ -8,6 +8,7 @@
 
 ExampleTestScene::ExampleTestScene()
 {
+	//NB: right now there is no z indexing. Create your stuff in order!
 	createBackground();
 	createFloor();
 	createObstacles();
