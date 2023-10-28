@@ -9,12 +9,10 @@ class ExampleTestScene : public Scene
 public:
 	ExampleTestScene();
 protected:
-	void createBackground();
 	void createPlayer();
 	void createFloor();
 	void createObstacles();
 private:
-	std::optional<int> m_backgroundUID;
 	std::optional<int> m_playerUID;
 	std::optional<int> m_obstacleUID;
 	std::optional<int> m_floorUID;

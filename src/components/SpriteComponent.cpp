@@ -2,39 +2,49 @@
 
 #include "src/components/PhysicsComponent.hpp"
 
-void SpriteComponent::setTexturePath(std::string spriteTexturePath)
-{
-	 //TODO: this is $$! Change it.
-	 m_texture.loadFromFile(spriteTexturePath);
-	 m_sprite.setTexture(m_texture);
-}
-
-const sf::Sprite& SpriteComponent::getDrawable() const
-{
-	return m_sprite;
-}
-
 void SpriteComponent::updateWithPhysics(const PhysicsComponent& component)
 {
-	//TODO: make this cheaper.
+	//Assume the window is 1600 x 1200
+	float windowHeight = 1200.f;
+	float windowWidth = 1600.f;
 
 	//Wherever the physics body is now, update the graphic to match.
-	setPosition(component.getPosition());
 
-	//Set the size too
-	setSize(component.getSize());
+	//TODO: make this not completely suck. Use matrices, you fool!!
+	sf::Vector2f size = component.getSize();
+	sf::Vector2f centerPos = component.getCenterPoint();
+
+	sf::Vector2f normalizedSize = sf::Vector2f(size.x / windowWidth, size.y / windowHeight);
+	sf::Vector2f normalizedCenterPos = sf::Vector2f(centerPos.x / windowWidth, (windowHeight - centerPos.y) / windowHeight); //Subtraction is to flip y axis
+	sf::Vector2f normalizedHalfSize = normalizedSize /= 2.f;
+
+	m_vertices = {
+		normalizedCenterPos.x + normalizedHalfSize.x, normalizedCenterPos.y + normalizedHalfSize.y, 0.f, 1.f, 1.f,
+		normalizedCenterPos.x + normalizedHalfSize.x, normalizedCenterPos.y - normalizedHalfSize.y, 0.f, 1.f, 0.f,
+		normalizedCenterPos.x - normalizedHalfSize.x, normalizedCenterPos.y - normalizedHalfSize.y, 0.f, 0.f, 0.f,
+		normalizedCenterPos.x - normalizedHalfSize.x, normalizedCenterPos.y + normalizedHalfSize.y, 0.f, 0.f, 1.f
+
+	};
+
+	m_indices = { 0,1,3 , 1, 2, 3 };
 }
 
-void SpriteComponent::setPosition(sf::Vector2f position)
+const std::vector<GLfloat>& SpriteComponent::getVertices() const
 {
-	m_sprite.setPosition(position);
+	return m_vertices;
 }
 
-void SpriteComponent::setSize(sf::Vector2f size)
+const std::vector<GLuint>& SpriteComponent::getIndices() const
 {
-	float scaleX = size.x /m_sprite.getTextureRect().width;
-	float scaleY = size.y / m_sprite.getTextureRect().height;
-
-	m_sprite.setScale(sf::Vector2f(scaleX, scaleY));
+	return m_indices;
 }
 
+size_t SpriteComponent::getVertexCount() const
+{
+	return m_vertices.size();
+}
+
+size_t SpriteComponent::getIndexCount() const
+{
+	return m_indices.size();
+}

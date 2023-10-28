@@ -1,23 +1,20 @@
-#ifndef SPRITECOMPONENT_HPP
-#define SPRITECOMPONENT_HPP
+#ifndef GLSPRITECOMPONENT_HPP
+#define GLSPRITECOMPONENT_HPP
 
 class PhysicsComponent;
 
-#include "SFML/Graphics/Texture.hpp"
-#include "SFML/Graphics/Sprite.hpp"
-
-/// @brief A simple graphical Sprite component that renders a Sprite wherever the entity's physics body is
 class SpriteComponent
 {
 public:
-	const sf::Sprite& getDrawable() const;
-	void setTexturePath(std::string spriteTexturePath);
 	void updateWithPhysics(const PhysicsComponent& component);
-	void setPosition(sf::Vector2f position);
-	void setSize(sf::Vector2f size);
+	const std::vector<GLfloat>& getVertices() const;
+	const std::vector<GLuint>& getIndices() const;
+	size_t getVertexCount() const;
+	size_t getIndexCount() const;
+
 private:
-	sf::Sprite m_sprite;
-	sf::Texture m_texture;
+	std::vector<GLfloat> m_vertices;
+	std::vector<GLuint> m_indices;
 };
 
 #endif

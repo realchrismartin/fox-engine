@@ -33,19 +33,15 @@ public:
 		}
 	}
 
-	template<typename T>
-	void draw(T drawableComponent)
-	{
-		if (m_glActive)
-		{
-			return;
-		}
-		m_renderWindow->draw(drawableComponent.getDrawable());
-	}
 
 	template<typename T>
 	void drawGL(T drawableComponent)
 	{
+		if (drawableComponent.getVertexCount() <= (size_t)0 || drawableComponent.getIndexCount() <= (size_t)0)
+		{
+			return;
+		}
+
 		glBindTexture(GL_TEXTURE_2D, m_textureID);
 		
 		glBufferData(GL_ARRAY_BUFFER, drawableComponent.getVertexCount() * sizeof(GLfloat), &drawableComponent.getVertices()[0], GL_STATIC_DRAW);
@@ -104,13 +100,15 @@ private:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+		stbi_set_flip_vertically_on_load(true);
+
 		int width, height, nrChannels;
-		unsigned char* imageData = stbi_load("../../img/character.png", &width, &height, &nrChannels, 0);
+		unsigned char* imageData = stbi_load("../../img/sprite_sheet.png", &width, &height, &nrChannels, 0);
 
 		// Load texture data into the bound texture
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
 
-		// Unbind the texture once it is loaded, IF we plan on rebindign just before draw
+		// Unbind the texture once it is loaded. We rebind it just before drawing using it.
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		stbi_image_free(imageData);
