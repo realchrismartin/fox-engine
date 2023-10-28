@@ -38,9 +38,10 @@ public:
 	{
 		draw(drawableComponent.getVertexCount(), drawableComponent.getIndexCount(), drawableComponent.getVertices(), drawableComponent.getIndices());
 	}
-private:
 
 	void draw(size_t vertexCount, size_t indexCount, const std::vector<GLfloat>& vertices, const std::vector<GLuint>& indices);
+private:
+
 	void setupOpenGL();
 
 	std::unique_ptr<sf::RenderWindow> m_renderWindow;

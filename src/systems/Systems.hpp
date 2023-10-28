@@ -102,11 +102,27 @@ private:
 	static const void runRenderSystem(Scene& scene, Window& window)
 	{
 		//Draw all the GL stuff
-		//TODO: some day, copy this entire chonker of data in one bufferSubData to be fancy.
+		std::vector<GLfloat> vertices;
+		std::vector<GLuint> indices;
+
+		//Collect all the vertices and indices.
 		for (auto const& entity : EntityFilter<SpriteComponent>(scene))
 		{
-			window.draw(scene.getComponent<SpriteComponent>(entity.getUID()));
+			auto sprite = scene.getComponent<SpriteComponent>(entity.getUID());
+
+			auto const& newVertices = sprite.getVertices();
+			auto const& newIndices = sprite.getIndices();
+
+			for (GLuint index : newIndices)
+			{
+				indices.push_back(index + ((GLuint)vertices.size() / 5)); //5 is the stride.
+			}	
+
+			vertices.insert(vertices.end(), newVertices.begin(), newVertices.end());
 		}
+
+		//Do one bufferSubData and draw!
+		window.draw(vertices.size(), indices.size(), vertices, indices);
 	}
 };
 
