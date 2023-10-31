@@ -9,6 +9,7 @@
 
 #include "src/components/InputComponent.hpp"
 #include "src/components/PhysicsComponent.hpp"
+#include "src/components/TransformComponent.hpp"
 #include "src/components/SpriteComponent.hpp"
 
 /// @brief A collection of static functions that are "systems", functions that operate on specific associations of components in a scene to update them.
@@ -97,6 +98,12 @@ private:
 			scene.getComponent<SpriteComponent>(entity).updateWithPhysics(scene.getComponent<PhysicsComponent>(entity));
 		}
 
+		//Update each transform with its physics component
+		//This also resets the model matrix first (currently) - TODO
+		for (auto const& entity : EntityFilter<PhysicsComponent, TransformComponent>(scene))
+		{
+			scene.getComponent<TransformComponent>(entity).updateWithPhysics(scene.getComponent<PhysicsComponent>(entity));
+		}
 	}
 
 	static const void runRenderSystem(Scene& scene, Window& window)

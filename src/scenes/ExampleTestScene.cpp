@@ -5,6 +5,7 @@
 #include "src/components/InputComponent.hpp"
 #include "src/components/PhysicsComponent.hpp"
 #include "src/components/SpriteComponent.hpp"
+#include "src/components/TransformComponent.hpp"
 
 ExampleTestScene::ExampleTestScene()
 {
@@ -31,6 +32,7 @@ void ExampleTestScene::createPlayer()
 		addComponent<InputComponent>(uid);
 
 		addComponent<PhysicsComponent>(uid);
+		addComponent<TransformComponent>(uid);
 		getComponent<PhysicsComponent>(uid).setMass(10.f);
 		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(50.f, 50.f));
 		getComponent<PhysicsComponent>(uid).setHasStaticBody(false);
@@ -55,6 +57,7 @@ void ExampleTestScene::createFloor()
 
 		addComponent<SpriteComponent>(uid);
 
+		addComponent<TransformComponent>(uid);
 		addComponent<PhysicsComponent>(uid);
 		getComponent<PhysicsComponent>(uid).setMass(20.f);
 		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(1600.f, 50.f));
@@ -95,6 +98,7 @@ void ExampleTestScene::createObstacles()
 
 		addComponent<SpriteComponent>(uid);
 
+		addComponent<TransformComponent>(uid);
 		addComponent<PhysicsComponent>(uid);
 		getComponent<PhysicsComponent>(uid).setMass(5.f);
 		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(40.f, 40.f));
