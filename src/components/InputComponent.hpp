@@ -5,9 +5,10 @@
 
 enum class UserInputActionsEnum
 {
+	PRESSING_W,
+	PRESSING_S,
 	PRESSING_A,
-	PRESSING_D,
-	PRESSING_SPACEBAR
+	PRESSING_D
 };
 
 /// @brief A component which stores events coming from sf::RenderWindow and filters out the ones we don't care about. In the end, it tracks the events that are actively occurring that are "input" related

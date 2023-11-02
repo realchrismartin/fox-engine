@@ -14,6 +14,17 @@ void InputComponent::informOfWindowEvent(sf::Event e)
 		{
 			switch (e.key.code)
 			{
+				case(sf::Keyboard::W):
+				{
+					m_activeInputs.insert(UserInputActionsEnum::PRESSING_W);
+					break;
+				}
+				case(sf::Keyboard::S):
+				{
+
+					m_activeInputs.insert(UserInputActionsEnum::PRESSING_S);
+					break;
+				}
 				case(sf::Keyboard::A):
 				{
 					m_activeInputs.insert(UserInputActionsEnum::PRESSING_A);
@@ -22,11 +33,6 @@ void InputComponent::informOfWindowEvent(sf::Event e)
 				case(sf::Keyboard::D):
 				{
 					m_activeInputs.insert(UserInputActionsEnum::PRESSING_D);
-					break;
-				}
-				case(sf::Keyboard::Space):
-				{
-					m_activeInputs.insert(UserInputActionsEnum::PRESSING_SPACEBAR);
 					break;
 				}
 				default:
@@ -41,6 +47,17 @@ void InputComponent::informOfWindowEvent(sf::Event e)
 		{
 			switch (e.key.code)
 			{
+				case(sf::Keyboard::W):
+				{
+					m_activeInputs.erase(UserInputActionsEnum::PRESSING_W);
+					break;
+				}
+				case(sf::Keyboard::S):
+				{
+
+					m_activeInputs.erase(UserInputActionsEnum::PRESSING_S);
+					break;
+				}
 				case(sf::Keyboard::A):
 				{
 					m_activeInputs.erase(UserInputActionsEnum::PRESSING_A);
@@ -49,11 +66,6 @@ void InputComponent::informOfWindowEvent(sf::Event e)
 				case(sf::Keyboard::D):
 				{
 					m_activeInputs.erase(UserInputActionsEnum::PRESSING_D);
-					break;
-				}
-				case(sf::Keyboard::Space):
-				{
-					m_activeInputs.erase(UserInputActionsEnum::PRESSING_SPACEBAR);
 					break;
 				}
 				default:

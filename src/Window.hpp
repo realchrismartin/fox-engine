@@ -30,6 +30,7 @@ public:
 	void display();
 	void pollForEvents();
 	bool isOpen() const;
+	Shader& getBoundShader();
 
 	const std::vector<sf::Event>& getEvents() const;
 
@@ -47,8 +48,8 @@ private:
 	std::unique_ptr<sf::RenderWindow> m_renderWindow;
 	std::vector<sf::Event> m_events;
 
-	Texture texture;
-	Shader shader;
+	Texture m_texture;
+	Shader m_shader;
 
 	GLuint m_VAOId;
 	GLuint m_vertexBufferObject;

@@ -2,6 +2,7 @@
 #define SHADER_HPP
 
 #include <fstream>
+#include "glm/glm/gtc/type_ptr.hpp"
 
 class Shader
 {
@@ -54,6 +55,19 @@ public:
 		const GLchar* locationName = uniformBindingName.c_str();
 		
 		glUniform1i(glGetUniformLocation(m_shaderProgramId, locationName), 0);
+	}
+
+	void updateMat4Uniform(std::string uniformBindingName, const glm::mat4& value)
+	{
+		if (m_shaderProgramId == 0)
+		{
+			return;
+		}
+
+		const GLchar* locationName = uniformBindingName.c_str();
+		
+		glUniformMatrix4fv(glGetUniformLocation(m_shaderProgramId, locationName), 1, GL_FALSE, glm::value_ptr(value));
+
 	}
 
 	std::string loadShader(const std::string& fname) 

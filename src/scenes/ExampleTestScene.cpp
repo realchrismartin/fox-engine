@@ -3,9 +3,8 @@
 #include "src/entities/GameEntity.hpp"
 
 #include "src/components/InputComponent.hpp"
-#include "src/components/PhysicsComponent.hpp"
-#include "src/components/SpriteComponent.hpp"
 #include "src/components/TransformComponent.hpp"
+#include "src/components/ModelComponent.hpp"
 
 ExampleTestScene::ExampleTestScene()
 {
@@ -31,14 +30,10 @@ void ExampleTestScene::createPlayer()
 
 		addComponent<InputComponent>(uid);
 
-		addComponent<PhysicsComponent>(uid);
 		addComponent<TransformComponent>(uid);
-		getComponent<PhysicsComponent>(uid).setMass(10.f);
-		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(50.f, 50.f));
-		getComponent<PhysicsComponent>(uid).setHasStaticBody(false);
-		getComponent<PhysicsComponent>(uid).setStartingPosition(sf::Vector2f(400.f, 300.f));
-
-		addComponent<SpriteComponent>(uid);
+		getComponent<TransformComponent>(uid).setScale({ .5f,.5f,.5f });
+		getComponent<TransformComponent>(uid).setRotation({ 0.f,0.f,0.f });
+		addComponent<ModelComponent>(uid);
 	}
 }
 
@@ -54,14 +49,10 @@ void ExampleTestScene::createFloor()
 	if (m_floorUID.has_value()) 
 	{
 		int uid = m_floorUID.value();
-
-		addComponent<SpriteComponent>(uid);
-
 		addComponent<TransformComponent>(uid);
-		addComponent<PhysicsComponent>(uid);
-		getComponent<PhysicsComponent>(uid).setMass(20.f);
-		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(1600.f, 50.f));
-		getComponent<PhysicsComponent>(uid).setStartingPosition(sf::Vector2f(0.f, 1150.f));
+		getComponent<TransformComponent>(uid).setScale({ 5.f,.2f,1.f});
+		getComponent<TransformComponent>(uid).setPosition({ -1.f,-1.f,1.f});
+		addComponent<ModelComponent>(uid);
 	}
 }
 
@@ -78,8 +69,6 @@ void ExampleTestScene::createBackground()
 	{
 		int uid = m_backgroundUID.value();
 
-		addComponent<SpriteComponent>(uid);
-		getComponent<SpriteComponent>(uid).setSizeAndCenterPoint(sf::Vector2f(1600.f, 1200.f), sf::Vector2f(800.f, 600.f));
 	}
 }
 
@@ -95,14 +84,6 @@ void ExampleTestScene::createObstacles()
 	if (m_obstacleUID.has_value()) 
 	{
 		int uid = m_obstacleUID.value();
-
-		addComponent<SpriteComponent>(uid);
-
 		addComponent<TransformComponent>(uid);
-		addComponent<PhysicsComponent>(uid);
-		getComponent<PhysicsComponent>(uid).setMass(5.f);
-		getComponent<PhysicsComponent>(uid).setSize(sf::Vector2f(40.f, 40.f));
-		getComponent<PhysicsComponent>(uid).setHasStaticBody(false);
-		getComponent<PhysicsComponent>(uid).setStartingPosition(sf::Vector2f(450.f, 500.f));
 	}
 }

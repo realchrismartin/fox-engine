@@ -44,14 +44,14 @@ void Window::setupOpenGL()
 	glBufferData(GL_ARRAY_BUFFER,m_maxVertices * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_maxIndices * sizeof(GLuint), nullptr, GL_STATIC_DRAW);
 
-	texture.activate();
-	texture.bind();
+	m_texture.activate();
+	m_texture.bind();
 
-	shader.activate();
+	m_shader.activate();
 
-	shader.bind();
-	shader.updateIntUniform("textureSampler", 0);
-	shader.unbind();
+	m_shader.bind();
+	m_shader.updateIntUniform("textureSampler", 0);
+	m_shader.unbind();
 }
 
 void Window::draw(size_t vertexCount, size_t indexCount, const std::vector<GLfloat>& vertices, const std::vector<GLuint>& indices)
@@ -61,8 +61,8 @@ void Window::draw(size_t vertexCount, size_t indexCount, const std::vector<GLflo
 		return;
 	}
 
-	shader.bind();
-	texture.bind();
+	m_shader.bind();
+	m_texture.bind();
 
 	glBufferSubData(GL_ARRAY_BUFFER,0, sizeof(GLfloat) * vertexCount, &vertices[0]);
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,0, sizeof(GLuint) * indexCount, &indices[0]);
@@ -100,6 +100,11 @@ void Window::pollForEvents()
 bool Window::isOpen() const
 {
 	return m_renderWindow->isOpen();
+}
+
+Shader& Window::getBoundShader() 
+{
+	return m_shader;
 }
 
 const std::vector<sf::Event>& Window::getEvents() const
