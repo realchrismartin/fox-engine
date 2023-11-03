@@ -9,5 +9,6 @@
 
   void main()
   {
+    //FragColor = vec4(.5,.5,.5,.5);
     FragColor = texture(textureSampler, TexCoord);
   }
