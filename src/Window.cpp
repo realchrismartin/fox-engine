@@ -14,6 +14,9 @@ void Window::setupOpenGL()
 	std::cout << "Using OpenGL " << glGetString(GL_VERSION) << std::endl;
 	std::cout << "Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
 
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
 	//Create buffer objects
 	glGenVertexArrays(1, &m_VAOId);
 	glBindVertexArray(m_VAOId);

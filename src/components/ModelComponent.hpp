@@ -7,18 +7,18 @@ public:
 	ModelComponent();
 	const std::vector<GLfloat>& getVertices() const;
 	const std::vector<GLuint>& getIndices() const;
+	void setTextureCoordinates(sf::Vector2i coordinates);
+	void setSpriteSize(sf::Vector2i spriteSize);
 private:
+	void initModelData();
+
 	std::vector<GLfloat> m_vertices;
 	std::vector<GLuint> m_indices;
 
 	sf::Vector2i m_textureCoordinates = sf::Vector2i(0,0);
 
-	float m_textureHeight = 100.f;
-	float m_textureWidth = 100.f;
-
-	float m_spriteHeight = 50.f;
-	float m_spriteWidth = 50.f;
-
+	sf::Vector2i m_textureSize = sf::Vector2i(100, 100); //TODO unhardcode
+	sf::Vector2i m_spriteSize = sf::Vector2i(50,50); //TODO unhardcode
 };
 
 #endif

@@ -8,11 +8,11 @@
 
 ExampleTestScene::ExampleTestScene()
 {
-	//NB: right now there is no z indexing. Create your stuff in order!
-	createBackground();
-	createFloor();
+	//TODO: depth testing is not working
 	createObstacles();
+	createFloor();
 	createPlayer();
+	createBackground();
 }
 
 void ExampleTestScene::createPlayer()
@@ -31,9 +31,10 @@ void ExampleTestScene::createPlayer()
 		addComponent<InputComponent>(uid);
 
 		addComponent<TransformComponent>(uid);
-		getComponent<TransformComponent>(uid).setScale({ .5f,.5f,.5f });
-		getComponent<TransformComponent>(uid).setRotation({ 0.f,0.f,0.f });
 		addComponent<ModelComponent>(uid);
+		getComponent<ModelComponent>(uid).setTextureCoordinates(sf::Vector2i(0, 0));
+		getComponent<ModelComponent>(uid).setSpriteSize(sf::Vector2i(49,49));
+
 	}
 }
 
@@ -50,9 +51,11 @@ void ExampleTestScene::createFloor()
 	{
 		int uid = m_floorUID.value();
 		addComponent<TransformComponent>(uid);
-		getComponent<TransformComponent>(uid).setScale({ 5.f,.2f,1.f});
+		getComponent<TransformComponent>(uid).setScale({ 100.f,.2f,100.f});
 		getComponent<TransformComponent>(uid).setPosition({ -1.f,-1.f,1.f});
 		addComponent<ModelComponent>(uid);
+		getComponent<ModelComponent>(uid).setTextureCoordinates(sf::Vector2i(0, 50));
+		getComponent<ModelComponent>(uid).setSpriteSize(sf::Vector2i(11, 100));
 	}
 }
 

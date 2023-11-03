@@ -109,13 +109,13 @@ private:
 
 		//View matrix
 		glm::mat4 viewMatrix = glm::lookAt(
-			glm::vec3(0.f,10.f,-10.f), 
+			glm::vec3(0.f,2.5f,-10.f), 
 			glm::vec3(0.f,0.f,0.f),
 			glm::vec3(0.f,1.f,0.f)
 		);
 
 		// Projection matrix : 45 degree Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-		glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)1600.f / (float)1200.f, 0.1f, 100.0f);
+		glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), 4.f/3.f, .1f, 1000.0f);
 
 		for (auto const& entity : EntityFilter<TransformComponent, ModelComponent>(scene))
 		{
