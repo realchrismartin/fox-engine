@@ -12,8 +12,7 @@ public:
 private:
 	void initModelData();
 
-
-	void loadFace(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec2>& textureCoordinates, const std::vector<std::string>& faceData);
+	void loadFace(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec3>& vertexNormals, const std::vector<std::string>& faceData, std::map<std::string, GLuint>& faceMap);
 
 	std::vector<GLfloat> m_vertices;
 	std::vector<GLuint> m_indices;

@@ -40,8 +40,8 @@ void Window::setupOpenGL()
 
 	//Setup the maxima
 	//TODO: something is wrong. This has to be done here or maxVertices gets set to 3??
-	m_maxVertices = 100;
-	m_maxIndices = 100;
+	m_maxVertices = 99000;
+	m_maxIndices = 99000;
 
 	//Initialize the buffers with null data and their max sizes.
 	glBufferData(GL_ARRAY_BUFFER,m_maxVertices * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
@@ -61,6 +61,18 @@ void Window::draw(size_t vertexCount, size_t indexCount, const std::vector<GLflo
 {
 	if (vertexCount <= (size_t)0 || indexCount <= (size_t)0)
 	{
+		return;
+	}
+
+	if (vertexCount > m_maxVertices)
+	{
+		Logger::log("Too many vertices to render!");
+		return;
+	}
+
+	if (indexCount > m_maxIndices)
+	{
+		Logger::log("Too many indices!");
 		return;
 	}
 

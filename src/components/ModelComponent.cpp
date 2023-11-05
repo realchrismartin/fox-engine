@@ -10,6 +10,7 @@ ModelComponent::ModelComponent()
 
 void ModelComponent::initModelData()
 {
+    /*
 	sf::Vector2f normalizedTextureCoordinates = sf::Vector2f((float)m_textureCoordinates.x / (float)m_textureSize.x, (float)m_textureCoordinates.y / (float)m_textureSize.y);
 	sf::Vector2f normalizedSpriteSize = sf::Vector2f((float)m_spriteSize.x / (float)m_textureSize.x, (float)m_spriteSize.y / (float)m_textureSize.y); //Assumes texture is bigger than the sprite...
 
@@ -17,33 +18,13 @@ void ModelComponent::initModelData()
     sf::Vector2f bl = sf::Vector2f(normalizedTextureCoordinates.x, normalizedTextureCoordinates.y - normalizedSpriteSize.y);
     sf::Vector2f tr = sf::Vector2f(normalizedTextureCoordinates.x + normalizedSpriteSize.x, normalizedTextureCoordinates.y);
     sf::Vector2f br = sf::Vector2f(normalizedTextureCoordinates.x + normalizedSpriteSize.x, normalizedTextureCoordinates.y - normalizedSpriteSize.y);
-
-    m_vertices = {
-        -0.5f, -0.5f,  0.5f, bl.x, bl.y, // Vertex 0 (Front Bottom-Left)
-         0.5f, -0.5f,  0.5f, br.x, br.y, // Vertex 1 (Front Bottom-Right)
-         0.5f,  0.5f,  0.5f, tr.x, tr.y, // Vertex 2 (Front Top-Right)
-        -0.5f,  0.5f,  0.5f, tl.x, tl.y, // Vertex 3 (Front Top-Left)
-
-        -0.5f, -0.5f, -0.5f, br.x, br.y, // Vertex 4 (Back Bottom-Right)
-         0.5f, -0.5f, -0.5f, bl.x, bl.y, // Vertex 5 (Back Bottom-Left)
-         0.5f,  0.5f, -0.5f, tl.x, tl.y, // Vertex 6 (Back Top-Left)
-        -0.5f,  0.5f, -0.5f, tr.x, tr.y  // Vertex 7 (Back Top-Right)
-    };
-
-    m_indices = {
-        0, 1, 2, 2, 3, 0,    // Front face
-        4, 5, 6, 6, 7, 4,    // Back face
-        1, 5, 6, 6, 2, 1,    // Right face
-        0, 3, 7, 7, 4, 0,    // Left face
-        3, 2, 6, 6, 7, 3,    // Top face
-        0, 1, 5, 5, 4, 0     // Bottom face
-    };
-
-    return; //TODO
+    */
 
     std::ifstream input;
 
-    input.open("../../img/cube.obj"); //TODO
+    //input.open("../../img/cube.obj"); //TODO
+    //input.open("../../img/house_obj.obj"); //TODO
+    input.open("../../img/windmill.obj"); //TODO
 
 
     if (!input.is_open())
@@ -55,6 +36,7 @@ void ModelComponent::initModelData()
     std::vector<std::vector<std::string>> faceLineTokens;
 
     std::vector<glm::vec3> vertices;
+    std::vector<glm::vec3> vertexNormals;
     std::vector<glm::vec2> textureCoordinates;
 
     bool first = true;
@@ -83,16 +65,23 @@ void ModelComponent::initModelData()
 				{
 					lineType = 1;
 				}
+                else if (token == "vn")
+                {
+                    lineType = 2;
+                }
 				else if (token == "f")
 				{
-					lineType = 2;
+                    lineType = 3;
 				}
 
 				first = false;
 				continue;
 			}
 
-			lineTokens.push_back(token);
+            if (lineType != -1)
+            {
+			    lineTokens.push_back(token);
+            }
 		}
 
 		switch (lineType)
@@ -113,7 +102,17 @@ void ModelComponent::initModelData()
 			textureCoordinates.push_back(glm::vec2((float)std::stof(lineTokens[0]), (float)std::stof(lineTokens[1])));
 			break;
         }
-		case (2): 
+        case(2):
+        {
+            //Vertex normal
+			if (lineTokens.size() != (size_t)3)
+			{
+                break;
+			}
+            vertexNormals.push_back(glm::vec3((float)std::stof(lineTokens[0]), (float)std::stof(lineTokens[1]), (float)std::stof(lineTokens[2])));
+            break;
+        }
+		case (3): 
 			faceLineTokens.push_back(lineTokens); 
 			break;
 		default:
@@ -123,31 +122,34 @@ void ModelComponent::initModelData()
 
     input.close();
 
+    std::map<std::string, GLuint> faceMap;
+
     // Now that other data is loaded, load faces
     for (auto const& faceString : faceLineTokens)
     {
-        loadFace(vertices, textureCoordinates, faceString);
+        loadFace(vertices,  textureCoordinates,vertexNormals, faceString, faceMap);
     }
 }
 
-void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec2>& textureCoordinates, const std::vector<std::string>& faceData)
+void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec3>& vertexNormals, const std::vector<std::string>& faceData, std::map<std::string,GLuint>& faceMap)
 {
-    std::unordered_map<std::string, GLuint> faceMap;
 
-    for (std::string face : faceData)
+    for (auto const& faceComponent : faceData)
     {
-        std::stringstream stream(face);
+        std::stringstream stream(faceComponent);
         std::string token;
 
         int dataType = 0; // Whether this token is a vertex index, vertex texture index
 
         int vertexIndex = -1;
         int vertexTextureIndex = -1;
+        int vertexNormalIndex = -1;
 
+        //Faces are defined using lists of vertex, textureand normal indices in the format vertex_index / texture_index / normal_index for which each index starts at 1
         while (std::getline(stream, token, '/'))
         {
             // Get the index for whatever data token this is, decrement by 1 due to 1-indexing
-            int index = (int)atoi(token.c_str()) - 1;
+            int index = (int)atoi(token.c_str());
 
             switch (dataType)
             {
@@ -157,6 +159,9 @@ void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std:
             case (1): // Vertex texture
                 vertexTextureIndex = index;
                 break;
+            case(2): //Vertex normal
+                vertexNormalIndex = index;
+                break;
             default: // Unused / extra data
                 break;
             }
@@ -164,21 +169,21 @@ void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std:
             dataType++;
         }
 
-        if (vertexIndex >= vertices.size())
+        if ((vertexIndex -1) >= vertices.size())
         {
             std::cout << "ERROR: tried to load vertex " << vertexIndex << " but there were only " << vertices.size() << " vertices!!" << std::endl;
             return;
         }
 
-        if (vertexTextureIndex >= textureCoordinates.size())
+        if ((vertexTextureIndex - 1) >= textureCoordinates.size())
         {
             std::cout << "ERROR: tried to load texture " << vertexTextureIndex << " but there were only " << textureCoordinates.size() << " texture coords!!" << std::endl;
-            //return;
+            return;
         }
 
         // Create a map key from the assembled data for this face - look up the data from the model and connect it together
         // Store the data in the map (if needed) and push vertices if needed, store an index either way
-        std::string mapKey = std::to_string(vertexIndex) + "_" + std::to_string(vertexTextureIndex);
+        std::string mapKey = std::to_string(vertexIndex) + "_" + std::to_string(vertexTextureIndex) + "_" + std::to_string(vertexNormalIndex);
 
         if (faceMap.count(mapKey))
         {
@@ -189,8 +194,8 @@ void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std:
         {
             // We need to push both vertex data and index data
             // We also need to update our map
-            auto v = vertices.at(vertexIndex);
-           // auto t = textureCoordinates.at(vertexTextureIndex);
+            auto v = vertices.at(vertexIndex - 1);
+            auto t = textureCoordinates.at(vertexTextureIndex - 1);
 
             // Add vertex data to buffer
             // Note: ordering we push here needs to match the buffer layout
@@ -198,18 +203,16 @@ void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std:
             m_vertices.push_back(v.y);
             m_vertices.push_back(v.x);
 
-            m_vertices.push_back(0.f);
-            m_vertices.push_back(0.f);
-            /*
             m_vertices.push_back(t.x);
             m_vertices.push_back(t.y);
-            */
 
             GLuint index = (GLuint)faceMap.size();    // This is the "next" face - first one is index 0, etc.
             faceMap[mapKey] = index;          // Update map to specify index for this face - map size changes, so next index is + 1
             m_indices.push_back(index); // Add face index 
         }
     }
+
+    int x = 0;
 }
 
 const std::vector<GLfloat>& ModelComponent::getVertices() const
@@ -225,11 +228,11 @@ const std::vector<GLuint>& ModelComponent::getIndices() const
 void ModelComponent::setTextureCoordinates(sf::Vector2i coordinates)
 {
     m_textureCoordinates = coordinates;
-    initModelData();
+    //initModelData(); //TODO
 }
 
 void ModelComponent::setSpriteSize(sf::Vector2i spriteSize)
 {
     m_spriteSize = spriteSize;
-    initModelData();
+    //initModelData(); //TODO
 }

@@ -29,11 +29,12 @@ void ExampleTestScene::createPlayer()
 		int uid = m_playerUID.value();
 
 		addComponent<InputComponent>(uid);
-
 		addComponent<TransformComponent>(uid);
 		addComponent<ModelComponent>(uid);
+		/*
 		getComponent<ModelComponent>(uid).setTextureCoordinates(sf::Vector2i(0, 0));
 		getComponent<ModelComponent>(uid).setSpriteSize(sf::Vector2i(49,49));
+		*/
 
 	}
 }
