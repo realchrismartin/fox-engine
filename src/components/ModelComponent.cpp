@@ -118,8 +118,7 @@ void ModelComponent::loadModel(const ModelData& model)
     glm::vec2 textureCoordinateRatio = glm::vec2((float)m_modelData.spriteSize.x / (float)m_modelData.textureSize.x, (float)m_modelData.spriteSize.y / (float)m_modelData.textureSize.y);
 
     //Find the amount to add to each texture coordinate to offset it correctly in the overall texture
-
-    auto textureOffsetFactor = glm::vec2((float)m_modelData.spriteOffsetOnTexture.x / (float)m_modelData.textureSize.x, (float)m_modelData.spriteOffsetOnTexture.y / (float)m_modelData.textureSize.y);
+    glm::vec2 textureOffsetFactor = glm::vec2((float)m_modelData.spriteOffsetOnTexture.x / (float)m_modelData.textureSize.x, (float)m_modelData.spriteOffsetOnTexture.y / (float)m_modelData.textureSize.y);
 
     // Now that other data is loaded, load faces
     for (auto const& faceString : faceLineTokens)
