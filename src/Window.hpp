@@ -1,7 +1,7 @@
 #ifndef WINDOW_HPP
 #define WINDOW_HPP
 
-#include "SFML/Graphics/RenderWindow.hpp"
+#include "SFML/Window/Window.hpp"
 #include "SFML/Window/Event.hpp"
 #include "src/graphics/Shader.hpp"
 #include "src/graphics/Texture.hpp"
@@ -15,14 +15,7 @@ public:
 
 	Window()
 	{
-		m_renderWindow = std::make_unique<sf::RenderWindow>(sf::VideoMode(1600, 1200), "Chris and J's Game");
-		m_renderWindow->setFramerateLimit(60);
-
-		//Make a "camera" that's a view of the window.
-		sf::View camera = sf::View(sf::Vector2f(800.f,600.f), sf::Vector2f(1600.f,1200.f));
-		//camera.rotate(50.f);
-		m_renderWindow->setView(camera);
-
+		m_renderWindow = std::make_unique<sf::Window>(sf::VideoMode(1600, 1200), "Chris and J's Game", sf::Style::Default, sf::ContextSettings(24,8, 0, 4, 6));
 		setupOpenGL();
 	}
 
@@ -45,7 +38,7 @@ private:
 
 	void setupOpenGL();
 
-	std::unique_ptr<sf::RenderWindow> m_renderWindow;
+	std::unique_ptr<sf::Window> m_renderWindow;
 	std::vector<sf::Event> m_events;
 
 	Texture m_texture;

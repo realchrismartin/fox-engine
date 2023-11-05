@@ -54,7 +54,6 @@ private:
 
 	static const void runInputProcessingSystem(Scene& scene, float elapsedTime)
 	{
-
 		//Move transforms around with the input
 		for (auto const& entity : EntityFilter<InputComponent, TransformComponent>(scene))
 		{
@@ -62,7 +61,7 @@ private:
 			InputComponent& input = scene.getComponent<InputComponent>(entity);
 
 			glm::vec3 position = transform.getPosition();
-			glm::vec3 rotation = glm::vec3(0.f, 0.f, 0.f);
+			glm::vec3 rotation = glm::vec3(0.f, 90.f, 0.f);
 
 			for (auto const& enumValue : input.getActiveInputs())
 			{
@@ -71,25 +70,25 @@ private:
 					//TODO
 					case(UserInputActionsEnum::PRESSING_W):
 					{
-						position += glm::vec3(0.f,0.f, .1f);
-						rotation += glm::vec3(0.f, 180.f, 0.f);
+						position += glm::vec3(0.f,0.f, .005f);
+						rotation += glm::vec3(0.f, -180.f, 0.f);
 						break;
 					}
 					case(UserInputActionsEnum::PRESSING_S):
 					{
-						position += glm::vec3(0.f,0.f, -.1f);
+						position += glm::vec3(0.f,0.f,-.005f);
 						break;
 					}
 					case(UserInputActionsEnum::PRESSING_A):
 					{
-						position += glm::vec3(.1f, 0.f, 0.f);
-						rotation += glm::vec3(0.f, 90.f, 0.f);
+						position += glm::vec3(.005f, 0.f, 0.f);
+						rotation += glm::vec3(0.f, -90.f, 0.f);
 						break;
 					}
 					case(UserInputActionsEnum::PRESSING_D):
 					{
-						position += glm::vec3(-.1f, 0.f, 0.f);
-						rotation += glm::vec3(0.f, -90.f, 0.f);
+						position += glm::vec3(-.005f, 0.f, 0.f);
+						rotation += glm::vec3(0.f, 90.f, 0.f);
 						break;
 					}
 					default:
@@ -109,14 +108,13 @@ private:
 
 		//View matrix
 		glm::mat4 viewMatrix = glm::lookAt(
-			glm::vec3(0.f,2.5f,-20.f), 
+			glm::vec3(0.f,10.f,-20.f), 
 			glm::vec3(0.f,0.f,0.f),
 			glm::vec3(0.f,1.f,0.f)
 		);
 
 		// Projection matrix : 45 degree Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-		glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.0f), 4.f/3.f, .00001f, 1000.0f);
-
+		glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.0f), 1024.f/768.f, 1.f, 100.f);
 		for (auto const& entity : EntityFilter<TransformComponent, ModelComponent>(scene))
 		{
 			ModelComponent& model = scene.getComponent<ModelComponent>(entity);

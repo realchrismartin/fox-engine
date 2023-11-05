@@ -8,11 +8,11 @@
 
 ExampleTestScene::ExampleTestScene()
 {
-	//TODO: depth testing is not working
-	createObstacles();
-	createFloor();
-	createPlayer();
+	//TODO: depth testing is not working (properly anyway)
 	createBackground();
+	createFloor();
+	createObstacles();
+	createPlayer();
 }
 
 void ExampleTestScene::createPlayer()
@@ -31,11 +31,6 @@ void ExampleTestScene::createPlayer()
 		addComponent<InputComponent>(uid);
 		addComponent<TransformComponent>(uid);
 		addComponent<ModelComponent>(uid);
-		/*
-		getComponent<ModelComponent>(uid).setTextureCoordinates(sf::Vector2i(0, 0));
-		getComponent<ModelComponent>(uid).setSpriteSize(sf::Vector2i(49,49));
-		*/
-
 	}
 }
 
@@ -52,11 +47,15 @@ void ExampleTestScene::createFloor()
 	{
 		int uid = m_floorUID.value();
 		addComponent<TransformComponent>(uid);
-		getComponent<TransformComponent>(uid).setScale({ 100.f,.2f,100.f});
-		getComponent<TransformComponent>(uid).setPosition({ -1.f,-1.f,1.f});
+		getComponent<TransformComponent>(uid).setScale({ 50.f, 1.f, 50.f});
+		getComponent<TransformComponent>(uid).setPosition({ 0.f,-10.f,0.f});
 		addComponent<ModelComponent>(uid);
-		getComponent<ModelComponent>(uid).setTextureCoordinates(sf::Vector2i(0, 50));
-		getComponent<ModelComponent>(uid).setSpriteSize(sf::Vector2i(11, 100));
+
+		ModelData model;
+		model.modelFilePath = "../../img/cube.obj";
+		model.spriteSize = { 512,512 };
+		model.spriteOffsetOnTexture = { 511,0 };
+		getComponent<ModelComponent>(uid).loadModel(model);
 	}
 }
 
@@ -89,5 +88,8 @@ void ExampleTestScene::createObstacles()
 	{
 		int uid = m_obstacleUID.value();
 		addComponent<TransformComponent>(uid);
+		getComponent<TransformComponent>(uid).setPosition({ -5.f,0.f,5.f});
+		addComponent<ModelComponent>(uid);
+
 	}
 }

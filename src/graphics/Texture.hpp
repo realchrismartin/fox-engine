@@ -27,6 +27,8 @@ public:
 		// Set texture parameters 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
 		//Ensure dat bad boi gets flipped vertically
 		stbi_set_flip_vertically_on_load(true);
@@ -51,6 +53,7 @@ public:
 		}
 
 		glBindTexture(GL_TEXTURE_2D, m_textureID);
+
 	}
 
 	void unbind()

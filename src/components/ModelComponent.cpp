@@ -5,27 +5,18 @@
 
 ModelComponent::ModelComponent()
 {
-    initModelData();
+    loadModel(m_modelData); //TODO: pointless copy
 }
 
-void ModelComponent::initModelData()
+void ModelComponent::loadModel(const ModelData& model)
 {
-    /*
-	sf::Vector2f normalizedTextureCoordinates = sf::Vector2f((float)m_textureCoordinates.x / (float)m_textureSize.x, (float)m_textureCoordinates.y / (float)m_textureSize.y);
-	sf::Vector2f normalizedSpriteSize = sf::Vector2f((float)m_spriteSize.x / (float)m_textureSize.x, (float)m_spriteSize.y / (float)m_textureSize.y); //Assumes texture is bigger than the sprite...
+    m_vertices.clear();
+    m_indices.clear();
 
-    sf::Vector2f tl = sf::Vector2f(normalizedTextureCoordinates.x, normalizedTextureCoordinates.y);
-    sf::Vector2f bl = sf::Vector2f(normalizedTextureCoordinates.x, normalizedTextureCoordinates.y - normalizedSpriteSize.y);
-    sf::Vector2f tr = sf::Vector2f(normalizedTextureCoordinates.x + normalizedSpriteSize.x, normalizedTextureCoordinates.y);
-    sf::Vector2f br = sf::Vector2f(normalizedTextureCoordinates.x + normalizedSpriteSize.x, normalizedTextureCoordinates.y - normalizedSpriteSize.y);
-    */
+    m_modelData = model;
 
     std::ifstream input;
-
-    //input.open("../../img/cube.obj"); //TODO
-    //input.open("../../img/house_obj.obj"); //TODO
-    input.open("../../img/windmill.obj"); //TODO
-
+    input.open(m_modelData.modelFilePath);
 
     if (!input.is_open())
     {
@@ -124,16 +115,21 @@ void ModelComponent::initModelData()
 
     std::map<std::string, GLuint> faceMap;
 
+    glm::vec2 textureCoordinateRatio = glm::vec2((float)m_modelData.spriteSize.x / (float)m_modelData.textureSize.x, (float)m_modelData.spriteSize.y / (float)m_modelData.textureSize.y);
+
+    //Find the amount to add to each texture coordinate to offset it correctly in the overall texture
+
+    auto textureOffsetFactor = glm::vec2((float)m_modelData.spriteOffsetOnTexture.x / (float)m_modelData.textureSize.x, (float)m_modelData.spriteOffsetOnTexture.y / (float)m_modelData.textureSize.y);
+
     // Now that other data is loaded, load faces
     for (auto const& faceString : faceLineTokens)
     {
-        loadFace(vertices,  textureCoordinates,vertexNormals, faceString, faceMap);
+        loadFace(vertices, textureCoordinates, vertexNormals, faceString, faceMap, textureCoordinateRatio, textureOffsetFactor);
     }
 }
 
-void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec3>& vertexNormals, const std::vector<std::string>& faceData, std::map<std::string,GLuint>& faceMap)
+void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec3>& vertexNormals, const std::vector<std::string>& faceData, std::map<std::string,GLuint>& faceMap, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor)
 {
-
     for (auto const& faceComponent : faceData)
     {
         std::stringstream stream(faceComponent);
@@ -202,17 +198,14 @@ void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std:
             m_vertices.push_back(v.z);
             m_vertices.push_back(v.y);
             m_vertices.push_back(v.x);
-
-            m_vertices.push_back(t.x);
-            m_vertices.push_back(t.y);
+            m_vertices.push_back(textureOffsetFactor.x + (t.x * textureCoordinateRatio.x));
+            m_vertices.push_back(textureOffsetFactor.y + (t.y * textureCoordinateRatio.y));
 
             GLuint index = (GLuint)faceMap.size();    // This is the "next" face - first one is index 0, etc.
             faceMap[mapKey] = index;          // Update map to specify index for this face - map size changes, so next index is + 1
             m_indices.push_back(index); // Add face index 
         }
     }
-
-    int x = 0;
 }
 
 const std::vector<GLfloat>& ModelComponent::getVertices() const
@@ -223,16 +216,4 @@ const std::vector<GLfloat>& ModelComponent::getVertices() const
 const std::vector<GLuint>& ModelComponent::getIndices() const
 {
 	return m_indices;
-}
-
-void ModelComponent::setTextureCoordinates(sf::Vector2i coordinates)
-{
-    m_textureCoordinates = coordinates;
-    //initModelData(); //TODO
-}
-
-void ModelComponent::setSpriteSize(sf::Vector2i spriteSize)
-{
-    m_spriteSize = spriteSize;
-    //initModelData(); //TODO
 }

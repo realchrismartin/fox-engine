@@ -3,6 +3,8 @@
 
 void Window::setupOpenGL()
 {
+	m_renderWindow->setActive(true);
+
 	GLenum err = glewInit();
 
 	if (GLEW_OK != err)
@@ -15,7 +17,6 @@ void Window::setupOpenGL()
 	std::cout << "Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
 
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
 
 	//Create buffer objects
 	glGenVertexArrays(1, &m_VAOId);
