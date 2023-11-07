@@ -13,11 +13,13 @@ protected:
 	void createFloor();
 	void createBackground();
 	void createObstacles();
+	void createBush();
 private:
 	std::optional<int> m_backgroundUID;
 	std::optional<int> m_playerUID;
 	std::optional<int> m_obstacleUID;
 	std::optional<int> m_floorUID;
+	std::optional<int> m_bushUID;
 };
 
 #endif

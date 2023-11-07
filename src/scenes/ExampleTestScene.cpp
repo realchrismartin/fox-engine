@@ -13,6 +13,7 @@ ExampleTestScene::ExampleTestScene()
 	createFloor();
 	createObstacles();
 	createPlayer();
+	createBush();
 }
 
 void ExampleTestScene::createPlayer()
@@ -32,6 +33,13 @@ void ExampleTestScene::createPlayer()
 		addComponent<TransformComponent>(uid);
 		addComponent<ModelComponent>(uid);
 		getComponent<TransformComponent>(uid).addChild(m_obstacleUID.value());
+
+		ModelData model;
+		model.modelFilePath = "../../img/untitled.obj";
+		model.spriteSize = { 1024,1024 };
+		model.spriteOffsetOnTexture = { 0,511 };
+		getComponent<ModelComponent>(uid).loadModel(model);
+
 	}
 
 }
@@ -94,5 +102,23 @@ void ExampleTestScene::createObstacles()
 		getComponent<TransformComponent>(uid).setPosition({ -5.f,0.f,5.f});
 		addComponent<ModelComponent>(uid);
 
+	}
+}
+
+void ExampleTestScene::createBush()
+{
+	m_bushUID = createEntity();
+
+	if (m_bushUID.has_value())
+	{
+		int uid = m_bushUID.value();
+		addComponent<TransformComponent>(uid);
+		getComponent<TransformComponent>(uid).setPosition({1.f,0.f,1.f});
+		addComponent<ModelComponent>(uid);
+		ModelData model;
+		model.modelFilePath = "../../img/quoteunquote-bush.obj";
+		model.spriteSize = { 228,228 };
+		model.spriteOffsetOnTexture = { 0,513 };
+		getComponent<ModelComponent>(uid).loadModel(model);
 	}
 }
