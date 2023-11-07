@@ -2,9 +2,14 @@
 
 #include "glm/glm/gtc/matrix_transform.hpp"
 
-const glm::mat4& TransformComponent::getModelMatrix()
+void TransformComponent::setModelMatrix(const glm::mat4& matrix)
 {
-	glm::mat4 matrix = glm::mat4(1.0); //TODO: stop resetting this constantly?
+	m_matrix = matrix;
+}
+
+glm::mat4 TransformComponent::getModelMatrix()
+{
+	glm::mat4 matrix = m_matrix;
 
 	matrix = glm::translate(matrix, m_position);
 	matrix = glm::rotate(matrix, m_rotation.x,glm::vec3(1.f,0.f,0.f));

@@ -53,6 +53,18 @@ public:
 		//If we have a component in the specified pool for this entity, return a pointer to it.
 		T* pointer = static_cast<T*>(componentData);
 
+		//TODO: please move this later this is very expensive to do here....
+		if (!pointer->getChildren().empty())
+		{
+			for (auto const& child : pointer->getChildren())
+			{
+				if(m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)]->hasRemovedEntity(child))
+				{
+					pointer->removeChild(child);
+				}
+			}
+		}
+
 		return *pointer;
 	}
 
@@ -97,7 +109,7 @@ protected:
 		if (!m_componentTypeToPoolMap.count(componentTypeId))
 		{
 			//The pool for this component type isn't set up yet. Gotta set it up!
-			m_componentPools.push_back(std::move(std::make_unique<ComponentPool>(sizeof(T), m_maxEntities)));
+			m_componentPools.push_back(std::move(std::make_unique<ComponentPool>(componentTypeId,sizeof(T), m_maxEntities)));
 
 			//Assign a pool index for this component pool we just added.
 			m_componentTypeToPoolMap[componentTypeId] = (int)m_componentPools.size() - 1;

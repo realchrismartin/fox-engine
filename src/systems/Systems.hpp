@@ -20,6 +20,7 @@ public:
 	static const void update(Scene& scene, Window& window, float elapsedTime)
 	{
 		runWindowEventSystem(scene, window);
+		runSceneGraphUpdateSystem(scene);
 		runInputProcessingSystem(scene, elapsedTime);
 	};
 
@@ -50,6 +51,17 @@ private:
 				input.informOfWindowEvent(event);
 			}
 		}
+	}
+
+	static const void runSceneGraphUpdateSystem(Scene& scene)
+	{
+		for (auto const& entity : EntityFilter<InputComponent, TransformComponent>(scene))
+		{
+			TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
+			
+			//TODO: we'll do scene graph stuff here.... maybe later
+		}
+
 	}
 
 	static const void runInputProcessingSystem(Scene& scene, float elapsedTime)

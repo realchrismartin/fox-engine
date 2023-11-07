@@ -31,7 +31,9 @@ void ExampleTestScene::createPlayer()
 		addComponent<InputComponent>(uid);
 		addComponent<TransformComponent>(uid);
 		addComponent<ModelComponent>(uid);
+		getComponent<TransformComponent>(uid).addChild(m_obstacleUID.value());
 	}
+
 }
 
 void ExampleTestScene::createFloor()
@@ -57,6 +59,7 @@ void ExampleTestScene::createFloor()
 		model.spriteOffsetOnTexture = { 511,0 };
 		getComponent<ModelComponent>(uid).loadModel(model);
 	}
+
 }
 
 void ExampleTestScene::createBackground()

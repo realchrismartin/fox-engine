@@ -16,6 +16,9 @@ public:
 	void loadModel(const ModelData& model);
 	const std::vector<GLfloat>& getVertices() const;
 	const std::vector<GLuint>& getIndices() const;
+	const std::set<int>& getChildren() const { return m_children; }
+	void addChild(int child) {}
+	void removeChild(int child) {}
 private:
 	void loadFace(const std::vector<glm::vec3>& vertices, 
 		const std::vector<glm::vec2>& textureCoordinates, 
@@ -30,6 +33,8 @@ private:
 	std::vector<GLuint> m_indices;
 
 	ModelData m_modelData;
+
+	std::set<int> m_children;
 };
 
 #endif

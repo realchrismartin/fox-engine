@@ -36,8 +36,10 @@ class ComponentPool
 {
 public:
 
-	ComponentPool(size_t componentSize, size_t capacity)
+	ComponentPool(int componentTypeId, size_t componentSize, size_t capacity)
 	{
+		m_componentTypeId = componentTypeId;
+
 		//Store info on how big the component is that we're storing in this pool
 		m_componentSize = componentSize;
 
@@ -70,6 +72,8 @@ public:
 		//Assign the memory using placement new at the specified location (where the component pool has a spot registered for the entity)
 		//NB: if we already had a component in this slot (i.e. because we erased an entity that had the component), this should overwrite that component now.
 		T* unused = new (getComponent(entityUID)) T();
+
+		m_removedEntityList.erase(entityUID);
 	}
 
 	inline bool hasRegisteredEntity(int entityUID) const
@@ -123,7 +127,7 @@ public:
 			//Something is wrong.
 			assert(false);
 		}
-
+		
 		//Now we have the entity UID that is using the last component index.
 		//Copy that entity's component and overwrite the one at our index.
 		std::memcpy(getComponent(entityUID), getComponent(lastEntityUID), m_componentSize);
@@ -134,6 +138,8 @@ public:
 		//Now that we have swapped, we can remove the entity we are trying to remove.
 		m_componentsUsedCount--;
 		m_entityToComponentMap.erase(entityUID);
+
+		m_removedEntityList.insert(entityUID);
 	}
 
 	/// @brief Get the component at the specified entity uid's index.
@@ -148,17 +154,24 @@ public:
 		return m_data + ((size_t)m_entityToComponentMap[entityUID] * m_componentSize);
 	}
 
+	bool hasRemovedEntity(int entityUID) const
+	{
+		return m_removedEntityList.count(entityUID);
+	}
+
 	~ComponentPool()
 	{
 		delete[] m_data;
 	}
 
 private:
+	int m_componentTypeId = 0; //Which component type this is a pool for.
 	char* m_data = nullptr; //The component pool of data. It's char type because chars are 1 byte (usually), so it can fit ANYTHING.
 	size_t m_componentSize = 0; //How big a single component is in bytes in the component pool
 	size_t m_capacity = 0; //How many components we can hold.
 	int m_componentsUsedCount = 0; //How many components we ARE holding currently. This can't exceed the capacity.
 	std::unordered_map<int, int> m_entityToComponentMap; //Map of entity UID to component index. Used to keep that m_data array tightly packed!
+	std::set<int> m_removedEntityList; //Tracks entities that did have a component in this pool, but don't anymore
 };
 
 #endif

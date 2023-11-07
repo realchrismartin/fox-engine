@@ -62,6 +62,7 @@ void Scene::removeEntity(int uid)
 
 	//Tell all the pools that this entity is using that it can use those pool elements for something else. Do this regardless of registration on the entity.
 	//This doesn't clear memory or anything. What it DOES do is ensure the pool's memory is still contiguous, which may require copying component data around.
+
 	for (auto& pool : m_componentPools)
 	{
 		pool->deregisterEntity(currentSlotUID);
