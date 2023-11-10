@@ -8,12 +8,12 @@
 
 ExampleTestScene::ExampleTestScene()
 {
-	//TODO: depth testing is not working (properly anyway)
-	createBackground();
-	createFloor();
 	createPlayer();
 	createObstacles();
+	createBackground();
+	createFloor();
 	createBush();
+	createHat();
 }
 
 void ExampleTestScene::createPlayer()
@@ -32,6 +32,7 @@ void ExampleTestScene::createPlayer()
 		addComponent<InputComponent>(uid);
 		addComponent<TransformComponent>(uid);
 		addComponent<ModelComponent>(uid);
+		getComponent<TransformComponent>(uid).setScale({ .2f,.2f,.2f });
 
 		ModelData model;
 		model.modelFilePath = "../../img/untitled.obj";
@@ -57,7 +58,7 @@ void ExampleTestScene::createFloor()
 		int uid = m_floorUID.value();
 		addComponent<TransformComponent>(uid);
 		getComponent<TransformComponent>(uid).setScale({ 50.f, 1.f, 50.f});
-		getComponent<TransformComponent>(uid).setPosition({ 0.f,-10.f,0.f});
+		getComponent<TransformComponent>(uid).setPosition({ 0.f,-2.f,0.f});
 		addComponent<ModelComponent>(uid);
 
 		ModelData model;
@@ -98,10 +99,8 @@ void ExampleTestScene::createObstacles()
 	{
 		int uid = m_obstacleUID.value();
 		addComponent<TransformComponent>(uid);
-		getComponent<TransformComponent>(uid).setPosition({ -5.f,0.f,5.f});
+		getComponent<TransformComponent>(uid).setPosition({10.f,0.f,4.f}); 
 		addComponent<ModelComponent>(uid);
-
-		addChild(m_playerUID.value(), uid);
 	}
 }
 
@@ -113,14 +112,37 @@ void ExampleTestScene::createBush()
 	{
 		int uid = m_bushUID.value();
 		addComponent<TransformComponent>(uid);
-		getComponent<TransformComponent>(uid).setPosition({1.f,0.f,1.f});
+		getComponent<TransformComponent>(uid).setPosition({4.f,0.f,0.f});
 		addComponent<ModelComponent>(uid);
 		ModelData model;
 		model.modelFilePath = "../../img/quoteunquote-bush.obj";
 		model.spriteSize = { 228,228 };
 		model.spriteOffsetOnTexture = { 0,513 };
 		getComponent<ModelComponent>(uid).loadModel(model);
-
-		addChild(m_obstacleUID.value(), uid);
 	}
+}
+
+void ExampleTestScene::createHat()
+{
+	std::optional<int> entityUID = createEntity();
+
+	if (!entityUID.has_value())
+	{
+		return;
+	}
+
+	int uid = entityUID.value();
+
+	addComponent<TransformComponent>(uid);
+	getComponent<TransformComponent>(uid).setPosition({0.f,2.f,0.f});
+	addComponent<ModelComponent>(uid);
+
+	ModelData model;
+	model.modelFilePath = "../../img/quoteunquote-bush.obj";
+	model.spriteSize = { 228,228 };
+	model.spriteOffsetOnTexture = { 0,513 };
+	getComponent<ModelComponent>(uid).loadModel(model);
+
+	addChild(m_playerUID.value(), uid);
+
 }

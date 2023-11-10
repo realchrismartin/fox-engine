@@ -4,7 +4,9 @@
 
 void TransformComponent::updateLocalMatrix()
 {
-	m_matrix = glm::mat4(1.0); //TODO?
+	//TODO: only do this if we get dirty
+
+	m_matrix = glm::mat4(1.0);
 	m_matrix = glm::translate(m_matrix, m_position);
 	m_matrix = glm::rotate(m_matrix, m_rotation.x,glm::vec3(1.f,0.f,0.f));
 	m_matrix = glm::rotate(m_matrix, m_rotation.y,glm::vec3(0.f,1.f,0.f));

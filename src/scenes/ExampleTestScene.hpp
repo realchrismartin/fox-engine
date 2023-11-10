@@ -14,6 +14,7 @@ protected:
 	void createBackground();
 	void createObstacles();
 	void createBush();
+	void createHat();
 private:
 	std::optional<int> m_backgroundUID;
 	std::optional<int> m_playerUID;

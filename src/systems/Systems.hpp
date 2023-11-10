@@ -57,8 +57,6 @@ private:
 	static const void runSceneGraphUpdateSystem(Scene& scene)
 	{
 
-		glm::mat4 modelMatrix = glm::mat4(1.0);
-
 		std::function<glm::mat4& (int, Scene&, glm::mat4&, TransformComponent&)> accumulator = [](int entityUID, Scene& scene, glm::mat4& matrix, TransformComponent& component) -> glm::mat4&
 		{
 			component.updateLocalMatrix(); //TODO: wasteful
@@ -66,6 +64,7 @@ private:
 			return component.getModelMatrix(); //Return this matrix to maybe be used for children
 		};
 
+		glm::mat4 modelMatrix = glm::mat4(1.0);
 		scene.applyAccumulatorToSceneGraph<TransformComponent, glm::mat4>(modelMatrix, accumulator);
 	}
 
