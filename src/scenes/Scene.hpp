@@ -76,12 +76,13 @@ public:
 	GameEntity& getEntity(int entityIndex);
 	int getEntityCount() const;
 
-	template<typename ComponentType, typename ReturnType>
-	void applyAccumulatorToSceneGraph(ReturnType& returnType,std::function<ReturnType& (int,Scene&,ReturnType&,ComponentType&)> accumulator)
+	template<typename ComponentType>
+	void applyToSceneGraph(std::function<void(int,Scene&,ComponentType&)>& rootNodeFunctor,
+		                   std::function<void(int,Scene&,ComponentType&,ComponentType&)>& childNodeFunctor)
 	{
 		for (auto rootNode : m_rootNodes)
 		{
-			applyAccumulator(rootNode, returnType, accumulator);
+			applyFunctorToSceneGraph(std::nullopt,rootNode, rootNodeFunctor, childNodeFunctor);
 		}
 	}
 
@@ -118,8 +119,8 @@ protected:
 		m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)]->registerEntity<T>(entityUID);
 	};
 
-	template<typename ComponentType, typename ReturnType>
-	void applyAccumulator(int entityID, ReturnType& returnType, std::function<ReturnType& (int,Scene&,ReturnType&,ComponentType&)> accumulator)
+	template<typename ComponentType>
+	void applyFunctorToSceneGraph(std::optional<int> parentEntityID, int entityID, std::function<void(int,Scene&,ComponentType&)>& rootNodeFunctor, std::function<void(int,Scene&,ComponentType&,ComponentType&)>& childNodeFunctor)
 	{
 		int componentId = GetComponentTypeId<ComponentType>();
 
@@ -133,18 +134,28 @@ protected:
 			return; //This entity doesn't have a component of this type
 		}
 
-		//It's safe. get the component of this type
-		auto& component = getComponent<ComponentType>(entityID);
+		//Run the functor on the node.
+		if (parentEntityID.has_value())
+		{
+			//This is the child node
+			//We know the parent has a component of this type, because we recursed to get here
+			auto& parentComponent = getComponent<ComponentType>(parentEntityID.value());
+			auto& childComponent = getComponent<ComponentType>(entityID);
 
-		//Run the accumulator function on the node.
-		ReturnType& result = accumulator(entityID, *this, returnType, component);
+			childNodeFunctor(entityID, *this, parentComponent, childComponent);
+		}
+		else
+		{
+			auto& component = getComponent<ComponentType>(entityID);
+			rootNodeFunctor(entityID, *this, component);
+		}
 
-		//If the node has children, call this function to apply the accumulator to those children, passing the resulting returntype from the parent
+		//If the node has children, call this function to apply the functors to those children
 		if (m_sceneGraph.count(entityID))
 		{
 			for (auto child : m_sceneGraph.at(entityID))
 			{
-				applyAccumulator(child,result,accumulator);
+				applyFunctorToSceneGraph(entityID,child,rootNodeFunctor,childNodeFunctor);
 			}
 		}
 	}

@@ -16,9 +16,11 @@ class InputComponent
 {
 public:
 	void informOfWindowEvent(sf::Event event);
-	const std::set<UserInputActionsEnum>& getActiveInputs() const;
+	glm::vec3 getRotationGivenInput();
+	glm::vec3 getTranslationGivenInput();
 private:
 	std::set<UserInputActionsEnum> m_activeInputs;
+	float m_translationFactor = .01f;
 };
 
 #endif

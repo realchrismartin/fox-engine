@@ -56,16 +56,43 @@ private:
 
 	static const void runSceneGraphUpdateSystem(Scene& scene)
 	{
-
-		std::function<glm::mat4& (int, Scene&, glm::mat4&, TransformComponent&)> accumulator = [](int entityUID, Scene& scene, glm::mat4& matrix, TransformComponent& component) -> glm::mat4&
+		//Update each component's local and world matrices if needed.
+		//Track whether an update was made by keeping track of the overall graph's dirtiness
+		bool anyNodeWorldDirty = false;
+		std::function<void(int, Scene&, TransformComponent&)> rootNodeFunctor = [&anyNodeWorldDirty](int entityUID, Scene& scene, TransformComponent& component)
 		{
-			//TODO: we can do more with the dirty flag here.
-			component.updateWorldMatrix(matrix);
-			return component.getWorldMatrix();
+			component.updateLocalAndWorldMatrix();
+
+			anyNodeWorldDirty = anyNodeWorldDirty || component.isWorldDirty();
 		};
 
-		glm::mat4 modelMatrix = glm::mat4(1.0);
-		scene.applyAccumulatorToSceneGraph<TransformComponent, glm::mat4>(modelMatrix, accumulator);
+		std::function<void(int, Scene&, TransformComponent&,TransformComponent&)> childNodeFunctor = [&anyNodeWorldDirty](int entityUID, Scene& scene, TransformComponent& parentComponent, TransformComponent& childComponent)
+		{
+			childComponent.updateLocalAndWorldMatrix(parentComponent);
+
+			anyNodeWorldDirty = anyNodeWorldDirty || childComponent.isWorldDirty();
+		};
+
+		scene.applyToSceneGraph<TransformComponent>(rootNodeFunctor,childNodeFunctor);
+
+		//If the graph didn't update at all, stop here
+		if (!anyNodeWorldDirty)
+		{
+			return;
+		}
+
+		//If the graph updated, we can clear the world dirty flags now that all parent-child relationships have updated.
+		std::function<void(int, Scene&, TransformComponent&)> rootCleanFunctor = [](int entityUID, Scene& scene, TransformComponent& component)
+		{;
+			component.markWorldClean();
+		};
+
+		std::function<void(int, Scene&, TransformComponent&,TransformComponent&)> childCleanFunctor = [](int entityUID, Scene& scene, TransformComponent& parentComponent, TransformComponent& childComponent)
+		{
+			childComponent.markWorldClean();
+		};
+
+		scene.applyToSceneGraph<TransformComponent>(rootCleanFunctor,childCleanFunctor);
 	}
 
 	static const void runInputProcessingSystem(Scene& scene, float elapsedTime)
@@ -76,50 +103,8 @@ private:
 			TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
 			InputComponent& input = scene.getComponent<InputComponent>(entity);
 
-			//TODO: move me!
-
-			/*
-			glm::vec3 position = glm::vec3(0.f, 0.f, 0.f);
-			glm::vec3 rotation = glm::vec3(0.f, 90.f, 0.f);
-
-			for (auto const& enumValue : input.getActiveInputs())
-			{
-				switch (enumValue)
-				{
-					//TODO
-					case(UserInputActionsEnum::PRESSING_W):
-					{
-						position += glm::vec3(0.f,0.f, .005f);
-						rotation += glm::vec3(0.f, -180.f, 0.f);
-						break;
-					}
-					case(UserInputActionsEnum::PRESSING_S):
-					{
-						position += glm::vec3(0.f,0.f,-.005f);
-						break;
-					}
-					case(UserInputActionsEnum::PRESSING_A):
-					{
-						position += glm::vec3(.005f, 0.f, 0.f);
-						rotation += glm::vec3(0.f, -90.f, 0.f);
-						break;
-					}
-					case(UserInputActionsEnum::PRESSING_D):
-					{
-						position += glm::vec3(-.005f, 0.f, 0.f);
-						rotation += glm::vec3(0.f, 90.f, 0.f);
-						break;
-					}
-					default:
-					{
-						break;
-					}
-				}
-			}
-
-			transform.setRotation(rotation);
-			transform.setTranslation(position);
-			*/
+			transform.setRotation(input.getRotationGivenInput());
+			transform.addTranslation(input.getTranslationGivenInput());
 		}
 	}
 

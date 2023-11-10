@@ -6,16 +6,20 @@ class InputComponent;
 class TransformComponent
 {
 public:
-	glm::mat4& getWorldMatrix();
+	void markWorldClean();
+	bool isWorldDirty() const;
+	void updateLocalAndWorldMatrix();
+	void updateLocalAndWorldMatrix(TransformComponent& parentComponent);
 
-	void updateWorldMatrix(const glm::mat4& parentWorldMatrix);
+	glm::mat4& getWorldMatrix();
 
 	void setRotation(glm::vec3 rotation);
 	void setScale(glm::vec3 scale);
-	void setTranslation(glm::vec3 position);
+	void setTranslation(glm::vec3 translation);
+	void addTranslation(glm::vec3 translation);
+
 private:
 	void updateLocalMatrix();
-
 	glm::mat4 m_localMatrix = glm::mat4(1.0);
 	glm::mat4 m_worldMatrix = glm::mat4(1.0);
 
@@ -23,6 +27,7 @@ private:
 	glm::vec3 m_scale = glm::vec3(1.f, 1.f, 1.f);
 	glm::vec3 m_rotation = glm::vec3(0.f, 0.f, 0.f);
 
-	bool m_dirty = true;
+	bool m_localDirty = true;
+	bool m_worldDirty = true;
 };
 #endif

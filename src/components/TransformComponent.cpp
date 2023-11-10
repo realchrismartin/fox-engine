@@ -4,7 +4,7 @@
 
 void TransformComponent::updateLocalMatrix()
 {
-	if (!m_dirty)
+	if (!m_localDirty)
 	{
 		return;
 	}
@@ -15,13 +15,46 @@ void TransformComponent::updateLocalMatrix()
 	m_localMatrix = glm::rotate(m_localMatrix, m_rotation.y,glm::vec3(0.f,1.f,0.f));
 	m_localMatrix = glm::rotate(m_localMatrix, m_rotation.z,glm::vec3(0.f,0.f,1.f));
 	m_localMatrix = glm::scale(m_localMatrix, m_scale);
-}
-void TransformComponent::updateWorldMatrix(const glm::mat4& parentWorldMatrix)
-{
-	updateLocalMatrix();
 
-	//TODO: can we avoid redoing this multiplication? probably. maybe check if the parent is dirty?
-	m_worldMatrix = m_localMatrix * parentWorldMatrix;
+	m_localDirty = false;
+}
+
+void TransformComponent::updateLocalAndWorldMatrix()
+{
+	bool localDirty = m_localDirty;
+
+	updateLocalMatrix();
+	
+	if (localDirty)
+	{
+		m_worldMatrix = m_localMatrix;
+		m_worldDirty = true; //We updated.
+	}
+}
+
+
+void TransformComponent::updateLocalAndWorldMatrix(TransformComponent& parentComponent)
+{
+	bool localDirty = m_localDirty;
+
+	updateLocalMatrix();
+	
+	//If we updated locally or the parent updated
+	if (localDirty || parentComponent.isWorldDirty())
+	{
+		m_worldMatrix = m_localMatrix * parentComponent.getWorldMatrix();
+		m_worldDirty = true; //We updated.
+	}
+}
+
+void TransformComponent::markWorldClean()
+{
+	m_worldDirty = false;
+}
+
+bool TransformComponent::isWorldDirty() const
+{
+	return m_worldDirty;
 }
 
 glm::mat4& TransformComponent::getWorldMatrix()
@@ -35,17 +68,24 @@ void TransformComponent::setRotation(glm::vec3 rotation)
 	rotation = glm::vec3(glm::radians(rotation.x), glm::radians(rotation.y), glm::radians(rotation.z));
 
 	m_rotation = rotation;
-	m_dirty = true;
+	m_localDirty = true;
 }
 
 void TransformComponent::setScale(glm::vec3 scale)
 {
 	m_scale = scale;
-	m_dirty = true;
+	m_localDirty = true;
 }
 
 void TransformComponent::setTranslation(glm::vec3 translation)
 {
 	m_translation = translation;
-	m_dirty = true;
+	m_localDirty = true;
 }
+
+void TransformComponent::addTranslation(glm::vec3 translation)
+{
+	m_translation += translation;
+	m_localDirty = true;
+}
+
