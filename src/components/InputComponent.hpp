@@ -17,12 +17,8 @@ class InputComponent
 public:
 	void informOfWindowEvent(sf::Event event);
 	const std::set<UserInputActionsEnum>& getActiveInputs() const;
-	const std::set<int>& getChildren() const { return m_children; }
-	void addChild(int child) {}
-	void removeChild(int child) {}
 private:
 	std::set<UserInputActionsEnum> m_activeInputs;
-	std::set<int> m_children;
 };
 
 #endif

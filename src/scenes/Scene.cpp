@@ -16,6 +16,38 @@ int Scene::getEntityCount() const
 	return (int)m_gameEntityMap.size();
 }
 
+void Scene::addChild(int parentEntityUID, int childEntityUID)
+{
+	//Condition: the parent has to exist as an entity
+	if (!m_gameEntityMap.count(parentEntityUID))
+	{
+		//This entity was never registered.
+		return;
+	}
+
+	//Condition: this entity can't already be a child (it's allowed to be a root node though)
+	for (auto const& [parent, children] : m_sceneGraph)
+	{
+		if (children.count(childEntityUID))
+		{
+			return;
+		}
+	}
+
+	//All good - we can add this entity as a child of this parent
+	if (!m_sceneGraph.count(parentEntityUID))
+	{
+		m_sceneGraph.insert({ parentEntityUID, { childEntityUID } });
+	}
+	else 
+	{
+		m_sceneGraph.at(parentEntityUID).insert(childEntityUID);
+	}
+
+	//If we had the child as a root node before, remove it now - it has a parent!
+	m_rootNodes.erase(childEntityUID);
+}
+
 std::optional<int> Scene::createEntity()
 {
 	if (m_gameEntities.size() >= m_maxEntities)
@@ -27,6 +59,7 @@ std::optional<int> Scene::createEntity()
 
 	m_gameEntities.emplace_back(uid);
 	m_gameEntityMap[uid] = (int)m_gameEntities.size() - 1; //Map the UID to the slot we're using for the entity
+	m_rootNodes.insert(uid); //By default, the entity has no parents, so it is a root node.
 
 	m_availableEntityUID++;
 
@@ -45,6 +78,41 @@ void Scene::removeEntity(int uid)
 	{
 		//Somehow we have no entities but have a mapped one. IDK. Its a bug.
 		return;
+	}
+
+	//Remove the entity being removed from the scene graph
+
+	//Remove this uid as a child
+	for (auto& [parent, children] : m_sceneGraph)
+	{
+		if (children.count(uid))
+		{
+			children.erase(uid);
+		}
+	}
+
+	std::set<int> childrenToErase;
+
+	//Remove this uid as a parent
+	if (m_sceneGraph.count(uid))
+	{
+		//If we want to remove an entity and it has children, we assume we wanna remove the children too
+		for (auto& child : m_sceneGraph.at(uid))
+		{
+			childrenToErase.insert(child);
+		}
+
+		m_sceneGraph.erase(uid);
+	}
+
+	//Remove this uid as a root node
+	m_rootNodes.erase(uid);
+
+	//Now that the graph is updated to remove this entity, erase children too.
+	//TODO: CHECK THIS LOGIC <---------------------------------
+	for (auto const& child : childrenToErase)
+	{
+		removeEntity(child);
 	}
 
 	int slotBeingReplaced = m_gameEntityMap.at(uid);

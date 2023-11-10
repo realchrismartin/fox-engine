@@ -11,8 +11,8 @@ ExampleTestScene::ExampleTestScene()
 	//TODO: depth testing is not working (properly anyway)
 	createBackground();
 	createFloor();
-	createObstacles();
 	createPlayer();
+	createObstacles();
 	createBush();
 }
 
@@ -32,7 +32,6 @@ void ExampleTestScene::createPlayer()
 		addComponent<InputComponent>(uid);
 		addComponent<TransformComponent>(uid);
 		addComponent<ModelComponent>(uid);
-		getComponent<TransformComponent>(uid).addChild(m_obstacleUID.value());
 
 		ModelData model;
 		model.modelFilePath = "../../img/untitled.obj";
@@ -102,6 +101,7 @@ void ExampleTestScene::createObstacles()
 		getComponent<TransformComponent>(uid).setPosition({ -5.f,0.f,5.f});
 		addComponent<ModelComponent>(uid);
 
+		addChild(m_playerUID.value(), uid);
 	}
 }
 
@@ -120,5 +120,7 @@ void ExampleTestScene::createBush()
 		model.spriteSize = { 228,228 };
 		model.spriteOffsetOnTexture = { 0,513 };
 		getComponent<ModelComponent>(uid).loadModel(model);
+
+		addChild(m_obstacleUID.value(), uid);
 	}
 }

@@ -3,6 +3,7 @@
 
 #include "src/entities/GameEntity.hpp"
 #include "src/components/ComponentPool.hpp"
+#include <functional>
 
 class System;
 
@@ -53,18 +54,6 @@ public:
 		//If we have a component in the specified pool for this entity, return a pointer to it.
 		T* pointer = static_cast<T*>(componentData);
 
-		//TODO: please move this later this is very expensive to do here....
-		if (!pointer->getChildren().empty())
-		{
-			for (auto const& child : pointer->getChildren())
-			{
-				if(m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)]->hasRemovedEntity(child))
-				{
-					pointer->removeChild(child);
-				}
-			}
-		}
-
 		return *pointer;
 	}
 
@@ -87,7 +76,17 @@ public:
 	GameEntity& getEntity(int entityIndex);
 	int getEntityCount() const;
 
+	template<typename ComponentType, typename ReturnType>
+	void applyAccumulatorToSceneGraph(ReturnType& returnType,std::function<ReturnType& (int,Scene&,ReturnType&,ComponentType&)> accumulator)
+	{
+		for (auto rootNode : m_rootNodes)
+		{
+			applyAccumulator(rootNode, returnType, accumulator);
+		}
+	}
+
 protected:
+	void addChild(int parentEntityUID, int childEntityUID);
 	std::optional<int> createEntity();
 	void removeEntity(int uid);
 
@@ -119,8 +118,41 @@ protected:
 		m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)]->registerEntity<T>(entityUID);
 	};
 
+	template<typename ComponentType, typename ReturnType>
+	void applyAccumulator(int entityID, ReturnType& returnType, std::function<ReturnType& (int,Scene&,ReturnType&,ComponentType&)> accumulator)
+	{
+		int componentId = GetComponentTypeId<ComponentType>();
+
+		if (!m_componentTypeToPoolMap.count(componentId))
+		{
+			return; //The pool for this component type doesn't exist (yet?)
+		}
+
+		if (!m_componentPools[m_componentTypeToPoolMap.at(componentId)]->hasRegisteredEntity(entityID))
+		{
+			return; //This entity doesn't have a component of this type
+		}
+
+		//It's safe. get the component of this type
+		auto& component = getComponent<ComponentType>(entityID);
+
+		//Run the accumulator function on the node.
+		ReturnType& result = accumulator(entityID, *this, returnType, component);
+
+		//If the node has children, call this function to apply the accumulator to those children, passing the resulting returntype from the parent
+		if (m_sceneGraph.count(entityID))
+		{
+			for (auto child : m_sceneGraph.at(entityID))
+			{
+				applyAccumulator(child,result,accumulator);
+			}
+		}
+	}
+
 private:
 	size_t m_maxEntities = 10; //The max number of entities we can have, mostly dictated by the size of the component pools for now
+	std::map<int, std::set<int>> m_sceneGraph;
+	std::set<int> m_rootNodes;
 	std::map<int, int> m_gameEntityMap; //Map of entity UIDs to the entity placement in the entity vector
 	std::unordered_map<int, int> m_componentTypeToPoolMap; //Map of component types to the pool placement in the pool vector
 	std::vector<GameEntity> m_gameEntities; //Worth noting: entity destructors get called a lot because we store them directly in the vector here.

@@ -10,6 +10,7 @@
 #include "src/components/InputComponent.hpp"
 #include "src/components/TransformComponent.hpp"
 #include "src/components/ModelComponent.hpp"
+#include <functional>
 
 /// @brief A collection of static functions that are "systems", functions that operate on specific associations of components in a scene to update them.
 /// @brief The update and render meta-systems are the core of the game. 
@@ -55,13 +56,17 @@ private:
 
 	static const void runSceneGraphUpdateSystem(Scene& scene)
 	{
-		for (auto const& entity : EntityFilter<InputComponent, TransformComponent>(scene))
-		{
-			TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
-			
-			//TODO: we'll do scene graph stuff here.... maybe later
-		}
 
+		glm::mat4 modelMatrix = glm::mat4(1.0);
+
+		std::function<glm::mat4& (int, Scene&, glm::mat4&, TransformComponent&)> accumulator = [](int entityUID, Scene& scene, glm::mat4& matrix, TransformComponent& component) -> glm::mat4&
+		{
+			component.updateLocalMatrix(); //TODO: wasteful
+			component.multiplyModelMatrix(matrix); //Multiply by the parent matrix, order may be wrong
+			return component.getModelMatrix(); //Return this matrix to maybe be used for children
+		};
+
+		scene.applyAccumulatorToSceneGraph<TransformComponent, glm::mat4>(modelMatrix, accumulator);
 	}
 
 	static const void runInputProcessingSystem(Scene& scene, float elapsedTime)

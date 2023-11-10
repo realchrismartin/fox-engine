@@ -2,22 +2,23 @@
 
 #include "glm/glm/gtc/matrix_transform.hpp"
 
-void TransformComponent::setModelMatrix(const glm::mat4& matrix)
+void TransformComponent::updateLocalMatrix()
 {
-	m_matrix = matrix;
+	m_matrix = glm::mat4(1.0); //TODO?
+	m_matrix = glm::translate(m_matrix, m_position);
+	m_matrix = glm::rotate(m_matrix, m_rotation.x,glm::vec3(1.f,0.f,0.f));
+	m_matrix = glm::rotate(m_matrix, m_rotation.y,glm::vec3(0.f,1.f,0.f));
+	m_matrix = glm::rotate(m_matrix, m_rotation.z,glm::vec3(0.f,0.f,1.f));
+	m_matrix = glm::scale(m_matrix, m_scale);
+}
+void TransformComponent::multiplyModelMatrix(const glm::mat4& matrix)
+{
+	m_matrix *= matrix; //TODO
 }
 
-glm::mat4 TransformComponent::getModelMatrix()
+glm::mat4& TransformComponent::getModelMatrix()
 {
-	glm::mat4 matrix = m_matrix;
-
-	matrix = glm::translate(matrix, m_position);
-	matrix = glm::rotate(matrix, m_rotation.x,glm::vec3(1.f,0.f,0.f));
-	matrix = glm::rotate(matrix, m_rotation.y,glm::vec3(0.f,1.f,0.f));
-	matrix = glm::rotate(matrix, m_rotation.z,glm::vec3(0.f,0.f,1.f));
-	matrix = glm::scale(matrix, m_scale);
-
-	return matrix;
+	return m_matrix;
 }
 
 void TransformComponent::setRotation(glm::vec3 rotation)
