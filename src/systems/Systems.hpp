@@ -76,6 +76,7 @@ private:
 		scene.applyToSceneGraph<TransformComponent>(rootNodeFunctor,childNodeFunctor);
 
 		//If the graph didn't update at all, stop here
+		//TODO: not working
 		if (!anyNodeWorldDirty)
 		{
 			return;
