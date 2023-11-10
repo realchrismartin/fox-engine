@@ -58,7 +58,7 @@ void ExampleTestScene::createFloor()
 		int uid = m_floorUID.value();
 		addComponent<TransformComponent>(uid);
 		getComponent<TransformComponent>(uid).setScale({ 50.f, 1.f, 50.f});
-		getComponent<TransformComponent>(uid).setPosition({ 0.f,-2.f,0.f});
+		getComponent<TransformComponent>(uid).setTranslation({ 0.f,-2.f,0.f});
 		addComponent<ModelComponent>(uid);
 
 		ModelData model;
@@ -99,7 +99,7 @@ void ExampleTestScene::createObstacles()
 	{
 		int uid = m_obstacleUID.value();
 		addComponent<TransformComponent>(uid);
-		getComponent<TransformComponent>(uid).setPosition({10.f,0.f,4.f}); 
+		getComponent<TransformComponent>(uid).setTranslation({10.f,0.f,4.f}); 
 		addComponent<ModelComponent>(uid);
 	}
 }
@@ -112,7 +112,7 @@ void ExampleTestScene::createBush()
 	{
 		int uid = m_bushUID.value();
 		addComponent<TransformComponent>(uid);
-		getComponent<TransformComponent>(uid).setPosition({4.f,0.f,0.f});
+		getComponent<TransformComponent>(uid).setTranslation({4.f,0.f,0.f});
 		addComponent<ModelComponent>(uid);
 		ModelData model;
 		model.modelFilePath = "../../img/quoteunquote-bush.obj";
@@ -134,7 +134,7 @@ void ExampleTestScene::createHat()
 	int uid = entityUID.value();
 
 	addComponent<TransformComponent>(uid);
-	getComponent<TransformComponent>(uid).setPosition({0.f,2.f,0.f});
+	getComponent<TransformComponent>(uid).setTranslation({0.f,2.f,0.f});
 	addComponent<ModelComponent>(uid);
 
 	ModelData model;

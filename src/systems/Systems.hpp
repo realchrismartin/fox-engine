@@ -59,9 +59,9 @@ private:
 
 		std::function<glm::mat4& (int, Scene&, glm::mat4&, TransformComponent&)> accumulator = [](int entityUID, Scene& scene, glm::mat4& matrix, TransformComponent& component) -> glm::mat4&
 		{
-			component.updateLocalMatrix(); //TODO: wasteful
-			component.multiplyModelMatrix(matrix); //Multiply by the parent matrix, order may be wrong
-			return component.getModelMatrix(); //Return this matrix to maybe be used for children
+			//TODO: we can do more with the dirty flag here.
+			component.updateWorldMatrix(matrix);
+			return component.getWorldMatrix();
 		};
 
 		glm::mat4 modelMatrix = glm::mat4(1.0);
@@ -76,7 +76,10 @@ private:
 			TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
 			InputComponent& input = scene.getComponent<InputComponent>(entity);
 
-			glm::vec3 position = transform.getPosition();
+			//TODO: move me!
+
+			/*
+			glm::vec3 position = glm::vec3(0.f, 0.f, 0.f);
 			glm::vec3 rotation = glm::vec3(0.f, 90.f, 0.f);
 
 			for (auto const& enumValue : input.getActiveInputs())
@@ -115,7 +118,8 @@ private:
 			}
 
 			transform.setRotation(rotation);
-			transform.setPosition(position);
+			transform.setTranslation(position);
+			*/
 		}
 	}
 
@@ -123,6 +127,7 @@ private:
 	{
 
 		//View matrix
+		//TODO: make there be another view matrix for the ui
 		glm::mat4 viewMatrix = glm::lookAt(
 			glm::vec3(0.f,10.f,-20.f), 
 			glm::vec3(0.f,0.f,0.f),
@@ -131,12 +136,15 @@ private:
 
 		// Projection matrix : 45 degree Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
 		glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.0f), 1024.f/768.f, 1.f, 100.f);
+
 		for (auto const& entity : EntityFilter<TransformComponent, ModelComponent>(scene))
 		{
 			ModelComponent& model = scene.getComponent<ModelComponent>(entity);
 			TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
-			glm::mat4 modelMatrix = transform.getModelMatrix();
 
+			//TODO: move the mvp matrix to a SSBO so we can do ... one ... draw
+			//TODO: move smth else too TBD
+			glm::mat4 modelMatrix = transform.getWorldMatrix();
 			glm::mat4 mvp = projectionMatrix * viewMatrix * modelMatrix;
 
 			//Bind the model matrix via uniform
