@@ -20,26 +20,12 @@ public:
 	template<typename T>
 	T& getComponent(const int entityUID)
 	{
-		//Handle case where we don't have an entity yet
-		if (!m_gameEntityMap.count(entityUID))
+		if (!hasComponent<T>(entityUID))
 		{
-			throw std::out_of_range("There is no entity with this UID.");
+			throw std::out_of_range("There is no registered component of this type for this entity. The entity might not even exist..");
 		}
-		
-		//Grab the id for the type of component we are getting.
+
 		int componentTypeId = GetComponentTypeId<T>();
-
-		//Handle case that there is no component pool for this component type, which is definitely an error. Just choke on it.
-		if (!m_componentTypeToPoolMap.count(componentTypeId))
-		{
-			throw std::out_of_range("There is no component pool for this component type");
-		}
-
-		//Handle case where we don't have a registered component of this type for this entity
-		if (!m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)]->hasRegisteredEntity(entityUID))
-		{
-			throw std::out_of_range("There is no registered component of this type for this entity");
-		}
 
 		//Get the component data that is associated with this entity UID
 		void* componentData = m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)]->getComponent(entityUID);
@@ -67,6 +53,34 @@ public:
 		return getComponent<T>(entity.getUID());
 	}
 
+	template<typename T>
+	bool hasComponent(int entityUID)
+	{
+		//Handle case where we don't have an entity yet
+		if (!m_gameEntityMap.count(entityUID))
+		{
+			return false;
+		}
+		
+		//Grab the id for the type of component we are getting.
+		int componentTypeId = GetComponentTypeId<T>();
+
+		//Handle case that there is no component pool for this component type, which is definitely an error. Just choke on it.
+		if (!m_componentTypeToPoolMap.count(componentTypeId))
+		{
+			return false;
+		}
+
+		//Handle case where we don't have a registered component of this type for this entity
+		if (!m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)]->hasRegisteredEntity(entityUID))
+		{
+			return false;
+		}
+
+		return true;
+
+	}
+
 	/// @brief Return true if the entity at this index in the entity list has registered components with the specified IDs. 
 	/// @param entityIndex  The index of the entity. This is not the entity UID.
 	/// @param componentTypeIds 
@@ -85,10 +99,15 @@ public:
 			applyFunctorToSceneGraph(std::nullopt,rootNode, rootNodeFunctor, childNodeFunctor);
 		}
 	}
+	
+	std::optional<int> getCameraEntity() const;
+	std::optional<int> getCameraTargetEntity() const;
 
 protected:
 	void addChild(int parentEntityUID, int childEntityUID);
 	std::optional<int> createEntity();
+	void setCameraEntity(int uid);
+	void setCameraTargetEntity(int uid);
 	void removeEntity(int uid);
 
 	//Add a component to the entity specified by the ID
@@ -169,6 +188,9 @@ private:
 	std::vector<GameEntity> m_gameEntities; //Worth noting: entity destructors get called a lot because we store them directly in the vector here.
 	std::vector<std::unique_ptr<ComponentPool>> m_componentPools;
 	int m_availableEntityUID = 0;
+
+	std::optional<int> m_cameraEntityId;
+	std::optional<int> m_cameraTargetEntityId;
 };
 
 #endif

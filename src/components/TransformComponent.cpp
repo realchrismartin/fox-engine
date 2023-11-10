@@ -9,12 +9,13 @@ void TransformComponent::updateLocalMatrix()
 		return;
 	}
 
+	//TODO: order is probably wrong
 	m_localMatrix = glm::mat4(1.0);
 	m_localMatrix = glm::translate(m_localMatrix, m_translation);
+	m_localMatrix = glm::scale(m_localMatrix, m_scale);
 	m_localMatrix = glm::rotate(m_localMatrix, m_rotation.x,glm::vec3(1.f,0.f,0.f));
 	m_localMatrix = glm::rotate(m_localMatrix, m_rotation.y,glm::vec3(0.f,1.f,0.f));
 	m_localMatrix = glm::rotate(m_localMatrix, m_rotation.z,glm::vec3(0.f,0.f,1.f));
-	m_localMatrix = glm::scale(m_localMatrix, m_scale);
 
 	m_localDirty = false;
 }
@@ -42,7 +43,7 @@ void TransformComponent::updateLocalAndWorldMatrix(TransformComponent& parentCom
 	//If we updated locally or the parent updated
 	if (localDirty || parentComponent.isWorldDirty())
 	{
-		m_worldMatrix = m_localMatrix * parentComponent.getWorldMatrix();
+		m_worldMatrix = parentComponent.getWorldMatrix() * m_localMatrix;
 		m_worldDirty = true; //We updated.
 	}
 }

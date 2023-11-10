@@ -39,7 +39,6 @@ void ExampleTestScene::createPlayer()
 		model.spriteSize = { 1024,1024 };
 		model.spriteOffsetOnTexture = { 0,511 };
 		getComponent<ModelComponent>(uid).loadModel(model);
-
 	}
 
 }
@@ -101,6 +100,7 @@ void ExampleTestScene::createObstacles()
 		addComponent<TransformComponent>(uid);
 		getComponent<TransformComponent>(uid).setTranslation({10.f,0.f,4.f}); 
 		addComponent<ModelComponent>(uid);
+		setCameraEntity(uid);
 	}
 }
 
@@ -112,13 +112,14 @@ void ExampleTestScene::createBush()
 	{
 		int uid = m_bushUID.value();
 		addComponent<TransformComponent>(uid);
-		getComponent<TransformComponent>(uid).setTranslation({4.f,0.f,0.f});
+		getComponent<TransformComponent>(uid).setTranslation({0.f,0.f,-10.f});
 		addComponent<ModelComponent>(uid);
 		ModelData model;
 		model.modelFilePath = "../../img/quoteunquote-bush.obj";
 		model.spriteSize = { 228,228 };
 		model.spriteOffsetOnTexture = { 0,513 };
 		getComponent<ModelComponent>(uid).loadModel(model);
+
 	}
 }
 
@@ -134,7 +135,7 @@ void ExampleTestScene::createHat()
 	int uid = entityUID.value();
 
 	addComponent<TransformComponent>(uid);
-	getComponent<TransformComponent>(uid).setTranslation({0.f,2.f,0.f});
+	getComponent<TransformComponent>(uid).setTranslation({ 10.f,2.5f,0.f });
 	addComponent<ModelComponent>(uid);
 
 	ModelData model;
@@ -144,5 +145,4 @@ void ExampleTestScene::createHat()
 	getComponent<ModelComponent>(uid).loadModel(model);
 
 	addChild(m_playerUID.value(), uid);
-
 }

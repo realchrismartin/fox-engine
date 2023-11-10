@@ -16,6 +16,16 @@ int Scene::getEntityCount() const
 	return (int)m_gameEntityMap.size();
 }
 
+std::optional<int> Scene::getCameraEntity() const
+{
+	return m_cameraEntityId;
+}
+
+std::optional<int> Scene::getCameraTargetEntity() const
+{
+	return m_cameraTargetEntityId;
+}
+
 void Scene::addChild(int parentEntityUID, int childEntityUID)
 {
 	//Condition: the parent has to exist as an entity
@@ -66,6 +76,40 @@ std::optional<int> Scene::createEntity()
 	return uid;
 }
 
+void Scene::setCameraEntity(int uid)
+{
+	if (!m_gameEntityMap.count(uid))
+	{
+		//This entity was never registered.
+		return;
+	}
+
+	if (m_gameEntities.empty())
+	{
+		//Somehow we have no entities but have a mapped one. IDK. Its a bug.
+		return;
+	}
+
+	m_cameraEntityId = uid;
+}
+
+void Scene::setCameraTargetEntity(int uid)
+{
+	if (!m_gameEntityMap.count(uid))
+	{
+		//This entity was never registered.
+		return;
+	}
+
+	if (m_gameEntities.empty())
+	{
+		//Somehow we have no entities but have a mapped one. IDK. Its a bug.
+		return;
+	}
+
+	m_cameraTargetEntityId = uid;
+}
+
 void Scene::removeEntity(int uid)
 {
 	if (!m_gameEntityMap.count(uid))
@@ -78,6 +122,18 @@ void Scene::removeEntity(int uid)
 	{
 		//Somehow we have no entities but have a mapped one. IDK. Its a bug.
 		return;
+	}
+
+	//If this entity is the camera, lose it
+	if (m_cameraEntityId.has_value() && m_cameraEntityId.value() == uid)
+	{
+		m_cameraEntityId = std::nullopt;
+	}
+
+	//If this entity is the camera target, lose it
+	if (m_cameraTargetEntityId.has_value() && m_cameraTargetEntityId.value() == uid)
+	{
+		m_cameraTargetEntityId = std::nullopt;
 	}
 
 	//Remove the entity being removed from the scene graph

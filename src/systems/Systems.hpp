@@ -113,11 +113,46 @@ private:
 
 		//View matrix
 		//TODO: make there be another view matrix for the ui
-		glm::mat4 viewMatrix = glm::lookAt(
-			glm::vec3(0.f,10.f,-20.f), 
-			glm::vec3(0.f,0.f,0.f),
-			glm::vec3(0.f,1.f,0.f)
-		);
+
+		glm::vec3 cameraCenter = glm::vec3(0.f,10.f,-10.f);
+		glm::vec3 cameraUpVector = glm::vec3(0.f, 1.f, 0.f);
+		glm::vec3 eyeTarget = glm::vec3(0.f, 0.f, 0.f);
+
+		std::optional<int> cameraEntityId = scene.getCameraEntity();
+
+		if (cameraEntityId.has_value())
+		{
+			if (scene.hasComponent<TransformComponent>(cameraEntityId.value()))
+			{
+				TransformComponent& cameraTransform = scene.getComponent<TransformComponent>(cameraEntityId.value());
+				
+				glm::mat4 worldMatrix = cameraTransform.getWorldMatrix();
+				glm::vec4 center = glm::vec4(0.f, 0.f, 0.f, 1.f);
+
+				auto transformedCameraCenter = worldMatrix * center;
+
+				cameraCenter = glm::vec3(transformedCameraCenter.x, transformedCameraCenter.y, transformedCameraCenter.z);
+			}
+		}
+
+		std::optional<int> cameraTargetEntityId = scene.getCameraTargetEntity();
+
+		if (cameraTargetEntityId.has_value())
+		{
+			if (scene.hasComponent<TransformComponent>(cameraTargetEntityId.value()))
+			{
+				TransformComponent& cameraTargetTransform = scene.getComponent<TransformComponent>(cameraTargetEntityId.value());
+				
+				glm::mat4 worldMatrix = cameraTargetTransform.getWorldMatrix();
+				glm::vec4 target = glm::vec4(0.f, 0.f, 0.f, 1.f);
+
+				auto transformedCameraTarget = worldMatrix * target;
+
+				eyeTarget = glm::vec3(transformedCameraTarget.x, transformedCameraTarget.y, transformedCameraTarget.z);
+			}
+		}
+
+		glm::mat4 viewMatrix = glm::lookAt(cameraCenter,eyeTarget, cameraUpVector);
 
 		// Projection matrix : 45 degree Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
 		glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.0f), 1024.f/768.f, 1.f, 100.f);

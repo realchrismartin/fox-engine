@@ -20,7 +20,7 @@ public:
 	glm::vec3 getTranslationGivenInput();
 private:
 	std::set<UserInputActionsEnum> m_activeInputs;
-	float m_translationFactor = .01f;
+	float m_translationFactor = .01f; //TODO
 };
 
 #endif
