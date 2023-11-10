@@ -161,3 +161,8 @@ glm::vec3 InputComponent::getTranslationGivenInput()
 	return vector;
 }
 
+bool InputComponent::anyInputActive() const
+{
+	return !m_activeInputs.empty();
+}
+

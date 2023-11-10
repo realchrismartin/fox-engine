@@ -18,6 +18,7 @@ public:
 	void informOfWindowEvent(sf::Event event);
 	glm::vec3 getRotationGivenInput();
 	glm::vec3 getTranslationGivenInput();
+	bool anyInputActive() const;
 private:
 	std::set<UserInputActionsEnum> m_activeInputs;
 	float m_translationFactor = .01f; //TODO

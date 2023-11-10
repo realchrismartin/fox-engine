@@ -104,8 +104,11 @@ private:
 			TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
 			InputComponent& input = scene.getComponent<InputComponent>(entity);
 
-			transform.setRotation(input.getRotationGivenInput());
-			transform.addTranslation(input.getTranslationGivenInput());
+			if (input.anyInputActive())
+			{
+				transform.setRotation(input.getRotationGivenInput());
+				transform.addTranslation(input.getTranslationGivenInput());
+			}
 		}
 	}
 
