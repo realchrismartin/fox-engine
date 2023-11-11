@@ -85,44 +85,6 @@ void InputComponent::informOfWindowEvent(sf::Event e)
 	}
 }
 
-glm::vec3 InputComponent::getRotationGivenInput()
-{
-	glm::vec3 vector = glm::vec3(0.f, 90.f, 0.f);
-
-	for (auto const& enumValue : m_activeInputs)
-	{
-		switch (enumValue)
-		{
-			case(UserInputActionsEnum::PRESSING_W):
-			{
-				vector += glm::vec3(0.f, -180.f, 0.f);
-				break;
-			}
-			case(UserInputActionsEnum::PRESSING_S):
-			{
-				vector += glm::vec3(0.f, 0.f, 0.f);
-				break;
-			}
-			case(UserInputActionsEnum::PRESSING_A):
-			{
-				vector += glm::vec3(0.f, -90.f, 0.f);
-				break;
-			}
-			case(UserInputActionsEnum::PRESSING_D):
-			{
-				vector += glm::vec3(0.f, 90.f, 0.f);
-				break;
-			}
-			default:
-			{
-				break;
-			}
-		}
-	}
-
-	return vector;
-}
-
 glm::vec3 InputComponent::getTranslationGivenInput()
 {
 	glm::vec3 vector = glm::vec3(0.f, 0.f, 0.f);
@@ -160,6 +122,45 @@ glm::vec3 InputComponent::getTranslationGivenInput()
 
 	return vector;
 }
+
+glm::vec3 InputComponent::getRotationGivenInput()
+{
+	glm::vec3 vector = glm::vec3(0.f, 0.f, 0.f);
+
+	for (auto const& enumValue : m_activeInputs)
+	{
+		switch (enumValue)
+		{
+			case(UserInputActionsEnum::PRESSING_W):
+			{
+				vector = glm::vec3(0.f, 270.f, 0.f);
+				break;
+			}
+			case(UserInputActionsEnum::PRESSING_S):
+			{
+				vector = glm::vec3(0.f, 90.f, 0.f);
+				break;
+			}
+			case(UserInputActionsEnum::PRESSING_A):
+			{
+				vector = glm::vec3(0.f, 0.f, 0.f);
+				break;
+			}
+			case(UserInputActionsEnum::PRESSING_D):
+			{
+				vector = glm::vec3(0.f, 180.f, 0.f);
+				break;
+			}
+			default:
+			{
+				break;
+			}
+		}
+	}
+
+	return vector;
+}
+
 
 bool InputComponent::anyInputActive() const
 {

@@ -8,6 +8,7 @@
 #include <cassert>
 #include <optional>
 #include <cmath>
+#include <functional>
 
 //SFML stuff
 #include "SFML/System/Vector2.hpp"

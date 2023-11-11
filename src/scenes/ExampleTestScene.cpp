@@ -10,7 +10,6 @@ ExampleTestScene::ExampleTestScene()
 {
 	createPlayer();
 	createObstacles();
-	createBackground();
 	createFloor();
 	createBush();
 	createHat();
@@ -33,12 +32,6 @@ void ExampleTestScene::createPlayer()
 		addComponent<TransformComponent>(uid);
 		addComponent<ModelComponent>(uid);
 		getComponent<TransformComponent>(uid).setScale({ .2f,.2f,.2f });
-
-		ModelData model;
-		model.modelFilePath = "../../img/untitled.obj";
-		model.spriteSize = { 1024,1024 };
-		model.spriteOffsetOnTexture = { 0,511 };
-		getComponent<ModelComponent>(uid).loadModel(model);
 	}
 
 }
@@ -69,22 +62,6 @@ void ExampleTestScene::createFloor()
 
 }
 
-void ExampleTestScene::createBackground()
-{
-	if (m_backgroundUID.has_value())
-	{
-		removeEntity(m_backgroundUID.value());
-	}
-
-	m_backgroundUID = createEntity();
-
-	if (m_backgroundUID.has_value()) 
-	{
-		int uid = m_backgroundUID.value();
-
-	}
-}
-
 void ExampleTestScene::createObstacles()
 {
 	if (m_obstacleUID.has_value())
@@ -99,8 +76,8 @@ void ExampleTestScene::createObstacles()
 		int uid = m_obstacleUID.value();
 		addComponent<TransformComponent>(uid);
 		getComponent<TransformComponent>(uid).setTranslation({10.f,0.f,4.f}); 
+		getComponent<TransformComponent>(uid).setRotation({ 0.f,90.f,0.f });
 		addComponent<ModelComponent>(uid);
-		setCameraEntity(uid);
 	}
 }
 

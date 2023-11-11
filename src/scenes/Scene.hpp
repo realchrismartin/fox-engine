@@ -3,7 +3,6 @@
 
 #include "src/entities/GameEntity.hpp"
 #include "src/components/ComponentPool.hpp"
-#include <functional>
 
 class System;
 

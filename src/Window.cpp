@@ -83,7 +83,7 @@ void Window::draw(size_t vertexCount, size_t indexCount, const std::vector<GLflo
 	glBufferSubData(GL_ARRAY_BUFFER,0, sizeof(GLfloat) * vertexCount, &vertices[0]);
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,0, sizeof(GLuint) * indexCount, &indices[0]);
 
-	glDrawElements(GL_TRIANGLES,indexCount, GL_UNSIGNED_INT, nullptr);
+	glDrawElements(GL_TRIANGLES,(GLsizei)indexCount, GL_UNSIGNED_INT, nullptr);
 }
 
 void Window::clear()

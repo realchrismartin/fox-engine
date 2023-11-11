@@ -2,34 +2,28 @@
 
 #include "glm/glm/gtc/matrix_transform.hpp"
 
-void TransformComponent::updateLocalMatrix()
+glm::mat4 TransformComponent::getLocalMatrix()
 {
-	if (!m_localDirty)
-	{
-		return;
-	}
+	glm::mat4 matrix = glm::mat4(1.0);
+	matrix = glm::translate(matrix, m_translation);
+	matrix = glm::scale(matrix, m_scale);
+	matrix = glm::rotate(matrix, m_rotation.x, glm::vec3(1.f, 0.f, 0.f));
+	matrix = glm::rotate(matrix, m_rotation.y, glm::vec3(0.f, 1.f, 0.f));
+	matrix = glm::rotate(matrix, m_rotation.z, glm::vec3(0.f, 0.f, 1.f));
 
-	//TODO: order is probably wrong
-	m_localMatrix = glm::mat4(1.0);
-	m_localMatrix = glm::translate(m_localMatrix, m_translation);
-	m_localMatrix = glm::scale(m_localMatrix, m_scale);
-	m_localMatrix = glm::rotate(m_localMatrix, m_rotation.x,glm::vec3(1.f,0.f,0.f));
-	m_localMatrix = glm::rotate(m_localMatrix, m_rotation.y,glm::vec3(0.f,1.f,0.f));
-	m_localMatrix = glm::rotate(m_localMatrix, m_rotation.z,glm::vec3(0.f,0.f,1.f));
-
-	m_localDirty = false;
+	return matrix;
 }
 
 void TransformComponent::updateLocalAndWorldMatrix()
 {
-	bool localDirty = m_localDirty;
-
-	updateLocalMatrix();
-	
-	if (localDirty)
+	if (m_localDirty)
 	{
+		m_localMatrix = getLocalMatrix();
+		m_localDirty = false;
+
+		//If we updated the local matrix, update the world matrix too
 		m_worldMatrix = m_localMatrix;
-		m_worldDirty = true; //We updated.
+		m_worldMatrixDirty = true;
 	}
 }
 
@@ -38,24 +32,29 @@ void TransformComponent::updateLocalAndWorldMatrix(TransformComponent& parentCom
 {
 	bool localDirty = m_localDirty;
 
-	updateLocalMatrix();
+	//Update the local matrix if it's dirty
+	if (m_localDirty)
+	{
+		m_localMatrix = getLocalMatrix();
+		m_localDirty = false;
+	}
 	
-	//If we updated locally or the parent updated
-	if (localDirty || parentComponent.isWorldDirty())
+	//If we updated the local matrix, or the parent's world matrix is dirty, update the world matrix too
+	if (localDirty || parentComponent.isWorldMatrixDirty())
 	{
 		m_worldMatrix = parentComponent.getWorldMatrix() * m_localMatrix;
-		m_worldDirty = true; //We updated.
+		m_worldMatrixDirty = true; //If the parent's matrix is dirty, it means this transform's matrix is now too.
 	}
 }
 
-void TransformComponent::markWorldClean()
+void TransformComponent::markWorldMatrixClean()
 {
-	m_worldDirty = false;
+	m_worldMatrixDirty = false;
 }
 
-bool TransformComponent::isWorldDirty() const
+bool TransformComponent::isWorldMatrixDirty() const
 {
-	return m_worldDirty;
+	return m_worldMatrixDirty;
 }
 
 glm::mat4& TransformComponent::getWorldMatrix()
@@ -65,16 +64,18 @@ glm::mat4& TransformComponent::getWorldMatrix()
 
 void TransformComponent::setRotation(glm::vec3 rotation)
 {
-	//TODO: bounds etc
-	rotation = glm::vec3(glm::radians(rotation.x), glm::radians(rotation.y), glm::radians(rotation.z));
+	//TODO: negative rotations don't work here. change them to positive 
+	float xFactor = rotation.x > 0.f ? 1.f : -1.f;
+	float yFactor = rotation.y > 0.f ? 1.f : -1.f;
+	float zFactor = rotation.z > 0.f ? 1.f : -1.f;
 
-	m_rotation = rotation;
+	m_rotation = glm::vec3(glm::radians(xFactor * fmod(rotation.x,360.f)), glm::radians(yFactor * fmod(rotation.y,360.f)), glm::radians(zFactor * fmod(rotation.z,360.f)));
 	m_localDirty = true;
 }
 
 void TransformComponent::setScale(glm::vec3 scale)
 {
-	m_scale = scale;
+	m_scale = glm::vec3(std::fmax(scale.x, 0.f), std::fmax(scale.y, 0.f), std::fmax(scale.z, 0.f));
 	m_localDirty = true;
 }
 
@@ -89,4 +90,3 @@ void TransformComponent::addTranslation(glm::vec3 translation)
 	m_translation += translation;
 	m_localDirty = true;
 }
-
