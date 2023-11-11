@@ -4,6 +4,7 @@
 #include "src/scenes/Scene.hpp"
 #include "src/components/TransformComponent.hpp"
 #include "glm/glm/ext/matrix_transform.hpp"
+#include "glm/glm/ext/matrix_clip_space.hpp"
 
 class Camera
 {
@@ -11,6 +12,12 @@ public:
 	glm::mat4 getUIViewMatrix()
 	{
 		return glm::mat4(1.0); //TODO
+	}
+
+	glm::mat4 getProjectionMatrix()
+	{
+		// Projection matrix : 45 degree Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+		return glm::perspective(glm::radians(90.0f), 1024.f / 768.f, 1.f, 100.f);
 	}
 
 	glm::mat4 getViewMatrix(Scene& scene)

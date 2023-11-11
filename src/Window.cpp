@@ -1,5 +1,6 @@
 #include "src/Window.hpp"
 #include "SFML/Graphics/View.hpp"
+#include "src/graphics/Vertex.hpp"
 
 void Window::setupOpenGL()
 {
@@ -33,8 +34,8 @@ void Window::setupOpenGL()
 	GLint vertexPosLocation = 0;
 	GLint texCoordLocation = 1;
 
-	glVertexAttribPointer(vertexPosLocation, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
-	glVertexAttribPointer(texCoordLocation, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(vertexPosLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+	glVertexAttribPointer(texCoordLocation, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(GLfloat))); //TODO: change offset to be based on member location in Vertex
 
 	glEnableVertexAttribArray(vertexPosLocation);
 	glEnableVertexAttribArray(texCoordLocation);
@@ -45,7 +46,7 @@ void Window::setupOpenGL()
 	m_maxIndices = 99000;
 
 	//Initialize the buffers with null data and their max sizes.
-	glBufferData(GL_ARRAY_BUFFER,m_maxVertices * sizeof(GLfloat), nullptr, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER,m_maxVertices * sizeof(Vertex), nullptr, GL_STATIC_DRAW);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_maxIndices * sizeof(GLuint), nullptr, GL_STATIC_DRAW);
 
 	m_texture.activate();
@@ -80,7 +81,7 @@ void Window::draw(size_t vertexCount, size_t indexCount, const std::vector<GLflo
 	m_shader.bind();
 	m_texture.bind();
 
-	glBufferSubData(GL_ARRAY_BUFFER,0, sizeof(GLfloat) * vertexCount, &vertices[0]);
+	glBufferSubData(GL_ARRAY_BUFFER,0, sizeof(Vertex) * vertexCount, &vertices[0]);
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,0, sizeof(GLuint) * indexCount, &indices[0]);
 
 	glDrawElements(GL_TRIANGLES,(GLsizei)indexCount, GL_UNSIGNED_INT, nullptr);

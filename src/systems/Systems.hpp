@@ -119,7 +119,7 @@ private:
 		glm::mat4 viewMatrix = camera.getViewMatrix(scene);
 
 		// Projection matrix : 45 degree Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-		glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.0f), 1024.f/768.f, 1.f, 100.f);
+		glm::mat4 projectionMatrix = camera.getProjectionMatrix(scene);
 
 		for (auto const& entity : EntityFilter<TransformComponent, ModelComponent>(scene))
 		{
