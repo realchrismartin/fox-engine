@@ -209,6 +209,9 @@ void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std:
             vertex.s = textureOffsetFactor.x + (t.x * textureCoordinateRatio.x);
             vertex.t = textureOffsetFactor.y + (t.y * textureCoordinateRatio.y);
 
+            //TODO: move m_numVertices and m_indices to something passed in during loadModel, somehow
+            //Maybe the scene can hold this data?
+
             m_vertices[m_numVertices] = vertex;
             m_numVertices++;
 
