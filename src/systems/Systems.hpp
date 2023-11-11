@@ -134,7 +134,7 @@ private:
 			window.getBoundShader().updateMat4Uniform("modelViewProjectionMatrix", mvp);
 
 			//Draw the bits of the model
-			window.draw(model.getVertices().size(), model.getIndices().size(), model.getVertices(), model.getIndices());
+			window.draw(model.getVertexCount(), model.getIndices().size(), model.getVertices(), model.getIndices());
 		}
 	}
 };

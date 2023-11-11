@@ -60,7 +60,7 @@ void Window::setupOpenGL()
 	m_shader.unbind();
 }
 
-void Window::draw(size_t vertexCount, size_t indexCount, const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices)
+void Window::draw(size_t vertexCount, size_t indexCount, GLvoid* vertices, const std::vector<GLuint>& indices)
 {
 	if (vertexCount <= (size_t)0 || indexCount <= (size_t)0)
 	{
@@ -82,7 +82,7 @@ void Window::draw(size_t vertexCount, size_t indexCount, const std::vector<Verte
 	m_shader.bind();
 	m_texture.bind();
 
-	glBufferSubData(GL_ARRAY_BUFFER,0, sizeof(Vertex) * vertexCount, &vertices[0]);
+	glBufferSubData(GL_ARRAY_BUFFER,0, sizeof(Vertex) * vertexCount, vertices);
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,0, sizeof(GLuint) * indexCount, &indices[0]);
 
 	glDrawElements(GL_TRIANGLES,(GLsizei)indexCount, GL_UNSIGNED_INT, nullptr);

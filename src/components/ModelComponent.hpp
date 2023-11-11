@@ -16,8 +16,11 @@ class ModelComponent
 public:
 	ModelComponent();
 	void loadModel(const ModelData& model);
-	const std::vector<Vertex>& getVertices() const;
+	GLvoid* getVertices() const;
+	size_t getVertexCount() const;
 	const std::vector<GLuint>& getIndices() const;
+
+	static const int MAX_VERTICES = 3000;
 private:
 	void loadFace(const std::vector<glm::vec3>& vertices, 
 		const std::vector<glm::vec2>& textureCoordinates, 
@@ -28,10 +31,9 @@ private:
 		const glm::vec2& spriteOffsetOnTexture
 		);
 
-	std::vector<Vertex> m_vertices;
+	Vertex m_vertices[MAX_VERTICES];
+	size_t m_numVertices = 0;
 	std::vector<GLuint> m_indices;
-
-	ModelData m_modelData;
 };
 
 #endif
