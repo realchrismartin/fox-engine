@@ -31,7 +31,7 @@ void ExampleTestScene::createPlayer()
 		addComponent<InputComponent>(uid);
 		addComponent<TransformComponent>(uid);
 		addComponent<ModelComponent>(uid);
-		getComponent<TransformComponent>(uid).setScale({ .2f,.2f,.2f });
+		getComponent<TransformComponent>(uid).setScale({ 2.f,1.f,1.f });
 	}
 
 }

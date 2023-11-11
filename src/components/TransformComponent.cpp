@@ -6,10 +6,10 @@ glm::mat4 TransformComponent::getLocalMatrix()
 {
 	glm::mat4 matrix = glm::mat4(1.0);
 	matrix = glm::translate(matrix, m_translation);
-	matrix = glm::scale(matrix, m_scale);
 	matrix = glm::rotate(matrix, m_rotation.x, glm::vec3(1.f, 0.f, 0.f));
 	matrix = glm::rotate(matrix, m_rotation.y, glm::vec3(0.f, 1.f, 0.f));
 	matrix = glm::rotate(matrix, m_rotation.z, glm::vec3(0.f, 0.f, 1.f));
+	matrix = glm::scale(matrix, m_scale);
 
 	return matrix;
 }
