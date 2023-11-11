@@ -1,5 +1,7 @@
 #include "ModelComponent.hpp"
 
+#include "src/graphics/Vertex.hpp"
+
 #include <fstream>
 #include <sstream>
 
@@ -8,15 +10,13 @@ ModelComponent::ModelComponent()
     loadModel(m_modelData); //TODO: pointless copy
 }
 
-void ModelComponent::loadModel(const ModelData& model)
+void ModelComponent::loadModel(const ModelData& modelData)
 {
     m_vertices.clear();
     m_indices.clear();
 
-    m_modelData = model;
-
     std::ifstream input;
-    input.open(m_modelData.modelFilePath);
+    input.open(modelData.modelFilePath);
 
     if (!input.is_open())
     {
@@ -115,10 +115,10 @@ void ModelComponent::loadModel(const ModelData& model)
 
     std::map<std::string, GLuint> faceMap;
 
-    glm::vec2 textureCoordinateRatio = glm::vec2((float)m_modelData.spriteSize.x / (float)m_modelData.textureSize.x, (float)m_modelData.spriteSize.y / (float)m_modelData.textureSize.y);
+    glm::vec2 textureCoordinateRatio = glm::vec2((float)modelData.spriteSize.x / (float)modelData.textureSize.x, (float)modelData.spriteSize.y / (float)modelData.textureSize.y);
 
     //Find the amount to add to each texture coordinate to offset it correctly in the overall texture
-    glm::vec2 textureOffsetFactor = glm::vec2((float)m_modelData.spriteOffsetOnTexture.x / (float)m_modelData.textureSize.x, (float)m_modelData.spriteOffsetOnTexture.y / (float)m_modelData.textureSize.y);
+    glm::vec2 textureOffsetFactor = glm::vec2((float)modelData.spriteOffsetOnTexture.x / (float)modelData.textureSize.x, (float)modelData.spriteOffsetOnTexture.y / (float)m_modelData.textureSize.y);
 
     // Now that other data is loaded, load faces
     for (auto const& faceString : faceLineTokens)
@@ -192,13 +192,17 @@ void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std:
             auto v = vertices.at(vertexIndex - 1);
             auto t = textureCoordinates.at(vertexTextureIndex - 1);
 
-            // Add vertex data to buffer
+            // Add vertex data to vertex vector
             // Note: ordering we push here needs to match the buffer layout
-            m_vertices.push_back(v.z);
-            m_vertices.push_back(v.y);
-            m_vertices.push_back(v.x);
-            m_vertices.push_back(textureOffsetFactor.x + (t.x * textureCoordinateRatio.x));
-            m_vertices.push_back(textureOffsetFactor.y + (t.y * textureCoordinateRatio.y));
+
+            Vertex vertex;
+            vertex.x = v.x;
+            vertex.y = v.y;
+            vertex.z = v.z;
+            vertex.s = textureOffsetFactor.x + (t.x * textureCoordinateRatio.x);
+            vertex.t = textureOffsetFactor.y + (t.y * textureCoordinateRatio.y);
+
+            m_vertices.push_back(vertex);
 
             GLuint index = (GLuint)faceMap.size();    // This is the "next" face - first one is index 0, etc.
             faceMap[mapKey] = index;          // Update map to specify index for this face - map size changes, so next index is + 1
@@ -207,7 +211,7 @@ void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std:
     }
 }
 
-const std::vector<GLfloat>& ModelComponent::getVertices() const
+const std::vector<Vertex>& ModelComponent::getVertices() const
 {
 	return m_vertices;
 }

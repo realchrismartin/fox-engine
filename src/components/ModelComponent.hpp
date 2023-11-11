@@ -1,6 +1,8 @@
 #ifndef MODELCOMPONENT_HPP
 #define MODELCOMPONENT_HPP
 
+#include "src/graphics/Vertex.hpp"
+
 struct ModelData
 {
 	glm::vec2 textureSize = glm::vec2(2000, 2000);
@@ -14,7 +16,7 @@ class ModelComponent
 public:
 	ModelComponent();
 	void loadModel(const ModelData& model);
-	const std::vector<GLfloat>& getVertices() const;
+	const std::vector<Vertex>& getVertices() const;
 	const std::vector<GLuint>& getIndices() const;
 private:
 	void loadFace(const std::vector<glm::vec3>& vertices, 
@@ -26,7 +28,7 @@ private:
 		const glm::vec2& spriteOffsetOnTexture
 		);
 
-	std::vector<GLfloat> m_vertices;
+	std::vector<Vertex> m_vertices;
 	std::vector<GLuint> m_indices;
 
 	ModelData m_modelData;

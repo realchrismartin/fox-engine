@@ -118,8 +118,7 @@ private:
 		//TODO: make there be another view matrix for the ui
 		glm::mat4 viewMatrix = camera.getViewMatrix(scene);
 
-		// Projection matrix : 45 degree Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-		glm::mat4 projectionMatrix = camera.getProjectionMatrix(scene);
+		glm::mat4 projectionMatrix = camera.getProjectionMatrix();
 
 		for (auto const& entity : EntityFilter<TransformComponent, ModelComponent>(scene))
 		{

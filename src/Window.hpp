@@ -7,6 +7,7 @@
 #include "src/graphics/Texture.hpp"
 
 class GraphicsComponent;
+struct Vertex;
 
 /// @brief A nice wrapper for a sf::RenderWindow that provides clean interfaces to Systems that need Window access.
 class Window
@@ -33,7 +34,7 @@ public:
 		draw(drawableComponent.getVertexCount(), drawableComponent.getIndexCount(), drawableComponent.getVertices(), drawableComponent.getIndices());
 	}
 
-	void draw(size_t vertexCount, size_t indexCount, const std::vector<GLfloat>& vertices, const std::vector<GLuint>& indices);
+	void draw(size_t vertexCount, size_t indexCount, const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
 private:
 
 	void setupOpenGL();

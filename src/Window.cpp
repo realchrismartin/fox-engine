@@ -1,4 +1,5 @@
 #include "src/Window.hpp"
+
 #include "SFML/Graphics/View.hpp"
 #include "src/graphics/Vertex.hpp"
 
@@ -59,7 +60,7 @@ void Window::setupOpenGL()
 	m_shader.unbind();
 }
 
-void Window::draw(size_t vertexCount, size_t indexCount, const std::vector<GLfloat>& vertices, const std::vector<GLuint>& indices)
+void Window::draw(size_t vertexCount, size_t indexCount, const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices)
 {
 	if (vertexCount <= (size_t)0 || indexCount <= (size_t)0)
 	{
