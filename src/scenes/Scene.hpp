@@ -5,6 +5,7 @@
 #include "src/components/ComponentPool.hpp"
 
 class System;
+struct ModelData;
 
 /// @brief An association of Entities with their Components.
 /// @brief Represents the game world and holds all entities and their components that are in the world.
@@ -80,6 +81,21 @@ public:
 
 	}
 
+	template<typename T>
+	ComponentPool& getComponentPool()
+	{
+		//Grab the id for the type of component we are getting.
+		int componentTypeId = GetComponentTypeId<T>();
+
+		//Handle case that there is no component pool for this component type, which is definitely an error. Just choke on it.
+		if (!m_componentTypeToPoolMap.count(componentTypeId))
+		{
+			throw std::out_of_range("There is no pool for this type.");
+		}
+
+		return *m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)].get();
+	}
+
 	/// @brief Return true if the entity at this index in the entity list has registered components with the specified IDs. 
 	/// @param entityIndex  The index of the entity. This is not the entity UID.
 	/// @param componentTypeIds 
@@ -101,6 +117,8 @@ public:
 	
 	std::optional<int> getCameraEntity() const;
 	std::optional<int> getCameraTargetEntity() const;
+
+	void loadModel(const ModelData& modelData, int entityUID);
 
 protected:
 	void addChild(int parentEntityUID, int childEntityUID);

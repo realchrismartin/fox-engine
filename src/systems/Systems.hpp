@@ -10,7 +10,11 @@
 
 #include "src/components/InputComponent.hpp"
 #include "src/components/TransformComponent.hpp"
+#include "src/components/VerticesComponent.hpp"
 #include "src/components/ModelComponent.hpp"
+#include "src/components/IndicesComponent.hpp"
+
+#include "src/graphics/MVPMatrix.hpp"
 
 /// @brief A collection of static functions that are "systems", functions that operate on specific associations of components in a scene to update them.
 /// @brief The update and render meta-systems are the core of the game. 
@@ -113,29 +117,69 @@ private:
 
 	static const void runRenderSystem(Window& window, Scene& scene, Camera& camera)
 	{
-
 		//View matrix
 		//TODO: make there be another view matrix for the ui
 		glm::mat4 viewMatrix = camera.getViewMatrix(scene);
-
 		glm::mat4 projectionMatrix = camera.getProjectionMatrix();
+		
+		size_t vertexCount = 0;
 
-		for (auto const& entity : EntityFilter<TransformComponent, ModelComponent>(scene))
+		//Lists of matrices and indices to build
+		std::vector<MVPMatrix> mvpMatrices;
+		std::vector<GLuint> indices;
+
+		ComponentPool& modelComponentPool = scene.getComponentPool<ModelComponent>();
+		ComponentPool& verticesComponentPool = scene.getComponentPool<VerticesComponent>();
+		ComponentPool& indicesComponentPool = scene.getComponentPool<IndicesComponent>();
+
+		for (auto entity : modelComponentPool.getRegisteredEntityUIDs())
+		{
+			//TODO: add the noted guarantees here! Tehy dont exist
+
+			//In the Scene we guarantee that every entity with a model has also vertices,indices,transform components
+			//We also guarantee that no other process can add one of these 4 components to the scene
+			//Since we always add and remove components at the same time in the Scene, this means the ordering of the registration is the same
+			//for all four pools.
+			//Here, we get the entity ordering for the model pool. We assume given the above it's the same ordering as the other 3 pools.
+
+			//TODO: move this to the addition/removal of an entity from the scene. Use this property to:
+			//Take raw local vertices from the Model component and update the Vertices component with them (whenever an add or remove is done) so they match the VBO.
+			//Update the Vertices' MVP matrix indices so they match the SSBO.
+		}
+
+		//TODO: don't use the iterator order below to do anything.
+		// IT's ok to update the MVP matrices in this order maybe ...
+
+		//For any entity that has a ModelCompoent (the scene manages VI components) and a Transform component:
+		for (auto const& entity : EntityFilter<TransformComponent, ModelComponent, VerticesComponent, IndicesComponent>(scene))
 		{
 			ModelComponent& model = scene.getComponent<ModelComponent>(entity);
 			TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
+			VerticesComponent& vertices = scene.getComponent<VerticesComponent>(entity);
+			IndicesComponent& indices = scene.getComponent<IndicesComponent>(entity);
 
-			//TODO: move the mvp matrix to a SSBO so we can do ... one ... draw
-			//TODO: move smth else too TBD
+			size_t vertexCount = model.getVertexCount();
+
+			//Calculate and add each mvp matrix to the list to send to the ssbo
 			glm::mat4 modelMatrix = transform.getWorldMatrix();
 			glm::mat4 mvp = projectionMatrix * viewMatrix * modelMatrix;
 
-			//Bind the model matrix via uniform
-			window.getBoundShader().updateMat4Uniform("modelViewProjectionMatrix", mvp);
+			MVPMatrix matrix;
+			matrix.mvpMatrix = mvp;
 
-			//Draw the bits of the model
-			window.draw(model.getVertexCount(), model.getIndices().size(), model.getVertices(), model.getIndices());
+			//TODO: this sucks. stop doing it like this
+			for (int i = 0; i < vertexCount; i++)
+			{
+				mvpMatrices.push_back(matrix); 
+			}
+
+			//Bind the model matrix via uniform
+			//window.getBoundShader().updateMat4Uniform("modelViewProjectionMatrix", mvp);
 		}
+
+		//Now that everything is added, do one draw.
+	//	window.draw(vertexCount, indices.size(),(GLvoid*)verticesComponentPool.getData(), &indices[0], &mvpMatrices[0]);
+		//TODO
 	}
 };
 

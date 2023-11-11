@@ -2,6 +2,7 @@
 #define COMPONENTPOOL_HPP
 
 #include <typeindex>
+#include <ranges>
 
 //TODO: protect this better later
 static std::unordered_map<std::type_index, int> s_componentTypeIdMap;
@@ -49,6 +50,11 @@ public:
 		m_capacity = capacity;
 	}
 
+	size_t getComponentsInUse() const
+	{
+		return m_componentsUsedCount;
+	}
+
 	template <typename T>
 	inline void registerEntity(int entityUID)
 	{
@@ -64,7 +70,8 @@ public:
 
 		//Save a mapping indicating that the entity with this UID will be using the component at the specified index.
 		//We always register new components at the end of the usable list, so the memory will be at the end of the list too 
-		m_entityToComponentMap[entityUID] = m_componentsUsedCount;
+		m_entityToComponentMap[entityUID] = (int)m_componentsUsedCount;
+		m_componentToEntityMap[(int)m_componentsUsedCount] = entityUID;
 
 		//Increment the component count - the next registered component will use this index.
 		m_componentsUsedCount++;
@@ -90,7 +97,7 @@ public:
 
 		//This is where the component is now.
 		int componentIndex = m_entityToComponentMap[entityUID];
-		int lastComponentIndex = m_componentsUsedCount - 1;
+		int lastComponentIndex = (int)m_componentsUsedCount - 1;
 
 		//Trivial case - the component is at the end of the in-use list
 		if (componentIndex == lastComponentIndex)
@@ -98,6 +105,7 @@ public:
 			//Reduce the component count - we just ignore that memory. We will overwrite it in registerEntity later, maybe, but it wont be used.
 			m_componentsUsedCount--;
 			m_entityToComponentMap.erase(entityUID);
+			m_componentToEntityMap.erase(componentIndex);
 			return;
 		}
 
@@ -132,10 +140,12 @@ public:
 
 		//Add that entity at our index, since it is using this index now.
 		m_entityToComponentMap[lastEntityUID] = componentIndex;
+		m_componentToEntityMap[componentIndex] = lastEntityUID;
 
 		//Now that we have swapped, we can remove the entity we are trying to remove.
 		m_componentsUsedCount--;
 		m_entityToComponentMap.erase(entityUID);
+		m_componentToEntityMap.erase(lastComponentIndex); //TODO: is this right?
 	}
 
 	/// @brief Get the component at the specified entity uid's index.
@@ -147,7 +157,32 @@ public:
 			return nullptr; //There is no component of this type registered for this entity.
 		}
 
-		return m_data + ((size_t)m_entityToComponentMap[entityUID] * m_componentSize);
+		return getComponentAtIndex((size_t)m_entityToComponentMap[entityUID]);
+	}
+
+	/// @brief Get the component at the actual index specified
+	/// @param index 
+	/// @return 
+	inline void* getComponentAtIndex(size_t index)
+	{
+		if (index >= m_componentsUsedCount)
+		{
+			return nullptr; //There's no way this component exists
+		}
+
+		return m_data + (index * m_componentSize);
+	}
+
+	/// @brief Get the entity IDs that have registered components in this pool. This is guaranteed to be in the order the components are stored.
+	/// @return 
+	std::ranges::elements_view < std::ranges::ref_view<std::map<int, int>>, 1Ui64> getRegisteredEntityUIDs()
+	{
+		return std::views::values(m_componentToEntityMap);
+	}
+
+	void* getData() const
+	{
+		return m_data;
 	}
 
 	~ComponentPool()
@@ -160,8 +195,9 @@ private:
 	char* m_data = nullptr; //The component pool of data. It's char type because chars are 1 byte (usually), so it can fit ANYTHING.
 	size_t m_componentSize = 0; //How big a single component is in bytes in the component pool
 	size_t m_capacity = 0; //How many components we can hold.
-	int m_componentsUsedCount = 0; //How many components we ARE holding currently. This can't exceed the capacity.
+	size_t m_componentsUsedCount = 0; //How many components we ARE holding currently. This can't exceed the capacity.
 	std::unordered_map<int, int> m_entityToComponentMap; //Map of entity UID to component index. Used to keep that m_data array tightly packed!
+	std::map<int, int> m_componentToEntityMap;
 };
 
 #endif

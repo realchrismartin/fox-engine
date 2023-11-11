@@ -10,6 +10,8 @@ struct Vertex
 
 	GLfloat s = 0.f;
 	GLfloat t = 0.f;
+
+	GLfloat mvpIndex = 0.f;
 };
 
 #endif

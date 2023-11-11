@@ -1,6 +1,22 @@
 #include "src/scenes/Scene.hpp"
 #include "src/util/Logger.hpp"
 
+
+void Scene::loadModel(const ModelData& modelData, int entityUID)
+{
+	//TODO: find the components for this model. If they both exist, reset them and load the model data into them.
+
+	//TODO: if entity doesn't eixst, stop
+
+	//TODO: if entity doesn't have a model component, add one
+
+	//TODO: if entity doesn't have a vertices component, add one
+
+	//TODO: if entity doesn't have an indices component, add one
+
+	//TODO: call loadData on the model component given the vertex and index components to load it up
+}
+
 GameEntity& Scene::getEntity(int entityIndex)
 {
 	if (m_gameEntities.size() <= (size_t)entityIndex)

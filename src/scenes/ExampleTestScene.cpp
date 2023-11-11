@@ -4,7 +4,8 @@
 
 #include "src/components/InputComponent.hpp"
 #include "src/components/TransformComponent.hpp"
-#include "src/components/ModelComponent.hpp"
+#include "src/components/VerticesComponent.hpp"
+#include "src/graphics/ModelData.hpp"
 
 ExampleTestScene::ExampleTestScene()
 {
@@ -30,7 +31,7 @@ void ExampleTestScene::createPlayer()
 
 		addComponent<InputComponent>(uid);
 		addComponent<TransformComponent>(uid);
-		addComponent<ModelComponent>(uid);
+		addComponent<VerticesComponent>(uid);
 		getComponent<TransformComponent>(uid).setScale({ 2.f,1.f,1.f });
 	}
 
@@ -51,13 +52,13 @@ void ExampleTestScene::createFloor()
 		addComponent<TransformComponent>(uid);
 		getComponent<TransformComponent>(uid).setScale({ 50.f, 1.f, 50.f});
 		getComponent<TransformComponent>(uid).setTranslation({ 0.f,-2.f,0.f});
-		addComponent<ModelComponent>(uid);
+		addComponent<VerticesComponent>(uid);
 
 		ModelData model;
 		model.modelFilePath = "../../img/cube.obj";
 		model.spriteSize = { 512,512 };
 		model.spriteOffsetOnTexture = { 511,0 };
-		getComponent<ModelComponent>(uid).loadModel(model);
+	//	getComponent<VerticesComponent>(uid).loadModel(model);
 	}
 
 }
@@ -77,7 +78,7 @@ void ExampleTestScene::createObstacles()
 		addComponent<TransformComponent>(uid);
 		getComponent<TransformComponent>(uid).setTranslation({10.f,0.f,4.f}); 
 		getComponent<TransformComponent>(uid).setRotation({ 0.f,90.f,0.f });
-		addComponent<ModelComponent>(uid);
+		addComponent<VerticesComponent>(uid);
 	}
 }
 
@@ -90,12 +91,12 @@ void ExampleTestScene::createBush()
 		int uid = m_bushUID.value();
 		addComponent<TransformComponent>(uid);
 		getComponent<TransformComponent>(uid).setTranslation({0.f,0.f,-10.f});
-		addComponent<ModelComponent>(uid);
+		addComponent<VerticesComponent>(uid);
 		ModelData model;
 		model.modelFilePath = "../../img/quoteunquote-bush.obj";
 		model.spriteSize = { 228,228 };
 		model.spriteOffsetOnTexture = { 0,513 };
-		getComponent<ModelComponent>(uid).loadModel(model);
+	//	getComponent<VerticesComponent>(uid).loadModel(model);
 
 	}
 }
@@ -113,13 +114,13 @@ void ExampleTestScene::createHat()
 
 	addComponent<TransformComponent>(uid);
 	getComponent<TransformComponent>(uid).setTranslation({ 10.f,2.5f,0.f });
-	addComponent<ModelComponent>(uid);
+	addComponent<VerticesComponent>(uid);
 
 	ModelData model;
 	model.modelFilePath = "../../img/quoteunquote-bush.obj";
 	model.spriteSize = { 228,228 };
 	model.spriteOffsetOnTexture = { 0,513 };
-	getComponent<ModelComponent>(uid).loadModel(model);
+	//getComponent<VerticesComponent>(uid).loadModel(model);
 
 	addChild(m_playerUID.value(), uid);
 }

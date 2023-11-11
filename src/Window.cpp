@@ -2,6 +2,7 @@
 
 #include "SFML/Graphics/View.hpp"
 #include "src/graphics/Vertex.hpp"
+#include "src/graphics/MVPMatrix.hpp"
 
 void Window::setupOpenGL()
 {
@@ -19,8 +20,7 @@ void Window::setupOpenGL()
 	std::cout << "Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
 
 	glEnable(GL_DEPTH_TEST);
-
-	//Create buffer objects
+	//Create the VAO so we can store properties on it
 	glGenVertexArrays(1, &m_VAOId);
 	glBindVertexArray(m_VAOId);
 
@@ -32,11 +32,18 @@ void Window::setupOpenGL()
 	glGenBuffers(2, &m_elementArrayBufferObject);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementArrayBufferObject);
 
-	GLint vertexPosLocation = 0;
-	GLint texCoordLocation = 1;
+	//Create and init SSBO
+	glGenBuffers(3, &m_shaderStorageBufferObject);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_shaderStorageBufferObject);
 
+	constexpr GLint vertexPosLocation = 0;
+	constexpr GLint texCoordLocation = 1;
+	constexpr GLint mvpIndexLocation = 2;
+
+	//Store properties on the VAO
 	glVertexAttribPointer(vertexPosLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 	glVertexAttribPointer(texCoordLocation, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(GLfloat))); //TODO: change offset to be based on member location in Vertex
+	glVertexAttribPointer(mvpIndexLocation, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(5 * sizeof(GLfloat))); //TODO: change offset to be based on member location in Vertex
 
 	glEnableVertexAttribArray(vertexPosLocation);
 	glEnableVertexAttribArray(texCoordLocation);
@@ -49,6 +56,9 @@ void Window::setupOpenGL()
 	//Initialize the buffers with null data and their max sizes.
 	glBufferData(GL_ARRAY_BUFFER,m_maxVertices * sizeof(Vertex), nullptr, GL_STATIC_DRAW);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_maxIndices * sizeof(GLuint), nullptr, GL_STATIC_DRAW);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, m_maxVertices * sizeof(MVPMatrix), nullptr, GL_STATIC_DRAW); //TODO: does this want static?
+
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, m_shaderStorageBufferObject);
 
 	m_texture.activate();
 	m_texture.bind();
@@ -58,9 +68,14 @@ void Window::setupOpenGL()
 	m_shader.bind();
 	m_shader.updateIntUniform("textureSampler", 0);
 	m_shader.unbind();
+
+	//un-bind
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
-void Window::draw(size_t vertexCount, size_t indexCount, GLvoid* vertices, const std::vector<GLuint>& indices)
+void Window::draw(size_t vertexCount, size_t indexCount, GLvoid* vertices, GLvoid* indices, GLvoid* mvpMatrices)
 {
 	if (vertexCount <= (size_t)0 || indexCount <= (size_t)0)
 	{
@@ -82,8 +97,17 @@ void Window::draw(size_t vertexCount, size_t indexCount, GLvoid* vertices, const
 	m_shader.bind();
 	m_texture.bind();
 
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferObject);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementArrayBufferObject);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_shaderStorageBufferObject);
+
 	glBufferSubData(GL_ARRAY_BUFFER,0, sizeof(Vertex) * vertexCount, vertices);
-	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,0, sizeof(GLuint) * indexCount, &indices[0]);
+	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,0, sizeof(GLuint) * indexCount, indices);
+
+	//TODO: make this re-use mvp matrices instead of copying it so many times
+	//TODO: assumes that we have one mvp matrix per vertex
+	std::memcpy(glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY), mvpMatrices, sizeof(MVPMatrix) * vertexCount);
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
 	glDrawElements(GL_TRIANGLES,(GLsizei)indexCount, GL_UNSIGNED_INT, nullptr);
 }

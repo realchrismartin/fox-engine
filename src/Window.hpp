@@ -28,15 +28,7 @@ public:
 
 	const std::vector<sf::Event>& getEvents() const;
 
-	/*
-	template<typename T>
-	void draw(T drawableComponent)
-	{
-		draw(drawableComponent.getVertexCount(), drawableComponent.getIndexCount(), drawableComponent.getVertices(), drawableComponent.getIndices());
-	}
-	*/
-
-	void draw(size_t vertexCount, size_t indexCount, GLvoid* vertices, const std::vector<GLuint>& indices);
+	void draw(size_t vertexCount, size_t indexCount, GLvoid* vertices, GLvoid* indices, GLvoid* mvpMatrices);
 private:
 
 	void setupOpenGL();
@@ -48,8 +40,9 @@ private:
 	Shader m_shader;
 
 	GLuint m_VAOId;
-	GLuint m_vertexBufferObject;
-	GLuint m_elementArrayBufferObject;
+	GLuint m_vertexBufferObject = 1;
+	GLuint m_elementArrayBufferObject = 2;
+	GLuint m_shaderStorageBufferObject = 3;
 
 	GLuint m_maxVertices;
 	GLuint m_maxIndices;
