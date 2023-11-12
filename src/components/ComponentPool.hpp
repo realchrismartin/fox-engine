@@ -99,46 +99,32 @@ public:
 		int componentIndex = m_entityToComponentMap[entityUID];
 		int lastComponentIndex = (int)m_componentsUsedCount - 1;
 
-		//Trivial case - the component is at the end of the in-use list
+		//Trivial case - the component for the entity we're removing is at the end of the pool
 		if (componentIndex == lastComponentIndex)
 		{
 			//Reduce the component count - we just ignore that memory. We will overwrite it in registerEntity later, maybe, but it wont be used.
 			m_componentsUsedCount--;
 			m_entityToComponentMap.erase(entityUID);
-			m_componentToEntityMap.erase(componentIndex);
+			m_componentToEntityMap.erase(lastComponentIndex);
 			return;
 		}
 
-		//Less-trivial case - the component is somewhere in the middle of the list
-		//We gotta swap the last element of the component list INTO this spot.
-		//TODO: do the swap of the last element.
+		//Less-trivial case - the component for the entity we're removing is somewhere in the middle of the pool
+		//We gotta swap the last element of the component list INTO the free spot.
+		//We do this by copying the component data to the free spot.
 
-		bool foundComponentUID = false;
-		int lastEntityUID = 0;
-
-		//TODO: make this more efficient :(
-		for (auto const& [entityUID, componentIndex] : m_entityToComponentMap)
+		if (!m_componentToEntityMap.count(lastComponentIndex))
 		{
-			if (componentIndex == lastComponentIndex)
-			{
-				//This entityUID is using the last component index.
-				foundComponentUID = true;
-				lastEntityUID = entityUID;
-				break;
-			}
-		}
-
-		if (!foundComponentUID)
-		{
-			//Something is wrong.
+			//Something is wrong. There should be an entity using this index.
 			assert(false);
 		}
+
+		int lastEntityUID = m_componentToEntityMap.at(lastComponentIndex);
 		
-		//Now we have the entity UID that is using the last component index.
-		//Copy that entity's component and overwrite the one at our index.
+		//Copy the last entity's component to the free spot, overwriting the one for the entity we're removing
 		std::memcpy(getComponent(entityUID), getComponent(lastEntityUID), m_componentSize);
 
-		//Add that entity at our index, since it is using this index now.
+		//Update both maps to indicate that we moved the entity at the end of the list to the free spot
 		m_entityToComponentMap[lastEntityUID] = componentIndex;
 		m_componentToEntityMap[componentIndex] = lastEntityUID;
 

@@ -4,6 +4,10 @@
 #include "src/entities/GameEntity.hpp"
 #include "src/components/ComponentPool.hpp"
 
+class ModelComponent;
+class VerticesComponent;
+class IndicesComponent;
+class TransformComponent;
 class System;
 struct ModelData;
 
@@ -132,28 +136,27 @@ protected:
 	template<typename T>
 	void addComponent(int entityUID)
 	{
-		//Handle case where we don't have an entity with this ID yet
-		if (!m_gameEntityMap.count(entityUID))
+		if (std::is_same(T, ModelComponent) == true)
 		{
-			Logger::log("There is no entity with this UID. Skipping adding a component to it.");
-			return; //Return having done nothing
+			throw std::invalid_argument("Cannot manually add a ModelComponent.");
 		}
-		
-		//Grab the id for the type of component we are adding
-		int componentTypeId = GetComponentTypeId<T>();
-
-		if (!m_componentTypeToPoolMap.count(componentTypeId))
+		/*
+		else if (std::is_same(T, TransformComponent) == true)
 		{
-			//The pool for this component type isn't set up yet. Gotta set it up!
-			m_componentPools.push_back(std::move(std::make_unique<ComponentPool>(componentTypeId,sizeof(T), m_maxEntities)));
-
-			//Assign a pool index for this component pool we just added.
-			m_componentTypeToPoolMap[componentTypeId] = (int)m_componentPools.size() - 1;
+			throw std::invalid_argument("Cannot manually add a ModelComponent.");
 		}
+		else if (std::is_same(T, VerticesComponent) == true)
+		{
+			throw std::invalid_argument("Cannot manually add a ModelComponent.");
+		}
+		else if (std::is_same(T, IndicesComponent) == true)
+		{
+			throw std::invalid_argument("Cannot manually add a ModelComponent.");
+		}
+		*/
 
-		//Tell the pool that the entity with the given UID is using a given component memory chunk now.
-		m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)]->registerEntity<T>(entityUID);
-	};
+		addComponentPrivate<T>(entityUID);
+	}
 
 	template<typename ComponentType>
 	void applyFunctorToSceneGraph(std::optional<int> parentEntityID, int entityID, std::function<void(int,Scene&,ComponentType&)>& rootNodeFunctor, std::function<void(int,Scene&,ComponentType&,ComponentType&)>& childNodeFunctor)
@@ -197,6 +200,35 @@ protected:
 	}
 
 private:
+	//Add a component to the entity specified by the ID
+	//This involves assigning an existing component from our component pools, or allocating a new one.
+	template<typename T>
+	void addComponentPrivate(int entityUID)
+	{
+		//Handle case where we don't have an entity with this ID yet
+		if (!m_gameEntityMap.count(entityUID))
+		{
+			Logger::log("There is no entity with this UID. Skipping adding a component to it.");
+			return; //Return having done nothing
+		}
+		
+		//Grab the id for the type of component we are adding
+		int componentTypeId = GetComponentTypeId<T>();
+
+		if (!m_componentTypeToPoolMap.count(componentTypeId))
+		{
+			//The pool for this component type isn't set up yet. Gotta set it up!
+			m_componentPools.push_back(std::move(std::make_unique<ComponentPool>(componentTypeId,sizeof(T), m_maxEntities)));
+
+			//Assign a pool index for this component pool we just added.
+			m_componentTypeToPoolMap[componentTypeId] = (int)m_componentPools.size() - 1;
+		}
+
+		//Tell the pool that the entity with the given UID is using a given component memory chunk now.
+		m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)]->registerEntity<T>(entityUID);
+	};
+
+
 	size_t m_maxEntities = 10; //The max number of entities we can have, mostly dictated by the size of the component pools for now
 	std::map<int, std::set<int>> m_sceneGraph;
 	std::set<int> m_rootNodes;
