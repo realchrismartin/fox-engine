@@ -278,7 +278,7 @@ void Scene::removeEntity(int uid)
 	{
 		updateAllModelComponentAssociations();
 	}
-	else if !hadTransformComponent && !hadModelComponent && !hadVerticesComponent)
+	else if (!hadTransformComponent && !hadModelComponent && !hadVerticesComponent)
 	{
 		//noop
 	}

@@ -109,13 +109,11 @@ public:
 	GameEntity& getEntity(int entityIndex);
 	int getEntityCount() const;
 
-	template<typename ComponentType>
-	void applyToSceneGraph(std::function<void(int,Scene&,ComponentType&)>& rootNodeFunctor,
-		                   std::function<void(int,Scene&,ComponentType&,ComponentType&)>& childNodeFunctor)
+	void applyToSceneGraph(std::function<void(Scene&,std::optional<int>,int)>& functor)
 	{
-		for (auto rootNode : m_rootNodes)
+		for (auto entityId : m_rootNodes)
 		{
-			applyFunctorToSceneGraph(std::nullopt,rootNode, rootNodeFunctor, childNodeFunctor);
+			applyFunctorToSceneGraph(std::nullopt,entityId,functor);
 		}
 	}
 	
@@ -152,35 +150,16 @@ protected:
 		addComponentPrivate<T>(entityUID);
 	}
 
-	template<typename ComponentType>
-	void applyFunctorToSceneGraph(std::optional<int> parentEntityID, int entityID, std::function<void(int,Scene&,ComponentType&)>& rootNodeFunctor, std::function<void(int,Scene&,ComponentType&,ComponentType&)>& childNodeFunctor)
+	void applyFunctorToSceneGraph(std::optional<int> parentEntityID, int entityID, std::function<void(Scene&,std::optional<int>,int)>& functor)
 	{
-		int componentId = GetComponentTypeId<ComponentType>();
-
-		if (!m_componentTypeToPoolMap.count(componentId))
-		{
-			return; //The pool for this component type doesn't exist (yet?)
-		}
-
-		if (!m_componentPools[m_componentTypeToPoolMap.at(componentId)]->hasRegisteredEntity(entityID))
-		{
-			return; //This entity doesn't have a component of this type
-		}
-
 		//Run the functor on the node.
 		if (parentEntityID.has_value())
 		{
-			//This is the child node
-			//We know the parent has a component of this type, because we recursed to get here
-			auto& parentComponent = getComponent<ComponentType>(parentEntityID.value());
-			auto& childComponent = getComponent<ComponentType>(entityID);
-
-			childNodeFunctor(entityID, *this, parentComponent, childComponent);
+			functor(*this, parentEntityID.value(),entityID);
 		}
 		else
 		{
-			auto& component = getComponent<ComponentType>(entityID);
-			rootNodeFunctor(entityID, *this, component);
+			functor(*this, std::nullopt, entityID);
 		}
 
 		//If the node has children, call this function to apply the functors to those children
@@ -188,7 +167,7 @@ protected:
 		{
 			for (auto child : m_sceneGraph.at(entityID))
 			{
-				applyFunctorToSceneGraph(entityID,child,rootNodeFunctor,childNodeFunctor);
+				applyFunctorToSceneGraph(entityID,child,functor);
 			}
 		}
 	}
