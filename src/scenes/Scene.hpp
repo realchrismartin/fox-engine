@@ -4,7 +4,8 @@
 #include "src/entities/GameEntity.hpp"
 #include "src/components/ComponentPool.hpp"
 
-class ModelComponent;
+#include "src/components/ModelComponent.hpp"
+
 class VerticesComponent;
 class IndicesComponent;
 class TransformComponent;
@@ -136,24 +137,22 @@ protected:
 	template<typename T>
 	void addComponent(int entityUID)
 	{
-		if (std::is_same(T, ModelComponent) == true)
+		if (std::is_same_v<T, ModelComponent> == true)
 		{
 			throw std::invalid_argument("Cannot manually add a ModelComponent.");
 		}
-		/*
-		else if (std::is_same(T, TransformComponent) == true)
+		else if (std::is_same_v<T, TransformComponent> == true)
 		{
-			throw std::invalid_argument("Cannot manually add a ModelComponent.");
+			throw std::invalid_argument("Cannot manually add a TransformComponent.");
 		}
-		else if (std::is_same(T, VerticesComponent) == true)
+		else if (std::is_same_v<T, VerticesComponent> == true)
 		{
-			throw std::invalid_argument("Cannot manually add a ModelComponent.");
+			throw std::invalid_argument("Cannot manually add a VerticesComponent.");
 		}
-		else if (std::is_same(T, IndicesComponent) == true)
+		else if (std::is_same_v<T, IndicesComponent> == true)
 		{
-			throw std::invalid_argument("Cannot manually add a ModelComponent.");
+			throw std::invalid_argument("Cannot manually add a IndicesComponent.");
 		}
-		*/
 
 		addComponentPrivate<T>(entityUID);
 	}
@@ -200,6 +199,8 @@ protected:
 	}
 
 private:
+	void updateAllModelComponentAssociations();
+
 	//Add a component to the entity specified by the ID
 	//This involves assigning an existing component from our component pools, or allocating a new one.
 	template<typename T>

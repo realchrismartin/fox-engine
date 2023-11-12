@@ -56,7 +56,7 @@ public:
 	}
 
 	template <typename T>
-	inline void registerEntity(int entityUID)
+	void registerEntity(int entityUID)
 	{
 		if (hasRegisteredEntity(entityUID))
 		{
@@ -81,12 +81,12 @@ public:
 		T* unused = new (getComponent(entityUID)) T();
 	}
 
-	inline bool hasRegisteredEntity(int entityUID) const
+	bool hasRegisteredEntity(int entityUID) const
 	{
 		return m_entityToComponentMap.count(entityUID);
 	}
 
-	inline void deregisterEntity(int entityUID)
+	void deregisterEntity(int entityUID)
 	{
 		//NB: this does NOT clean up pool memory or anything. If we register an entity again, we assume we are going to either overwrite the memory immediately OR use whatever's there arleady.
 
@@ -134,9 +134,20 @@ public:
 		m_componentToEntityMap.erase(lastComponentIndex); //TODO: is this right?
 	}
 
+	std::optional<size_t> getIndexOfRegisteredEntity(int entityUID)
+	{
+		if(!hasRegisteredEntity(entityUID))
+		{
+			return std::nullopt; //not registered
+		}
+
+		return (size_t)m_entityToComponentMap[entityUID];
+
+	}
+
 	/// @brief Get the component at the specified entity uid's index.
 	///. We can do this because we know how big each one is.
-	inline void* getComponent(int entityUID)
+	void* getComponent(int entityUID)
 	{
 		if(!hasRegisteredEntity(entityUID))
 		{
@@ -149,7 +160,7 @@ public:
 	/// @brief Get the component at the actual index specified
 	/// @param index 
 	/// @return 
-	inline void* getComponentAtIndex(size_t index)
+	void* getComponentAtIndex(size_t index)
 	{
 		if (index >= m_componentsUsedCount)
 		{

@@ -11,12 +11,12 @@ size_t IndicesComponent::getIndexCount() const
 	return m_indices.size();
 }
 
-void IndicesComponent::reset()
+void IndicesComponent::addOffsetIndices(size_t offset, const std::vector<GLuint>& localIndices)
 {
 	m_indices.clear();
-}
 
-void IndicesComponent::addIndex(GLuint index)
-{
-	m_indices.push_back(index);
+	for (auto& index : localIndices)
+	{
+		m_indices.push_back(index + (GLuint)offset);
+	}
 }

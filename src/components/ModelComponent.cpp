@@ -12,9 +12,14 @@ size_t ModelComponent::getVertexCount() const
 	return m_numVertices;
 }
 
-void ModelComponent::loadModel(const ModelData& modelData, VerticesComponent& verticesComponent, IndicesComponent& indicesComponent)
+const std::vector<GLuint>& ModelComponent::getLocalIndices() const
 {
-	indicesComponent.reset();
+	return m_indices;
+}
+
+void ModelComponent::loadModel(const ModelData& modelData, VerticesComponent& verticesComponent)
+{
+	m_indices.clear();
 	m_numVertices = 0;
 
 	std::ifstream input;
@@ -125,11 +130,11 @@ void ModelComponent::loadModel(const ModelData& modelData, VerticesComponent& ve
 	// Now that other data is loaded, load faces
 	for (auto const& faceString : faceLineTokens)
 	{
-		loadFace(vertices, textureCoordinates, vertexNormals, faceString, faceMap, textureCoordinateRatio, textureOffsetFactor, verticesComponent, indicesComponent);
+		loadFace(vertices, textureCoordinates, vertexNormals, faceString, faceMap, textureCoordinateRatio, textureOffsetFactor, verticesComponent);
 	}
 }
 
-void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec3>& vertexNormals, const std::vector<std::string>& faceData, std::map<std::string,GLuint>& faceMap, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor, VerticesComponent& verticesComponent, IndicesComponent& indicesComponent)
+void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec3>& vertexNormals, const std::vector<std::string>& faceData, std::map<std::string,GLuint>& faceMap, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor, VerticesComponent& verticesComponent)
 {
 	for (auto const& faceComponent : faceData)
 	{
@@ -184,8 +189,7 @@ void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std:
 
 		if (faceMap.count(mapKey))
 		{
-			// Map doesn't need to be updated
-			indicesComponent.addIndex(faceMap.at(mapKey)); // Add face index to buffer
+			m_indices.push_back(faceMap.at(mapKey));
 		}
 		else
 		{
@@ -209,14 +213,14 @@ void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std:
 			vertex.z = v.z;
 			vertex.s = textureOffsetFactor.x + (t.x * textureCoordinateRatio.x);
 			vertex.t = textureOffsetFactor.y + (t.y * textureCoordinateRatio.y);
-			vertex.mvpIndex = (GLfloat)m_numVertices; //TODO: for now we assume we have one MVP per vertex... ugh
+			vertex.mvpIndex = 0.f; //This is updated as soon as this method completes in void Scene::updateAllModelComponentAssociations()
 
 			verticesComponent.addVertex(m_numVertices, vertex);
 			m_numVertices++;
 
 			GLuint index = (GLuint)faceMap.size();    // This is the "next" face - first one is index 0, etc.
 			faceMap[mapKey] = index;          // Update map to specify index for this face - map size changes, so next index is + 1
-			indicesComponent.addIndex(index); // Add face index 
+			m_indices.push_back(index);
 		}
 	}
 }

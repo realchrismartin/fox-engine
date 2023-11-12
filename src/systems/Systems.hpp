@@ -123,42 +123,24 @@ private:
 		glm::mat4 projectionMatrix = camera.getProjectionMatrix();
 		
 		size_t vertexCount = 0;
+		size_t indexCount = 0;
 
-		//Lists of matrices and indices to build
 		std::vector<MVPMatrix> mvpMatrices;
-		std::vector<GLuint> indices;
 
 		ComponentPool& modelComponentPool = scene.getComponentPool<ModelComponent>();
 		ComponentPool& verticesComponentPool = scene.getComponentPool<VerticesComponent>();
 		ComponentPool& indicesComponentPool = scene.getComponentPool<IndicesComponent>();
 
-		for (auto entity : modelComponentPool.getRegisteredEntityUIDs())
-		{
-			//TODO: add the noted guarantees here! Tehy dont exist
+		ComponentPool& modelPool = scene.getComponentPool<ModelComponent>();
 
-			//In the Scene we guarantee that every entity with a model has also vertices,indices,transform components
-			//We also guarantee that no other process can add one of these 4 components to the scene
-			//Since we always add and remove components at the same time in the Scene, this means the ordering of the registration is the same
-			//for all four pools.
-			//Here, we get the entity ordering for the model pool. We assume given the above it's the same ordering as the other 3 pools.
-
-			//TODO: move this to the addition/removal of an entity from the scene. Use this property to:
-			//Take raw local vertices from the Model component and update the Vertices component with them (whenever an add or remove is done) so they match the VBO.
-			//Update the Vertices' MVP matrix indices so they match the SSBO.
-		}
-
-		//TODO: don't use the iterator order below to do anything.
-		// IT's ok to update the MVP matrices in this order maybe ...
-
-		//For any entity that has a ModelCompoent (the scene manages VI components) and a Transform component:
-		for (auto const& entity : EntityFilter<TransformComponent, ModelComponent, VerticesComponent, IndicesComponent>(scene))
+		//Upstream, we guaranteed that if an entity has a model, it has a transform, vertices, and indices
+		//This means we can iterate over the model pool and it will be in the correct / same order as the other pools
+		for (auto const& entity : modelPool.getRegisteredEntityUIDs())
 		{
 			ModelComponent& model = scene.getComponent<ModelComponent>(entity);
 			TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
 			VerticesComponent& vertices = scene.getComponent<VerticesComponent>(entity);
 			IndicesComponent& indices = scene.getComponent<IndicesComponent>(entity);
-
-			size_t vertexCount = model.getVertexCount();
 
 			//Calculate and add each mvp matrix to the list to send to the ssbo
 			glm::mat4 modelMatrix = transform.getWorldMatrix();
@@ -166,20 +148,16 @@ private:
 
 			MVPMatrix matrix;
 			matrix.mvpMatrix = mvp;
+			mvpMatrices.push_back(matrix); 
 
-			//TODO: this sucks. stop doing it like this
-			for (int i = 0; i < vertexCount; i++)
-			{
-				mvpMatrices.push_back(matrix); 
-			}
-
+			vertexCount += model.getVertexCount();
+			indexCount += indices.getIndexCount();
+		}
 			//Bind the model matrix via uniform
 			//window.getBoundShader().updateMat4Uniform("modelViewProjectionMatrix", mvp);
-		}
-
 		//Now that everything is added, do one draw.
-	//	window.draw(vertexCount, indices.size(),(GLvoid*)verticesComponentPool.getData(), &indices[0], &mvpMatrices[0]);
-		//TODO
+
+		window.draw(vertexCount, indexCount, (GLvoid*)verticesComponentPool.getData(), (GLvoid*)indicesComponentPool.getData(), &mvpMatrices[0]);
 	}
 };
 

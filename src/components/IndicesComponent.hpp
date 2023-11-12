@@ -6,8 +6,7 @@ class IndicesComponent
 public:
 	const GLvoid* getIndices() const;
 	size_t getIndexCount() const;
-	void reset();
-	void addIndex(GLuint index);
+	void addOffsetIndices(size_t offset, const std::vector<GLuint>& localIndices);
 private:
 	std::vector<GLuint> m_indices;
 };
