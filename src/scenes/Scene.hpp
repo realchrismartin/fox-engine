@@ -229,7 +229,6 @@ private:
 		m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)]->registerEntity<T>(entityUID);
 	};
 
-
 	size_t m_maxEntities = 10; //The max number of entities we can have, mostly dictated by the size of the component pools for now
 	std::map<int, std::set<int>> m_sceneGraph;
 	std::set<int> m_rootNodes;

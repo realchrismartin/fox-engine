@@ -9,6 +9,7 @@ class ModelComponent
 {
 public:
 	size_t getVertexCount() const;
+	size_t getIndexCount() const;
 	const std::vector<GLuint>& getLocalIndices() const;
 	void loadModel(const ModelData& modelData, VerticesComponent& verticesComponent);
 private:

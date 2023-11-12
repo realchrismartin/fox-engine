@@ -12,6 +12,11 @@ size_t ModelComponent::getVertexCount() const
 	return m_numVertices;
 }
 
+size_t ModelComponent::getIndexCount() const
+{
+	return m_indices.size();
+}
+
 const std::vector<GLuint>& ModelComponent::getLocalIndices() const
 {
 	return m_indices;

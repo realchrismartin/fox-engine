@@ -4,10 +4,11 @@
 class IndicesComponent
 {
 public:
-	const GLvoid* getIndices() const;
-	size_t getIndexCount() const;
+	GLvoid* getIndices() const;
 	void addOffsetIndices(size_t offset, const std::vector<GLuint>& localIndices);
+	static const int MAX_INDICES = 3000;
 private:
-	std::vector<GLuint> m_indices;
+	GLuint m_indices[MAX_INDICES];
+
 };
 #endif

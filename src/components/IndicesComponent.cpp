@@ -1,22 +1,22 @@
 #include "IndicesComponent.hpp"
 #include "src/components/IndicesComponent.hpp"
 
-const GLvoid* IndicesComponent::getIndices() const
-{
-	return &m_indices[0];
-}
-
-size_t IndicesComponent::getIndexCount() const
-{
-	return m_indices.size();
-}
-
 void IndicesComponent::addOffsetIndices(size_t offset, const std::vector<GLuint>& localIndices)
 {
-	m_indices.clear();
+    if (localIndices.size() > (size_t)MAX_INDICES)
+    {
+        std::cout << "Skipped adding index, there are too many for the array size" << std::endl;
+        return;
+    }
 
-	for (auto& index : localIndices)
+	for (size_t i = 0 ; i < localIndices.size(); i++)
 	{
-		m_indices.push_back(index + (GLuint)offset);
+        m_indices[i] = localIndices[i] + (GLuint)offset;
 	}
 }
+
+GLvoid* IndicesComponent::getIndices() const
+{
+    return (GLvoid*)m_indices;
+}
+

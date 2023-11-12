@@ -47,16 +47,18 @@ void Window::setupOpenGL()
 
 	glEnableVertexAttribArray(vertexPosLocation);
 	glEnableVertexAttribArray(texCoordLocation);
+	glEnableVertexAttribArray(mvpIndexLocation);
 
 	//Setup the maxima
 	//TODO: something is wrong. This has to be done here or maxVertices gets set to 3??
 	m_maxVertices = 99000;
 	m_maxIndices = 99000;
+	m_maxMatrices = 1000;
 
 	//Initialize the buffers with null data and their max sizes.
 	glBufferData(GL_ARRAY_BUFFER,m_maxVertices * sizeof(Vertex), nullptr, GL_STATIC_DRAW);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_maxIndices * sizeof(GLuint), nullptr, GL_STATIC_DRAW);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, m_maxVertices * sizeof(MVPMatrix), nullptr, GL_STATIC_DRAW); //TODO: does this want static?
+	glBufferData(GL_SHADER_STORAGE_BUFFER, m_maxMatrices * sizeof(MVPMatrix), nullptr, GL_STATIC_DRAW); //TODO: does this want static?
 
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, m_shaderStorageBufferObject);
 
@@ -75,10 +77,11 @@ void Window::setupOpenGL()
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
-void Window::draw(size_t vertexCount, size_t indexCount, GLvoid* vertices, GLvoid* indices, GLvoid* mvpMatrices)
+void Window::draw(size_t vertexCount, size_t indexCount, size_t matrixCount, GLvoid* vertices, GLvoid* indices, GLvoid* mvpMatrices)
 {
 	if (vertexCount <= (size_t)0 || indexCount <= (size_t)0)
 	{
+		Logger::log("Either no vertices or indices were sent to render.");
 		return;
 	}
 
@@ -90,7 +93,13 @@ void Window::draw(size_t vertexCount, size_t indexCount, GLvoid* vertices, GLvoi
 
 	if (indexCount > m_maxIndices)
 	{
-		Logger::log("Too many indices!");
+		Logger::log("Too many indices to render!");
+		return;
+	}
+
+	if (matrixCount > m_maxMatrices)
+	{
+		Logger::log("Too many matrices to render!");
 		return;
 	}
 
@@ -100,13 +109,11 @@ void Window::draw(size_t vertexCount, size_t indexCount, GLvoid* vertices, GLvoi
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferObject);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementArrayBufferObject);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_shaderStorageBufferObject);
+	auto ssboAddr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY);
 
 	glBufferSubData(GL_ARRAY_BUFFER,0, sizeof(Vertex) * vertexCount, vertices);
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,0, sizeof(GLuint) * indexCount, indices);
-
-	//TODO: make this re-use mvp matrices instead of copying it so many times
-	//TODO: assumes that we have one mvp matrix per vertex
-	std::memcpy(glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY), mvpMatrices, sizeof(MVPMatrix) * vertexCount);
+	std::memcpy(ssboAddr, mvpMatrices, sizeof(MVPMatrix) * matrixCount);
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
 	glDrawElements(GL_TRIANGLES,(GLsizei)indexCount, GL_UNSIGNED_INT, nullptr);

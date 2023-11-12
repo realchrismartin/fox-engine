@@ -1,5 +1,4 @@
 #include "VerticesComponent.hpp"
-#include "VerticesComponent.hpp"
 
 void VerticesComponent::addVertex(size_t index, const Vertex& vertex)
 {

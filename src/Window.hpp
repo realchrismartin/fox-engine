@@ -16,7 +16,7 @@ public:
 
 	Window()
 	{
-		m_renderWindow = std::make_unique<sf::Window>(sf::VideoMode(1600, 1200), "Chris and J's Game", sf::Style::Default, sf::ContextSettings(24,8, 0, 4, 6));
+		m_renderWindow = std::make_unique<sf::Window>(sf::VideoMode(1600, 1200), "Chris and J's Game", sf::Style::Default, sf::ContextSettings(24,8, 0, 4, 3));
 		setupOpenGL();
 	}
 
@@ -28,7 +28,7 @@ public:
 
 	const std::vector<sf::Event>& getEvents() const;
 
-	void draw(size_t vertexCount, size_t indexCount, GLvoid* vertices, GLvoid* indices, GLvoid* mvpMatrices);
+	void draw(size_t vertexCount, size_t indexCount, size_t matrixCount, GLvoid* vertices, GLvoid* indices, GLvoid* mvpMatrices);
 private:
 
 	void setupOpenGL();
@@ -46,6 +46,7 @@ private:
 
 	GLuint m_maxVertices;
 	GLuint m_maxIndices;
+	GLuint m_maxMatrices;
 };
 #endif
 

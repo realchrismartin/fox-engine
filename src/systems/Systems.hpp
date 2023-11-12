@@ -122,25 +122,26 @@ private:
 		glm::mat4 viewMatrix = camera.getViewMatrix(scene);
 		glm::mat4 projectionMatrix = camera.getProjectionMatrix();
 		
+		size_t modelCount = 0;
 		size_t vertexCount = 0;
 		size_t indexCount = 0;
 
+		//TODO: later move enough data out of the transform component that we can use the pool itself in gl
 		std::vector<MVPMatrix> mvpMatrices;
+		std::vector<GLuint> indices;
 
 		ComponentPool& modelComponentPool = scene.getComponentPool<ModelComponent>();
 		ComponentPool& verticesComponentPool = scene.getComponentPool<VerticesComponent>();
 		ComponentPool& indicesComponentPool = scene.getComponentPool<IndicesComponent>();
 
-		ComponentPool& modelPool = scene.getComponentPool<ModelComponent>();
-
 		//Upstream, we guaranteed that if an entity has a model, it has a transform, vertices, and indices
 		//This means we can iterate over the model pool and it will be in the correct / same order as the other pools
-		for (auto const& entity : modelPool.getRegisteredEntityUIDs())
+		for (auto const& entity : modelComponentPool.getRegisteredEntityUIDs())
 		{
 			ModelComponent& model = scene.getComponent<ModelComponent>(entity);
 			TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
 			VerticesComponent& vertices = scene.getComponent<VerticesComponent>(entity);
-			IndicesComponent& indices = scene.getComponent<IndicesComponent>(entity);
+			IndicesComponent& indexComponent = scene.getComponent<IndicesComponent>(entity);
 
 			//Calculate and add each mvp matrix to the list to send to the ssbo
 			glm::mat4 modelMatrix = transform.getWorldMatrix();
@@ -150,14 +151,18 @@ private:
 			matrix.mvpMatrix = mvp;
 			mvpMatrices.push_back(matrix); 
 
-			vertexCount += model.getVertexCount();
-			indexCount += indices.getIndexCount();
+			for (GLuint ind : model.getLocalIndices())
+			{
+				GLuint offset = modelCount * VerticesComponent::MAX_VERTICES;
+				indices.push_back(ind + offset);
+				indexCount++;
+			}
+		
+			vertexCount += VerticesComponent::MAX_VERTICES;
+			modelCount++;
 		}
-			//Bind the model matrix via uniform
-			//window.getBoundShader().updateMat4Uniform("modelViewProjectionMatrix", mvp);
-		//Now that everything is added, do one draw.
 
-		window.draw(vertexCount, indexCount, (GLvoid*)verticesComponentPool.getData(), (GLvoid*)indicesComponentPool.getData(), &mvpMatrices[0]);
+		window.draw(vertexCount, indexCount, mvpMatrices.size(),(GLvoid*)verticesComponentPool.getData(), &indices[0], &mvpMatrices[0]);
 	}
 };
 

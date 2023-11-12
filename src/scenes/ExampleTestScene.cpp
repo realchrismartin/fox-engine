@@ -9,9 +9,9 @@
 
 ExampleTestScene::ExampleTestScene()
 {
+	createFloor();
 	createPlayer();
 	createObstacles();
-	createFloor();
 	createBush();
 	createHat();
 }
@@ -31,7 +31,7 @@ void ExampleTestScene::createPlayer()
 
 		addComponent<InputComponent>(uid);
 		ModelData model;
-		model.modelFilePath = "../../img/cube.obj";
+		model.modelFilePath = "../../img/untitled.obj";
 		model.spriteSize = { 512,512 };
 		model.spriteOffsetOnTexture = { 511,0 };
 		loadModel(model, uid);
@@ -55,6 +55,9 @@ void ExampleTestScene::createFloor()
 		model.modelFilePath = "../../img/cube.obj";
 		model.spriteSize = { 512,512 };
 		model.spriteOffsetOnTexture = { 511,0 };
+		loadModel(model, uid);
+		getComponent<TransformComponent>(uid).setScale({ 100.f,1.f,100.f });
+		getComponent<TransformComponent>(uid).setTranslation({ 0.f,-1.f,0.f});
 	}
 
 }
@@ -71,6 +74,11 @@ void ExampleTestScene::createObstacles()
 	if (m_obstacleUID.has_value()) 
 	{
 		int uid = m_obstacleUID.value();
+		ModelData model;
+		model.modelFilePath = "../../img/windmill.obj";
+		model.spriteSize = { 512,512 };
+		model.spriteOffsetOnTexture = { 511,0 };
+
 	}
 }
 
@@ -86,7 +94,6 @@ void ExampleTestScene::createBush()
 		model.spriteSize = { 228,228 };
 		model.spriteOffsetOnTexture = { 0,513 };
 		loadModel(model, uid);
-
 	}
 }
 

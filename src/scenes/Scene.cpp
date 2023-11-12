@@ -319,7 +319,7 @@ void Scene::updateAllModelComponentAssociations()
 		indicesComponent.addOffsetIndices(indexCount, modelComponent.getLocalIndices());
 
 		//Ensure the next index component gets the updated index count
-		indexCount += indicesComponent.getIndexCount();
+		indexCount += modelComponent.getIndexCount();
 
 		//The vertex buffer element for "mvp" is relative to the pool of transforms.
 		//We have one transform per model, not per vertex.
