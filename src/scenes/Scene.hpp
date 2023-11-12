@@ -7,10 +7,9 @@
 #include "src/components/ModelComponent.hpp"
 
 class VerticesComponent;
-class IndicesComponent;
 class TransformComponent;
 class System;
-struct ModelData;
+struct ModelConfig;
 
 /// @brief An association of Entities with their Components.
 /// @brief Represents the game world and holds all entities and their components that are in the world.
@@ -123,7 +122,7 @@ public:
 	std::optional<int> getCameraEntity() const;
 	std::optional<int> getCameraTargetEntity() const;
 
-	void loadModel(const ModelData& modelData, int entityUID);
+	void loadModel(const ModelConfig& modelData, int entityUID);
 
 protected:
 	void addChild(int parentEntityUID, int childEntityUID);
@@ -148,10 +147,6 @@ protected:
 		else if (std::is_same_v<T, VerticesComponent> == true)
 		{
 			throw std::invalid_argument("Cannot manually add a VerticesComponent.");
-		}
-		else if (std::is_same_v<T, IndicesComponent> == true)
-		{
-			throw std::invalid_argument("Cannot manually add a IndicesComponent.");
 		}
 
 		addComponentPrivate<T>(entityUID);

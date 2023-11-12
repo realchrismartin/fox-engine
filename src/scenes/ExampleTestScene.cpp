@@ -5,15 +5,14 @@
 #include "src/components/InputComponent.hpp"
 #include "src/components/TransformComponent.hpp"
 #include "src/components/VerticesComponent.hpp"
-#include "src/graphics/ModelData.hpp"
+#include "src/graphics/ModelConfig.hpp"
 
 ExampleTestScene::ExampleTestScene()
 {
-	createFloor();
 	createPlayer();
-	createObstacles();
+	createFloor();
+	createWindmill();
 	createBush();
-	createHat();
 }
 
 void ExampleTestScene::createPlayer()
@@ -30,11 +29,11 @@ void ExampleTestScene::createPlayer()
 		int uid = m_playerUID.value();
 
 		addComponent<InputComponent>(uid);
-		ModelData model;
+		ModelConfig model;
 		model.modelFilePath = "../../img/untitled.obj";
-		model.spriteSize = { 512,512 };
-		model.spriteOffsetOnTexture = { 511,0 };
 		loadModel(model, uid);
+		getComponent<TransformComponent>(uid).setScale({ .2f,.2f,.2f});
+		setCameraTargetEntity(uid);
 	}
 
 }
@@ -51,34 +50,32 @@ void ExampleTestScene::createFloor()
 	if (m_floorUID.has_value()) 
 	{
 		int uid = m_floorUID.value();
-		ModelData model;
+		ModelConfig model;
 		model.modelFilePath = "../../img/cube.obj";
 		model.spriteSize = { 512,512 };
 		model.spriteOffsetOnTexture = { 511,0 };
 		loadModel(model, uid);
 		getComponent<TransformComponent>(uid).setScale({ 100.f,1.f,100.f });
-		getComponent<TransformComponent>(uid).setTranslation({ 0.f,-1.f,0.f});
+		getComponent<TransformComponent>(uid).setTranslation({ 0.f,-2.f,0.f});
 	}
 
 }
 
-void ExampleTestScene::createObstacles()
+void ExampleTestScene::createWindmill()
 {
-	if (m_obstacleUID.has_value())
+	if (m_windmillUID.has_value())
 	{
-		removeEntity(m_obstacleUID.value());
+		removeEntity(m_windmillUID.value());
 	}
 
-	m_obstacleUID = createEntity();
+	m_windmillUID = createEntity();
 
-	if (m_obstacleUID.has_value()) 
+	if (m_windmillUID.has_value()) 
 	{
-		int uid = m_obstacleUID.value();
-		ModelData model;
-		model.modelFilePath = "../../img/windmill.obj";
-		model.spriteSize = { 512,512 };
-		model.spriteOffsetOnTexture = { 511,0 };
-
+		int uid = m_windmillUID.value();
+		ModelConfig model;
+		loadModel(model, uid);
+		getComponent<TransformComponent>(uid).setRotation({ 0.f,180.f,0.f});
 	}
 }
 
@@ -89,30 +86,12 @@ void ExampleTestScene::createBush()
 	if (m_bushUID.has_value())
 	{
 		int uid = m_bushUID.value();
-		ModelData model;
+		ModelConfig model;
 		model.modelFilePath = "../../img/quoteunquote-bush.obj";
 		model.spriteSize = { 228,228 };
 		model.spriteOffsetOnTexture = { 0,513 };
 		loadModel(model, uid);
+		getComponent<TransformComponent>(uid).setTranslation({ 10.f,0.f,5.f});
+		addChild(m_windmillUID.value(), uid);
 	}
-}
-
-void ExampleTestScene::createHat()
-{
-	std::optional<int> entityUID = createEntity();
-
-	if (!entityUID.has_value())
-	{
-		return;
-	}
-
-	int uid = entityUID.value();
-
-	ModelData model;
-	model.modelFilePath = "../../img/quoteunquote-bush.obj";
-	model.spriteSize = { 228,228 };
-	model.spriteOffsetOnTexture = { 0,513 };
-	loadModel(model, uid);
-
-	addChild(m_playerUID.value(), uid);
 }

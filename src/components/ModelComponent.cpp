@@ -1,8 +1,7 @@
 #include "src/components/ModelComponent.hpp"
 
-#include "src/graphics/ModelData.hpp"
+#include "src/graphics/ModelConfig.hpp"
 #include "src/components/VerticesComponent.hpp"
-#include "src/components/IndicesComponent.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -17,14 +16,24 @@ size_t ModelComponent::getIndexCount() const
 	return m_indices.size();
 }
 
-const std::vector<GLuint>& ModelComponent::getLocalIndices() const
+const std::vector<GLuint>& ModelComponent::getIndices() const
 {
 	return m_indices;
 }
 
-void ModelComponent::loadModel(const ModelData& modelData, VerticesComponent& verticesComponent)
+void ModelComponent::recalculateIndices(size_t offset)
 {
 	m_indices.clear();
+
+	for (GLuint i : m_localIndices)
+	{
+		m_indices.push_back(offset + i);
+	}
+}
+
+void ModelComponent::loadModel(const ModelConfig& modelData, VerticesComponent& verticesComponent)
+{
+	m_localIndices.clear();
 	m_numVertices = 0;
 
 	std::ifstream input;
@@ -137,6 +146,9 @@ void ModelComponent::loadModel(const ModelData& modelData, VerticesComponent& ve
 	{
 		loadFace(vertices, textureCoordinates, vertexNormals, faceString, faceMap, textureCoordinateRatio, textureOffsetFactor, verticesComponent);
 	}
+
+	//These will be wrong, but doing it anyway just to have data.
+	recalculateIndices(0);
 }
 
 void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec3>& vertexNormals, const std::vector<std::string>& faceData, std::map<std::string,GLuint>& faceMap, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor, VerticesComponent& verticesComponent)
@@ -194,7 +206,7 @@ void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std:
 
 		if (faceMap.count(mapKey))
 		{
-			m_indices.push_back(faceMap.at(mapKey));
+			m_localIndices.push_back(faceMap.at(mapKey));
 		}
 		else
 		{
@@ -225,7 +237,7 @@ void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std:
 
 			GLuint index = (GLuint)faceMap.size();    // This is the "next" face - first one is index 0, etc.
 			faceMap[mapKey] = index;          // Update map to specify index for this face - map size changes, so next index is + 1
-			m_indices.push_back(index);
+			m_localIndices.push_back(index);
 		}
 	}
 }

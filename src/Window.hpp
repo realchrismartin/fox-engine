@@ -14,12 +14,7 @@ class Window
 {
 public:
 
-	Window()
-	{
-		m_renderWindow = std::make_unique<sf::Window>(sf::VideoMode(1600, 1200), "Chris and J's Game", sf::Style::Default, sf::ContextSettings(24,8, 0, 4, 3));
-		setupOpenGL();
-	}
-
+	Window();
 	void clear();
 	void display();
 	void pollForEvents();
@@ -29,6 +24,10 @@ public:
 	const std::vector<sf::Event>& getEvents() const;
 
 	void draw(size_t vertexCount, size_t indexCount, size_t matrixCount, GLvoid* vertices, GLvoid* indices, GLvoid* mvpMatrices);
+
+	static const size_t MAX_VERTICES_PER_RENDER;
+	static const size_t MAX_INDICES_PER_RENDER;
+	static const size_t MAX_MATRICES_PER_RENDER;
 private:
 
 	void setupOpenGL();
@@ -43,10 +42,6 @@ private:
 	GLuint m_vertexBufferObject = 1;
 	GLuint m_elementArrayBufferObject = 2;
 	GLuint m_shaderStorageBufferObject = 3;
-
-	GLuint m_maxVertices;
-	GLuint m_maxIndices;
-	GLuint m_maxMatrices;
 };
 #endif
 

@@ -11,12 +11,11 @@ public:
 protected:
 	void createPlayer();
 	void createFloor();
-	void createObstacles();
+	void createWindmill();
 	void createBush();
-	void createHat();
 private:
 	std::optional<int> m_playerUID;
-	std::optional<int> m_obstacleUID;
+	std::optional<int> m_windmillUID;
 	std::optional<int> m_floorUID;
 	std::optional<int> m_bushUID;
 };

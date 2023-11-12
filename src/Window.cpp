@@ -4,6 +4,19 @@
 #include "src/graphics/Vertex.hpp"
 #include "src/graphics/MVPMatrix.hpp"
 
+const size_t Window::MAX_VERTICES_PER_RENDER = 90000;
+const size_t Window::MAX_INDICES_PER_RENDER = 9000;
+const size_t Window::MAX_MATRICES_PER_RENDER = 9000;
+
+Window::Window()
+{
+	//Set up the window and define OpenGL version
+	m_renderWindow = std::make_unique<sf::Window>(sf::VideoMode(1600, 1200), "FnF", sf::Style::Default, sf::ContextSettings(24, 8, 0, 4, 3));
+
+	//Set up the OpenGL context in the window
+	setupOpenGL();
+}
+
 void Window::setupOpenGL()
 {
 	m_renderWindow->setActive(true);
@@ -20,6 +33,7 @@ void Window::setupOpenGL()
 	std::cout << "Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
 
 	glEnable(GL_DEPTH_TEST);
+
 	//Create the VAO so we can store properties on it
 	glGenVertexArrays(1, &m_VAOId);
 	glBindVertexArray(m_VAOId);
@@ -36,11 +50,11 @@ void Window::setupOpenGL()
 	glGenBuffers(3, &m_shaderStorageBufferObject);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_shaderStorageBufferObject);
 
+	//Store properties on the VAO
 	constexpr GLint vertexPosLocation = 0;
 	constexpr GLint texCoordLocation = 1;
 	constexpr GLint mvpIndexLocation = 2;
 
-	//Store properties on the VAO
 	glVertexAttribPointer(vertexPosLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 	glVertexAttribPointer(texCoordLocation, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(GLfloat))); //TODO: change offset to be based on member location in Vertex
 	glVertexAttribPointer(mvpIndexLocation, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(5 * sizeof(GLfloat))); //TODO: change offset to be based on member location in Vertex
@@ -49,16 +63,10 @@ void Window::setupOpenGL()
 	glEnableVertexAttribArray(texCoordLocation);
 	glEnableVertexAttribArray(mvpIndexLocation);
 
-	//Setup the maxima
-	//TODO: something is wrong. This has to be done here or maxVertices gets set to 3??
-	m_maxVertices = 99000;
-	m_maxIndices = 99000;
-	m_maxMatrices = 1000;
-
 	//Initialize the buffers with null data and their max sizes.
-	glBufferData(GL_ARRAY_BUFFER,m_maxVertices * sizeof(Vertex), nullptr, GL_STATIC_DRAW);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_maxIndices * sizeof(GLuint), nullptr, GL_STATIC_DRAW);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, m_maxMatrices * sizeof(MVPMatrix), nullptr, GL_STATIC_DRAW); //TODO: does this want static?
+	glBufferData(GL_ARRAY_BUFFER,MAX_VERTICES_PER_RENDER * sizeof(Vertex), nullptr, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,MAX_INDICES_PER_RENDER * sizeof(GLuint), nullptr, GL_STATIC_DRAW);
+	glBufferData(GL_SHADER_STORAGE_BUFFER,MAX_MATRICES_PER_RENDER * sizeof(MVPMatrix), nullptr, GL_STATIC_DRAW); 
 
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, m_shaderStorageBufferObject);
 
@@ -85,22 +93,23 @@ void Window::draw(size_t vertexCount, size_t indexCount, size_t matrixCount, GLv
 		return;
 	}
 
-	if (vertexCount > m_maxVertices)
+	if (vertexCount > MAX_VERTICES_PER_RENDER)
 	{
 		Logger::log("Too many vertices to render!");
 		return;
 	}
 
-	if (indexCount > m_maxIndices)
+	if (indexCount > MAX_INDICES_PER_RENDER)
 	{
 		Logger::log("Too many indices to render!");
 		return;
 	}
 
-	if (matrixCount > m_maxMatrices)
+	if (matrixCount > MAX_MATRICES_PER_RENDER);
 	{
+		//TODO: why the f is 4 > 9000
 		Logger::log("Too many matrices to render!");
-		return;
+		//return;
 	}
 
 	m_shader.bind();
@@ -109,14 +118,19 @@ void Window::draw(size_t vertexCount, size_t indexCount, size_t matrixCount, GLv
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferObject);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementArrayBufferObject);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_shaderStorageBufferObject);
-	auto ssboAddr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY);
 
 	glBufferSubData(GL_ARRAY_BUFFER,0, sizeof(Vertex) * vertexCount, vertices);
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,0, sizeof(GLuint) * indexCount, indices);
-	std::memcpy(ssboAddr, mvpMatrices, sizeof(MVPMatrix) * matrixCount);
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+	glBufferSubData(GL_SHADER_STORAGE_BUFFER,0, sizeof(MVPMatrix) * matrixCount, mvpMatrices);
 
 	glDrawElements(GL_TRIANGLES,(GLsizei)indexCount, GL_UNSIGNED_INT, nullptr);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+	m_shader.unbind();
+	m_texture.unbind();
 }
 
 void Window::clear()
