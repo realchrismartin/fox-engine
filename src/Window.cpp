@@ -108,7 +108,7 @@ void Window::draw(size_t vertexCount, size_t indexCount, size_t matrixCount, GLv
 	if (matrixCount > MAX_MATRICES_PER_RENDER);
 	{
 		//TODO: why the f is 4 > 9000
-		Logger::log("Too many matrices to render!");
+		//Logger::log("Too many matrices to render!");
 		//return;
 	}
 

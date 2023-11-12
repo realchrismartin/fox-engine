@@ -12,6 +12,7 @@
 #include "src/components/TransformComponent.hpp"
 #include "src/components/VerticesComponent.hpp"
 #include "src/components/ModelComponent.hpp"
+#include "src/components/WorldTransformComponent.hpp"
 
 #include "src/graphics/MVPMatrix.hpp"
 
@@ -59,10 +60,9 @@ private:
 
 	static const void runSceneGraphUpdateSystem(Scene& scene)
 	{
-		//TODO: split the local and world matrices into separate components so we can upload the world matrices in one chunk >:3
-
 		//Update each component's local and world matrices if needed.
 		//Track whether an update was made by keeping track of the overall graph's dirtiness
+		//NB: we track the world matrix in a sep. component so we can upload the whole pool to the gpu at once
 		bool anyNodeWorldDirty = false;
 		std::function<void(Scene&, std::optional<int>,int)> functor = [&anyNodeWorldDirty](Scene& scene, std::optional<int> parentEntityUID, int entityUID)
 		{
@@ -71,13 +71,20 @@ private:
 				return;
 			}
 
-			TransformComponent& component = scene.getComponent<TransformComponent>(entityUID);
+			if (!scene.hasComponent<WorldTransformComponent>(entityUID))
+			{
+				return;
+			}
+
+			TransformComponent& transform = scene.getComponent<TransformComponent>(entityUID);
+			WorldTransformComponent& worldTransform = scene.getComponent<WorldTransformComponent>(entityUID);
 
 			//If this is a root node, update it directly and return.
 			if (!parentEntityUID.has_value())
 			{
-				component.updateLocalAndWorldMatrix();
-				anyNodeWorldDirty = anyNodeWorldDirty || component.isWorldMatrixDirty();
+				//Update the transform and world transform locally
+				transform.updateLocalAndWorldMatrix(worldTransform);
+				anyNodeWorldDirty = anyNodeWorldDirty || transform.isWorldMatrixDirty();
 				return;
 			}
 
@@ -88,10 +95,12 @@ private:
 				return;
 			}
 
-			TransformComponent& parentComponent = scene.getComponent<TransformComponent>(parentEntityUID.value());
+			TransformComponent& parentTransform = scene.getComponent<TransformComponent>(parentEntityUID.value());
+			WorldTransformComponent& parentWorldTransform = scene.getComponent<WorldTransformComponent>(parentEntityUID.value());
 
-			component.updateLocalAndWorldMatrix(parentComponent);
-			anyNodeWorldDirty = anyNodeWorldDirty || component.isWorldMatrixDirty();
+			//Update the transform and the world transform using the parent transform
+			transform.updateLocalAndWorldMatrix(parentTransform,parentWorldTransform, worldTransform);
+			anyNodeWorldDirty = anyNodeWorldDirty || parentTransform.isWorldMatrixDirty();
 		};
 
 		scene.applyToSceneGraph(functor);
@@ -137,44 +146,31 @@ private:
 
 	static const void runRenderSystem(Window& window, Scene& scene, Camera& camera)
 	{
-		//View matrix
-		//TODO: make there be another view matrix for the ui
+		//Calculate the combined projection-view matrix and send it to the GPU as a uniform.
+		//TODO: later, we will want a separate view matrix for the UI. Probably pass two uniforms and another VBO element.
 		glm::mat4 viewMatrix = camera.getViewMatrix(scene);
 		glm::mat4 projectionMatrix = camera.getProjectionMatrix();
-		
-		size_t modelCount = 0;
+		glm::mat4 projectionViewMatrix = projectionMatrix * viewMatrix;
 
-		//TODO: later move enough data out of the transform component that we can use the pool itself in gl?
-		std::vector<MVPMatrix> mvpMatrices;
-		std::vector<GLuint> indices;
+		window.getBoundShader().bind();
+		window.getBoundShader().updateMat4Uniform("projectionViewMatrix", projectionViewMatrix);
+		window.getBoundShader().unbind();
 
 		ComponentPool& modelComponentPool = scene.getComponentPool<ModelComponent>();
 		ComponentPool& verticesComponentPool = scene.getComponentPool<VerticesComponent>();
+		ComponentPool& worldTransformComponentPool = scene.getComponentPool<WorldTransformComponent>();
 
 		//Upstream, we guaranteed that if an entity has a model, it has a transform, vertices, and indices
 		//This means we can iterate over the model pool and it will be in the correct / same order as the other pools
+		//It would be ideal to not have to rebuild this list constantly, but we are not allowed to have gaps in the indices list.
+		std::vector<GLuint> indices;
 		for (auto const& entity : modelComponentPool.getRegisteredEntityUIDs())
 		{
 			ModelComponent& model = scene.getComponent<ModelComponent>(entity);
-			TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
-
-			//Calculate and add each mvp matrix to the list to send to the ssbo
-			//TODO: we can certainly send projection and view as uniforms and send the model matrix alone in the SSBO
-			//TODO: if we can remove the local matrix from the TransformComponent (i.e. split it into two components), we can send the entire pool of world matrices instead of calculating/copying here.
-			glm::mat4 modelMatrix = transform.getWorldMatrix();
-			glm::mat4 mvp = projectionMatrix * viewMatrix * modelMatrix;
-
-			MVPMatrix matrix;
-			matrix.mvpMatrix = mvp;
-			mvpMatrices.push_back(matrix); 
-
-			//It would be ideal to not have to rebuild this list constantly, but we are not allowed to have gaps in the indices list.
 			indices.insert(indices.end(), model.getIndices().begin(), model.getIndices().end());
-
-			modelCount++;
 		}
 
-		window.draw(modelCount * VerticesComponent::MAX_VERTICES, indices.size(), mvpMatrices.size(), (GLvoid*)verticesComponentPool.getData(), &indices[0], &mvpMatrices[0]);
+		window.draw(verticesComponentPool.getComponentsInUse() * VerticesComponent::MAX_VERTICES, indices.size(), verticesComponentPool.getComponentsInUse(), (GLvoid*)verticesComponentPool.getData(), &indices[0], (GLvoid*)worldTransformComponentPool.getData());
 	}
 };
 

@@ -2,7 +2,8 @@
 #define CAMERA_HPP
 
 #include "src/scenes/Scene.hpp"
-#include "src/components/TransformComponent.hpp"
+#include "src/components/WorldTransformComponent.hpp"
+
 #include "glm/glm/ext/matrix_transform.hpp"
 #include "glm/glm/ext/matrix_clip_space.hpp"
 
@@ -30,9 +31,9 @@ public:
 
 		if (cameraEntityId.has_value())
 		{
-			if (scene.hasComponent<TransformComponent>(cameraEntityId.value()))
+			if (scene.hasComponent<WorldTransformComponent>(cameraEntityId.value()))
 			{
-				TransformComponent& cameraTransform = scene.getComponent<TransformComponent>(cameraEntityId.value());
+				WorldTransformComponent& cameraTransform = scene.getComponent<WorldTransformComponent>(cameraEntityId.value());
 				
 				glm::mat4 worldMatrix = cameraTransform.getWorldMatrix();
 				glm::vec4 center = glm::vec4(0.f, 0.f, 0.f, 1.f);
@@ -47,9 +48,9 @@ public:
 
 		if (cameraTargetEntityId.has_value())
 		{
-			if (scene.hasComponent<TransformComponent>(cameraTargetEntityId.value()))
+			if (scene.hasComponent<WorldTransformComponent>(cameraTargetEntityId.value()))
 			{
-				TransformComponent& cameraTargetTransform = scene.getComponent<TransformComponent>(cameraTargetEntityId.value());
+				WorldTransformComponent& cameraTargetTransform = scene.getComponent<WorldTransformComponent>(cameraTargetEntityId.value());
 				
 				glm::mat4 worldMatrix = cameraTargetTransform.getWorldMatrix();
 				glm::vec4 target = glm::vec4(0.f, 0.f, 0.f, 1.f);

@@ -2,6 +2,7 @@
 #define TRANSFORMCOMPONENT_HPP
 
 class InputComponent;
+class WorldTransformComponent;
 
 class TransformComponent
 {
@@ -13,15 +14,11 @@ public:
 	bool isWorldMatrixDirty() const;
 
 	/// @brief Update this transform's local and world matrix, if needed
-	void updateLocalAndWorldMatrix(); 
+	void updateLocalAndWorldMatrix(WorldTransformComponent& worldTransform);
 
 	/// @brief Update this transform's local and world matrix with the parent's world matrix, if needed
 	/// @param parentComponent The transform component of the entity that is the parent of the entity that owns this transform component
-	void updateLocalAndWorldMatrix(TransformComponent& parentComponent);
-
-	/// @brief Get the world matrix for this transform.
-	/// @return 
-	glm::mat4& getWorldMatrix();
+	void updateLocalAndWorldMatrix(TransformComponent& parentComponent,WorldTransformComponent& parentWorldTransform, WorldTransformComponent& worldTransform);
 
 	/// @brief Set the local rotation for this transform
 	/// @param rotation 
@@ -42,13 +39,12 @@ public:
 private:
 	glm::mat4 getLocalMatrix();
 	glm::mat4 m_localMatrix = glm::mat4(1.0);
-	glm::mat4 m_worldMatrix = glm::mat4(1.0);
 
 	glm::vec3 m_translation = glm::vec3(0.f, 0.f, 0.f); //TODO: these don't have a specified range right now
 	glm::vec3 m_scale = glm::vec3(1.f, 1.f, 1.f);
 	glm::vec3 m_rotation = glm::vec3(0.f, 0.f, 0.f);
 
 	bool m_localDirty = true;
-	bool m_worldMatrixDirty = true;
+	bool m_worldDirty = true;
 };
 #endif

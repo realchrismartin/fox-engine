@@ -3,12 +3,14 @@
 
 #include "src/entities/GameEntity.hpp"
 #include "src/components/ComponentPool.hpp"
-
 #include "src/components/ModelComponent.hpp"
 
+#include "src/components/WorldTransformComponent.hpp" //Why is this here? TODO
+
+class System;
 class VerticesComponent;
 class TransformComponent;
-class System;
+class WorldTransformComponent;
 struct ModelConfig;
 
 /// @brief An association of Entities with their Components.
@@ -109,13 +111,7 @@ public:
 	GameEntity& getEntity(int entityIndex);
 	int getEntityCount() const;
 
-	void applyToSceneGraph(std::function<void(Scene&,std::optional<int>,int)>& functor)
-	{
-		for (auto entityId : m_rootNodes)
-		{
-			applyFunctorToSceneGraph(std::nullopt,entityId,functor);
-		}
-	}
+	void applyToSceneGraph(std::function<void(Scene&, std::optional<int>, int)>& functor);
 	
 	std::optional<int> getCameraEntity() const;
 	std::optional<int> getCameraTargetEntity() const;
@@ -142,6 +138,10 @@ protected:
 		{
 			throw std::invalid_argument("Cannot manually add a TransformComponent.");
 		}
+		else if (std::is_same_v<T, WorldTransformComponent> == true)
+		{
+			throw std::invalid_argument("Cannot manually add a TransformComponent.");
+		}
 		else if (std::is_same_v<T, VerticesComponent> == true)
 		{
 			throw std::invalid_argument("Cannot manually add a VerticesComponent.");
@@ -150,27 +150,7 @@ protected:
 		addComponentPrivate<T>(entityUID);
 	}
 
-	void applyFunctorToSceneGraph(std::optional<int> parentEntityID, int entityID, std::function<void(Scene&,std::optional<int>,int)>& functor)
-	{
-		//Run the functor on the node.
-		if (parentEntityID.has_value())
-		{
-			functor(*this, parentEntityID.value(),entityID);
-		}
-		else
-		{
-			functor(*this, std::nullopt, entityID);
-		}
-
-		//If the node has children, call this function to apply the functors to those children
-		if (m_sceneGraph.count(entityID))
-		{
-			for (auto child : m_sceneGraph.at(entityID))
-			{
-				applyFunctorToSceneGraph(entityID,child,functor);
-			}
-		}
-	}
+	void applyFunctorToSceneGraph(std::optional<int> parentEntityID, int entityID, std::function<void(Scene&, std::optional<int>, int)>& functor);
 
 private:
 	void updateAllModelComponentAssociations();

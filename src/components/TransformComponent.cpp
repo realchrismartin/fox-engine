@@ -1,6 +1,7 @@
 #include "src/components/TransformComponent.hpp"
 
 #include "glm/glm/gtc/matrix_transform.hpp"
+#include "src/components/WorldTransformComponent.hpp"
 
 glm::mat4 TransformComponent::getLocalMatrix()
 {
@@ -14,7 +15,7 @@ glm::mat4 TransformComponent::getLocalMatrix()
 	return matrix;
 }
 
-void TransformComponent::updateLocalAndWorldMatrix()
+void TransformComponent::updateLocalAndWorldMatrix(WorldTransformComponent& worldTransformComponent)
 {
 	if (m_localDirty)
 	{
@@ -22,13 +23,13 @@ void TransformComponent::updateLocalAndWorldMatrix()
 		m_localDirty = false;
 
 		//If we updated the local matrix, update the world matrix too
-		m_worldMatrix = m_localMatrix;
-		m_worldMatrixDirty = true;
+		worldTransformComponent.setWorldMatrix(m_localMatrix);
+		m_worldDirty = true;
 	}
 }
 
 
-void TransformComponent::updateLocalAndWorldMatrix(TransformComponent& parentComponent)
+void TransformComponent::updateLocalAndWorldMatrix(TransformComponent& parentComponent, WorldTransformComponent& parentWorldTransform, WorldTransformComponent& worldTransform)
 {
 	bool localDirty = m_localDirty;
 
@@ -42,24 +43,19 @@ void TransformComponent::updateLocalAndWorldMatrix(TransformComponent& parentCom
 	//If we updated the local matrix, or the parent's world matrix is dirty, update the world matrix too
 	if (localDirty || parentComponent.isWorldMatrixDirty())
 	{
-		m_worldMatrix = parentComponent.getWorldMatrix() * m_localMatrix;
-		m_worldMatrixDirty = true; //If the parent's matrix is dirty, it means this transform's matrix is now too.
+		worldTransform.setWorldMatrix(parentWorldTransform.getWorldMatrix() * m_localMatrix);
+		m_worldDirty = true; //If the parent's matrix is dirty, it means this transform's matrix is now too.
 	}
 }
 
 void TransformComponent::markWorldMatrixClean()
 {
-	m_worldMatrixDirty = false;
+	m_worldDirty = false;
 }
 
 bool TransformComponent::isWorldMatrixDirty() const
 {
-	return m_worldMatrixDirty;
-}
-
-glm::mat4& TransformComponent::getWorldMatrix()
-{
-	return m_worldMatrix;
+	return m_worldDirty;
 }
 
 void TransformComponent::setRotation(glm::vec3 rotation)

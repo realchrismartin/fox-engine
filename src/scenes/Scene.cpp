@@ -24,11 +24,13 @@ void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 	//Since these pools are de facto protected from being added to any other way, the indices for this entity UID match across them. This is important!
 	addComponentPrivate<ModelComponent>(entityUID);
 	addComponentPrivate<TransformComponent>(entityUID);
+	addComponentPrivate<WorldTransformComponent>(entityUID);
 	addComponentPrivate<VerticesComponent>(entityUID);
 
 	//Do an (expensive) sanity check that all of the indices match
 	ComponentPool& modelPool = getComponentPool<ModelComponent>();
 	ComponentPool& transformPool = getComponentPool<TransformComponent>();
+	ComponentPool& worldTransformPool = getComponentPool<WorldTransformComponent>();
 	ComponentPool& verticesPool = getComponentPool<VerticesComponent>();
 
 	//Check to confirm that all of the indices match correctly. If they don't something is wrong
@@ -36,14 +38,15 @@ void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 	//If it isn't just crash.
 	std::optional<size_t> modelPoolIndex = modelPool.getIndexOfRegisteredEntity(entityUID);
 	std::optional<size_t> transformPoolIndex = transformPool.getIndexOfRegisteredEntity(entityUID);
+	std::optional<size_t> worldTransformPoolIndex = worldTransformPool.getIndexOfRegisteredEntity(entityUID);
 	std::optional<size_t> verticesPoolIndex = verticesPool.getIndexOfRegisteredEntity(entityUID);
 
-	if (!modelPoolIndex.has_value() || !transformPoolIndex.has_value() || !verticesPoolIndex.has_value())
+	if (!modelPoolIndex.has_value() || !transformPoolIndex.has_value() || !worldTransformPoolIndex.has_value() || !verticesPoolIndex.has_value())
 	{
 		assert(false); //Something broke!
 	}
 
-	if (modelPoolIndex.value() != transformPoolIndex.value() || transformPoolIndex.value() != verticesPoolIndex.value() || verticesPoolIndex.value() != modelPoolIndex.value())
+	if (modelPoolIndex.value() != transformPoolIndex.value() || transformPoolIndex.value() != worldTransformPoolIndex.value() || worldTransformPoolIndex.value() != verticesPoolIndex.value() || verticesPoolIndex.value() != modelPoolIndex.value())
 	{
 		assert(false); //Something broke!
 	}
@@ -72,6 +75,14 @@ GameEntity& Scene::getEntity(int entityIndex)
 int Scene::getEntityCount() const
 {
 	return (int)m_gameEntityMap.size();
+}
+
+void Scene::applyToSceneGraph(std::function<void(Scene&, std::optional<int>, int)>& functor)
+{
+	for (auto entityId : m_rootNodes)
+	{
+		applyFunctorToSceneGraph(std::nullopt,entityId,functor);
+	}
 }
 
 std::optional<int> Scene::getCameraEntity() const
@@ -288,18 +299,38 @@ void Scene::removeEntity(int uid)
 	}
 }
 
+void Scene::applyFunctorToSceneGraph(std::optional<int> parentEntityID, int entityID, std::function<void(Scene&, std::optional<int>, int)>& functor)
+{
+	//Run the functor on the node.
+	if (parentEntityID.has_value())
+	{
+		functor(*this, parentEntityID.value(),entityID);
+	}
+	else
+	{
+		functor(*this, std::nullopt, entityID);
+	}
+
+	//If the node has children, call this function to apply the functors to those children
+	if (m_sceneGraph.count(entityID))
+	{
+		for (auto child : m_sceneGraph.at(entityID))
+		{
+			applyFunctorToSceneGraph(entityID,child,functor);
+		}
+	}
+}
+
 void Scene::updateAllModelComponentAssociations()
 {
 	//This fn is called when any one of the four model involved pools is modified.
+	//Upstream, we guaranteed that if an entity has a model, it has a transform, vertices, and indices
+	//This means we can iterate over the model pool and it will be in the correct / same order as the other pools
 
 	ComponentPool& modelPool = getComponentPool<ModelComponent>();
-	ComponentPool& transformPool = getComponentPool<TransformComponent>();
-	ComponentPool& verticesPool = getComponentPool<VerticesComponent>();
 
 	size_t entityCount = 0;
 
-	//Upstream, we guaranteed that if an entity has a model, it has a transform, vertices, and indices
-	//This means we can iterate over the model pool and it will be in the correct / same order as the other pools
 	for (auto const& entityUID : modelPool.getRegisteredEntityUIDs())
 	{
 		ModelComponent& modelComponent = getComponent<ModelComponent>(entityUID);
