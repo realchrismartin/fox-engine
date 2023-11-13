@@ -330,14 +330,18 @@ void Scene::updateAllModelComponentAssociations()
 	ComponentPool& modelPool = getComponentPool<ModelComponent>();
 
 	size_t entityCount = 0;
+	size_t vertexCount = 0;
 
 	for (auto const& entityUID : modelPool.getRegisteredEntityUIDs())
 	{
 		ModelComponent& modelComponent = getComponent<ModelComponent>(entityUID);
 		VerticesComponent& verticesComponent = getComponent<VerticesComponent>(entityUID);
 
-		//Update the indices to match their position in the pool. The offset is always MAX_VERTICES.
-		modelComponent.recalculateIndices(entityCount * VerticesComponent::MAX_VERTICES);
+		//Update the indices to match their position in the pool. 
+		//TODO: if we reeenable the full pool upload, uncomment here
+		//modelComponent.recalculateIndices(entityCount * VerticesComponent::MAX_VERTICES);
+		modelComponent.recalculateIndices(vertexCount);
+		vertexCount += modelComponent.getVertexCount();
 
 		//The vertex buffer element for "mvp" is relative to the pool of transforms.
 		//We have one transform per model, not per vertex.

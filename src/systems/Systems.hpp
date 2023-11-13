@@ -162,15 +162,29 @@ private:
 
 		//Upstream, we guaranteed that if an entity has a model, it has a transform, vertices, and indices
 		//This means we can iterate over the model pool and it will be in the correct / same order as the other pools
-		//It would be ideal to not have to rebuild this list constantly, but we are not allowed to have gaps in the indices list.
+		//We use this property of the pools to guarantee that the WorldTransform ordering matches the vertices ordering when we updated the mvp indices earlier.
+		std::vector<Vertex> vertices;
 		std::vector<GLuint> indices;
 		for (auto const& entity : modelComponentPool.getRegisteredEntityUIDs())
 		{
 			ModelComponent& model = scene.getComponent<ModelComponent>(entity);
+			VerticesComponent& verticesComponent = scene.getComponent<VerticesComponent>(entity);
+			Vertex* verticesArray = (Vertex*)verticesComponent.getVertices();
+
+			//Copy the index data to a temporary vector to remove the gaps
+			//It would be ideal to not have to rebuild this list constantly, but we are not allowed to have gaps in the indices list.
 			indices.insert(indices.end(), model.getIndices().begin(), model.getIndices().end());
+
+			//Copy the vertex data to a temporary vector to remove the gaps
+			//As much as I want to not do this, I just can't be OK with sending meaningless dead vertices to the GPU either.
+			//TODO: stop doing this once we dynamically resize the vertices component pool and have (mostly) similar meshes?
+			for (size_t i = 0; i < model.getVertexCount(); i++)
+			{
+				vertices.push_back(verticesArray[i]);
+			}
 		}
 
-		window.draw(verticesComponentPool.getComponentsInUse() * VerticesComponent::MAX_VERTICES, indices.size(), verticesComponentPool.getComponentsInUse(), (GLvoid*)verticesComponentPool.getData(), &indices[0], (GLvoid*)worldTransformComponentPool.getData());
+		window.draw(vertices.size(), indices.size(), worldTransformComponentPool.getComponentsInUse(), &vertices[0], &indices[0], (GLvoid*)worldTransformComponentPool.getData());
 	}
 };
 

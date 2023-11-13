@@ -25,11 +25,7 @@ public:
 
 	void draw(size_t vertexCount, size_t indexCount, size_t matrixCount, GLvoid* vertices, GLvoid* indices, GLvoid* mvpMatrices);
 
-	static const size_t MAX_VERTICES_PER_RENDER;
-	static const size_t MAX_INDICES_PER_RENDER;
-	static const size_t MAX_MATRICES_PER_RENDER;
 private:
-
 	void setupOpenGL();
 
 	std::unique_ptr<sf::Window> m_renderWindow;
@@ -42,6 +38,11 @@ private:
 	GLuint m_vertexBufferObject = 1;
 	GLuint m_elementArrayBufferObject = 2;
 	GLuint m_shaderStorageBufferObject = 3;
+
+	size_t m_maxVerticesPerRender;
+	size_t m_maxIndicesPerRender;
+	size_t m_maxSSBOMatricesPerRender;
+
 };
 #endif
 
