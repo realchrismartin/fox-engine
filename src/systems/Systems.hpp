@@ -10,7 +10,6 @@
 
 #include "src/components/InputComponent.hpp"
 #include "src/components/TransformComponent.hpp"
-#include "src/components/VerticesComponent.hpp"
 #include "src/components/ModelComponent.hpp"
 #include "src/components/MVPTransformComponent.hpp"
 

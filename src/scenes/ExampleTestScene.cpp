@@ -4,7 +4,6 @@
 
 #include "src/components/InputComponent.hpp"
 #include "src/components/TransformComponent.hpp"
-#include "src/components/VerticesComponent.hpp"
 #include "src/graphics/ModelConfig.hpp"
 
 ExampleTestScene::ExampleTestScene()
