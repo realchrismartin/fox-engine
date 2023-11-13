@@ -58,12 +58,6 @@ private:
 
 	static const void runSceneGraphUpdateSystem(Scene& scene, Camera& camera)
 	{
-		//Update the camera matrices if needed. If they change during this update, they will be marked dirty.
-
-		//TODO! logical issue, view matrix needs to know if the target will be dirty in order to update.
-		camera.updateProjectionMatrix();
-		camera.updateViewMatrix(scene);
-
 		//Update each component's local and world matrices if needed. If they change during this update, the world matrix will be marked dirty.
 		//We also track if any node is dirty at all, since we need to reset the graph's dirty flags afterward if this is the case.
 		bool anyNodeWorldDirty = false;
@@ -103,6 +97,26 @@ private:
 				transform.updateLocalAndWorldMatrix(parentTransform);
 			}
 			
+			//track whether any node's world matrix is dirty overall so we can reset the graph's dirty flags after updating.
+			anyNodeWorldDirty = anyNodeWorldDirty || transform.isWorldMatrixDirty();
+		};
+
+		//Update the whole scene graph - any entity that has transforms will have those transforms updated.
+		scene.applyToSceneGraph(functor);
+
+		//Now that we've updated world matrices and marked them dirty, update the camera matrices.
+		//Update the camera matrices if needed. If they change during this update, they will be marked dirty.
+		camera.updateProjectionMatrix();
+		camera.updateViewMatrix(scene);
+
+		//Now that we've updated both the world matrices and v/p matrices, update the MVP matrices
+		//Unfortunately we can't do this at the same time as the scene graph traversal b/c the camera view can depend on the world matrices of the targets,
+		//so we waste some efficiency by doing another iteration and component lookup...
+		for (auto const& entity : EntityFilter<TransformComponent, MVPTransformComponent>(scene))
+		{
+			TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
+			MVPTransformComponent& mvpTransform = scene.getComponent<MVPTransformComponent>(entity);
+
 			bool modelDirty = transform.isWorldMatrixDirty();
 			bool viewDirty = camera.isViewMatrixDirty();
 			bool projectionDirty = camera.isProjectionMatrixDirty();
@@ -112,13 +126,7 @@ private:
 			{
 				mvpTransform.setMVPMatrix(transform.getWorldMatrix(), camera.getViewMatrix(), camera.getProjectionMatrix());
 			}
-
-			//track whether any node's world matrix is dirty overall so we can reset the graph's dirty flags after updating.
-			anyNodeWorldDirty = anyNodeWorldDirty || transform.isWorldMatrixDirty();
-		};
-
-		//Update the whole scene graph - any entity that has transforms will have those transforms updated.
-		scene.applyToSceneGraph(functor);
+		}
 
 		//Mark the camera transform dirty flags clean
 		camera.markViewMatrixClean();
@@ -168,15 +176,20 @@ private:
 		std::vector<Vertex> vertices;
 		std::vector<GLuint> indices;
 
+		//Get a ref to the model component pool so we can iterate over the entities that have models in the order they are registered.
+		//Upstream, we guaranteed that if an entity has a model, it has a transform, vertices, and indices
+		//This means we can iterate over the model pool and it will be in the correct / same order as the other pools
+		//We use this property of the pools to guarantee that the MVPTransform ordering matches the vertices ordering when we updated the mvp indices earlier.
+		//We also know that each entity with a model component has a vertex component, transform component, etc.
+		//We use this property to not have to check for safety before we getComponent of these types in the loop
 		ComponentPool& modelComponentPool = scene.getComponentPool<ModelComponent>();
-		for (auto const& entity : modelComponentPool.getRegisteredEntityUIDs())
-		{
-			//Upstream, we guaranteed that if an entity has a model, it has a transform, vertices, and indices
-			//This means we can iterate over the model pool and it will be in the correct / same order as the other pools
-			//We use this property of the pools to guarantee that the MVPTransform ordering matches the vertices ordering when we updated the mvp indices earlier.
-			
-			//We also know that each entity with a model component has a vertex component, transform component, etc.
 
+		//Get a ref to the mvp transform pool so we can send the entire pool data to the GPU
+		ComponentPool& mvpTransformComponentPool = scene.getComponentPool<MVPTransformComponent>();
+
+		auto entityIds = modelComponentPool.getRegisteredEntityUIDs();
+		for (auto const& entity : entityIds)
+		{
 			ModelComponent& model = scene.getComponent<ModelComponent>(entity);
 			VerticesComponent& verticesComponent = scene.getComponent<VerticesComponent>(entity);
 
@@ -193,9 +206,6 @@ private:
 				vertices.push_back(verticesArray[i]);
 			}
 		}
-
-		//Get the mvp transform pool so we can send the entire pool data to the GPU
-		ComponentPool& mvpTransformComponentPool = scene.getComponentPool<MVPTransformComponent>();
 
 		//Send vertices, indices, and MVPs, then draw them.
 		window.draw(vertices.size(), indices.size(), mvpTransformComponentPool.getComponentsInUse(), &vertices[0], &indices[0], (GLvoid*)mvpTransformComponentPool.getData());
