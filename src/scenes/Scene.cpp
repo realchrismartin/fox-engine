@@ -25,12 +25,14 @@ void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 	addComponentPrivate<ModelComponent>(entityUID);
 	addComponentPrivate<TransformComponent>(entityUID);
 	addComponentPrivate<WorldTransformComponent>(entityUID);
+	addComponentPrivate<MVPTransformComponent>(entityUID);
 	addComponentPrivate<VerticesComponent>(entityUID);
 
 	//Do an (expensive) sanity check that all of the indices match
 	ComponentPool& modelPool = getComponentPool<ModelComponent>();
 	ComponentPool& transformPool = getComponentPool<TransformComponent>();
 	ComponentPool& worldTransformPool = getComponentPool<WorldTransformComponent>();
+	ComponentPool& mvpTransformPool = getComponentPool<MVPTransformComponent>();
 	ComponentPool& verticesPool = getComponentPool<VerticesComponent>();
 
 	//Check to confirm that all of the indices match correctly. If they don't something is wrong
@@ -39,14 +41,15 @@ void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 	std::optional<size_t> modelPoolIndex = modelPool.getIndexOfRegisteredEntity(entityUID);
 	std::optional<size_t> transformPoolIndex = transformPool.getIndexOfRegisteredEntity(entityUID);
 	std::optional<size_t> worldTransformPoolIndex = worldTransformPool.getIndexOfRegisteredEntity(entityUID);
+	std::optional<size_t> mvpTransformPoolIndex = mvpTransformPool.getIndexOfRegisteredEntity(entityUID);
 	std::optional<size_t> verticesPoolIndex = verticesPool.getIndexOfRegisteredEntity(entityUID);
 
-	if (!modelPoolIndex.has_value() || !transformPoolIndex.has_value() || !worldTransformPoolIndex.has_value() || !verticesPoolIndex.has_value())
+	if (!modelPoolIndex.has_value() || !transformPoolIndex.has_value() || !worldTransformPoolIndex.has_value() || !mvpTransformPoolIndex.has_value() || !verticesPoolIndex.has_value())
 	{
 		assert(false); //Something broke!
 	}
 
-	if (modelPoolIndex.value() != transformPoolIndex.value() || transformPoolIndex.value() != worldTransformPoolIndex.value() || worldTransformPoolIndex.value() != verticesPoolIndex.value() || verticesPoolIndex.value() != modelPoolIndex.value())
+	if (modelPoolIndex.value() != transformPoolIndex.value() || transformPoolIndex.value() != worldTransformPoolIndex.value() || worldTransformPoolIndex.value() != mvpTransformPoolIndex.value() || mvpTransformPoolIndex.value() != verticesPoolIndex.value() || verticesPoolIndex.value() != modelPoolIndex.value())
 	{
 		assert(false); //Something broke!
 	}
@@ -259,6 +262,8 @@ void Scene::removeEntity(int uid)
 	//Save whether there are model components. Use this to recalculate model component associations after updates are done.
 	bool hadModelComponent = hasComponent<ModelComponent>(uid);
 	bool hadTransformComponent = hasComponent<TransformComponent>(uid);
+	bool hadWorldTransformComponent = hasComponent<WorldTransformComponent>(uid);
+	bool hadMVPTransformComponent = hasComponent<MVPTransformComponent>(uid);
 	bool hadVerticesComponent = hasComponent<VerticesComponent>(uid);
 
 	for (auto& pool : m_componentPools)
@@ -285,11 +290,11 @@ void Scene::removeEntity(int uid)
 	m_gameEntityMap.erase(uid); //Remove the original entity from the map
 
 	//If we removed an indices component, we assume that we also removed a model/transform/vertex component
-	if (hadTransformComponent && hadModelComponent && hadVerticesComponent)
+	if (hadTransformComponent && hadModelComponent && hadVerticesComponent && hadMVPTransformComponent && hadWorldTransformComponent)
 	{
 		updateAllModelComponentAssociations();
 	}
-	else if (!hadTransformComponent && !hadModelComponent && !hadVerticesComponent)
+	else if (!hadTransformComponent && !hadModelComponent && !hadVerticesComponent && !hadMVPTransformComponent && !hadWorldTransformComponent)
 	{
 		//noop
 	}

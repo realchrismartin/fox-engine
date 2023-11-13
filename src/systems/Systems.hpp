@@ -13,6 +13,7 @@
 #include "src/components/VerticesComponent.hpp"
 #include "src/components/ModelComponent.hpp"
 #include "src/components/WorldTransformComponent.hpp"
+#include "src/components/MVPTransformComponent.hpp"
 
 /// @brief A collection of static functions that are "systems", functions that operate on specific associations of components in a scene to update them.
 /// @brief The update and render meta-systems are the core of the game. 
@@ -23,7 +24,7 @@ public:
 	static const void update(Window& window, Scene& scene, Camera& camera, float elapsedTime)
 	{
 		runWindowEventSystem(window, scene);
-		runSceneGraphUpdateSystem(scene);
+		runSceneGraphUpdateSystem(scene, camera);
 		runInputProcessingSystem(scene, elapsedTime);
 	};
 
@@ -56,13 +57,18 @@ private:
 		}
 	}
 
-	static const void runSceneGraphUpdateSystem(Scene& scene)
+	static const void runSceneGraphUpdateSystem(Scene& scene, Camera& camera)
 	{
+		
+		//Update the camera matrices. If they changed, they will be marked dirty.
+		camera.updateProjectionMatrix();
+		camera.updateViewMatrix(scene);
+
 		//Update each component's local and world matrices if needed.
 		//Track whether an update was made by keeping track of the overall graph's dirtiness
 		//NB: we track the world matrix in a sep. component so we can upload the whole pool to the gpu at once
 		bool anyNodeWorldDirty = false;
-		std::function<void(Scene&, std::optional<int>,int)> functor = [&anyNodeWorldDirty](Scene& scene, std::optional<int> parentEntityUID, int entityUID)
+		std::function<void(Scene&, std::optional<int>,int)> functor = [&anyNodeWorldDirty,&camera](Scene& scene, std::optional<int> parentEntityUID, int entityUID)
 		{
 			if (!scene.hasComponent<TransformComponent>(entityUID))
 			{
@@ -74,34 +80,55 @@ private:
 				return;
 			}
 
+			if (!scene.hasComponent<MVPTransformComponent>(entityUID))
+			{
+				return;
+			}
+
 			TransformComponent& transform = scene.getComponent<TransformComponent>(entityUID);
 			WorldTransformComponent& worldTransform = scene.getComponent<WorldTransformComponent>(entityUID);
+			MVPTransformComponent& mvpTransform = scene.getComponent<MVPTransformComponent>(entityUID);
 
-			//If this is a root node, update it directly and return.
 			if (!parentEntityUID.has_value())
 			{
-				//Update the transform and world transform locally
+				//If this is a root node, update it directly
 				transform.updateLocalAndWorldMatrix(worldTransform);
-				anyNodeWorldDirty = anyNodeWorldDirty || transform.isWorldMatrixDirty();
-				return;
 			}
-
-			//If this is a child node, update versus the parent.
-			if (!scene.hasComponent<TransformComponent>(parentEntityUID.value()))
+			else 
 			{
-				Logger::log("For some reason this child node has a transform, but its parent doesn't! This is probably a bug.");
-				return;
+				//If this is a child node, update versus the parent.
+				if (!scene.hasComponent<TransformComponent>(parentEntityUID.value()))
+				{
+					Logger::log("For some reason this child node has a transform, but its parent doesn't! This is probably a bug.");
+					return;
+				}
+
+				TransformComponent& parentTransform = scene.getComponent<TransformComponent>(parentEntityUID.value());
+				WorldTransformComponent& parentWorldTransform = scene.getComponent<WorldTransformComponent>(parentEntityUID.value());
+
+				//Update the transform and the world transform using the parent transform
+				transform.updateLocalAndWorldMatrix(parentTransform,parentWorldTransform, worldTransform);
+			}
+			
+			bool modelDirty = transform.isWorldMatrixDirty();
+			bool viewDirty = camera.isViewMatrixDirty();
+			bool projectionDirty = camera.isProjectionMatrixDirty();
+
+			//If any of the three matrices is dirty, update the combined MVP matrix.
+			if (modelDirty || viewDirty || projectionDirty)
+			{
+				mvpTransform.setMVPMatrix(worldTransform.getWorldMatrix(), camera.getViewMatrix(), camera.getProjectionMatrix());
 			}
 
-			TransformComponent& parentTransform = scene.getComponent<TransformComponent>(parentEntityUID.value());
-			WorldTransformComponent& parentWorldTransform = scene.getComponent<WorldTransformComponent>(parentEntityUID.value());
-
-			//Update the transform and the world transform using the parent transform
-			transform.updateLocalAndWorldMatrix(parentTransform,parentWorldTransform, worldTransform);
-			anyNodeWorldDirty = anyNodeWorldDirty || parentTransform.isWorldMatrixDirty();
+			//track whether any node's world matrix is dirty overall so we can reset the graph's dirty flags after updating.
+			anyNodeWorldDirty = anyNodeWorldDirty || transform.isWorldMatrixDirty();
 		};
 
 		scene.applyToSceneGraph(functor);
+
+		//Mark the camera transform dirty flags clean
+		camera.markViewMatrixClean();
+		camera.markProjectionMatrixClean();
 
 		//If the graph didn't update at all, stop here
 		if (!anyNodeWorldDirty)
@@ -121,7 +148,6 @@ private:
 			TransformComponent& component = scene.getComponent<TransformComponent>(entityUID);
 			component.markWorldMatrixClean();
 		};
-
 
 		scene.applyToSceneGraph(cleanFunctor);
 	}
@@ -146,7 +172,9 @@ private:
 	{
 		//Calculate the combined projection-view matrix and send it to the GPU as a uniform.
 		//TODO: later, we will want a separate view matrix for the UI. Probably pass two uniforms and another VBO element.
-		glm::mat4 viewMatrix = camera.getViewMatrix(scene);
+		camera.updateViewMatrix(scene);
+
+		glm::mat4 viewMatrix = camera.getViewMatrix();
 		glm::mat4 projectionMatrix = camera.getProjectionMatrix();
 		glm::mat4 projectionViewMatrix = projectionMatrix * viewMatrix;
 
@@ -157,6 +185,7 @@ private:
 		ComponentPool& modelComponentPool = scene.getComponentPool<ModelComponent>();
 		ComponentPool& verticesComponentPool = scene.getComponentPool<VerticesComponent>();
 		ComponentPool& worldTransformComponentPool = scene.getComponentPool<WorldTransformComponent>();
+		ComponentPool& mvpTransformComponentPool = scene.getComponentPool<MVPTransformComponent>();
 
 		std::vector<Vertex> vertices;
 		std::vector<GLuint> indices;
@@ -185,7 +214,8 @@ private:
 			}
 		}
 
-		window.draw(vertices.size(), indices.size(), worldTransformComponentPool.getComponentsInUse(), &vertices[0], &indices[0], (GLvoid*)worldTransformComponentPool.getData());
+		window.draw(vertices.size(), indices.size(), mvpTransformComponentPool.getComponentsInUse(), &vertices[0], &indices[0], (GLvoid*)mvpTransformComponentPool.getData());
+		//window.draw(vertices.size(), indices.size(), worldTransformComponentPool.getComponentsInUse(), &vertices[0], &indices[0], (GLvoid*)worldTransformComponentPool.getData());
 	}
 };
 

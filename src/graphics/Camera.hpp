@@ -2,6 +2,7 @@
 #define CAMERA_HPP
 
 #include "src/scenes/Scene.hpp"
+#include "src/components/TransformComponent.hpp"
 #include "src/components/WorldTransformComponent.hpp"
 
 #include "glm/glm/ext/matrix_transform.hpp"
@@ -10,45 +11,90 @@
 class Camera
 {
 public:
-	glm::mat4 getUIViewMatrix()
+	bool isViewMatrixDirty() const
 	{
-		return glm::mat4(1.0); //TODO
+		return m_viewMatrixDirty;
+	}
+	
+	bool isProjectionMatrixDirty() const
+	{
+		return m_projectionMatrixDirty;
 	}
 
-	glm::mat4 getProjectionMatrix()
+	void markViewMatrixClean()
 	{
-		// Projection matrix : 45 degree Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-		return glm::perspective(glm::radians(90.0f), 1024.f / 768.f, 1.f, 100.f);
+		m_viewMatrixDirty = false;
 	}
 
-	glm::mat4 getViewMatrix(Scene& scene)
+	void markProjectionMatrixClean()
 	{
-		glm::vec3 cameraCenter = glm::vec3(0.f,10.f,-10.f);
-		glm::vec3 eyeTarget = glm::vec3(0.f, 0.f, 0.f);
-		glm::vec3 cameraUpVector = glm::vec3(0.f, 1.f, 0.f);
+		m_projectionMatrixDirty = false;
+	}
 
-		std::optional<int> cameraEntityId = scene.getCameraEntity();
+	const glm::mat4& getProjectionMatrix() const
+	{
+		return m_projectionMatrix;
+	}
+	
+	const glm::mat4& getViewMatrix() const
+	{
+		return m_viewMatrix;
+	}
 
-		if (cameraEntityId.has_value())
+	void updateProjectionMatrix()
+	{
+		if (m_projectionMatrixEverSet)
 		{
-			if (scene.hasComponent<WorldTransformComponent>(cameraEntityId.value()))
+			return;
+		}
+
+		m_projectionMatrixEverSet = true;
+
+		// Projection matrix : 45 degree Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+		m_projectionMatrix = glm::perspective(glm::radians(90.0f), 1024.f / 768.f, 1.f, 100.f);
+
+		m_projectionMatrixDirty = true;
+	}
+
+	void updateViewMatrix(Scene& scene)
+	{
+		std::optional<int> cameraEntityId = scene.getCameraEntity();
+		std::optional<int> cameraTargetEntityId = scene.getCameraTargetEntity();
+
+		bool cameraChanged = false;
+		bool targetChanged = false;
+
+		if (cameraEntityId.has_value() && scene.hasComponent<TransformComponent>(cameraEntityId.value()) && scene.hasComponent<WorldTransformComponent>(cameraEntityId.value()))
+		{
+			TransformComponent& cameraLocalTransform = scene.getComponent<TransformComponent>(cameraEntityId.value());
+
+			if (m_cameraEntityLastTick.has_value() && m_cameraEntityLastTick.value() == cameraEntityId.value() && !cameraLocalTransform.isWorldMatrixDirty())
+			{
+				//We don't need to update the camera center.
+			}
+			else 
 			{
 				WorldTransformComponent& cameraTransform = scene.getComponent<WorldTransformComponent>(cameraEntityId.value());
-				
+
 				glm::mat4 worldMatrix = cameraTransform.getWorldMatrix();
 				glm::vec4 center = glm::vec4(0.f, 0.f, 0.f, 1.f);
 
 				auto transformedCameraCenter = worldMatrix * center;
 
-				cameraCenter = glm::vec3(transformedCameraCenter.x, transformedCameraCenter.y, transformedCameraCenter.z);
+				m_cameraCenter = glm::vec3(transformedCameraCenter.x, transformedCameraCenter.y, transformedCameraCenter.z);
+				cameraChanged = true;
 			}
 		}
 
-		std::optional<int> cameraTargetEntityId = scene.getCameraTargetEntity();
-
-		if (cameraTargetEntityId.has_value())
+		if (cameraTargetEntityId.has_value() && scene.hasComponent<TransformComponent>(cameraTargetEntityId.value()) && scene.hasComponent<WorldTransformComponent>(cameraTargetEntityId.value()))
 		{
-			if (scene.hasComponent<WorldTransformComponent>(cameraTargetEntityId.value()))
+			TransformComponent& cameraTargetLocalTransform = scene.getComponent<TransformComponent>(cameraTargetEntityId.value());
+
+			if (m_cameraTargetLastTick.has_value() && m_cameraTargetLastTick.value() == cameraTargetEntityId.value() && !cameraTargetLocalTransform.isWorldMatrixDirty())
+			{
+				//We don't need to update the camera center.
+			}
+			else
 			{
 				WorldTransformComponent& cameraTargetTransform = scene.getComponent<WorldTransformComponent>(cameraTargetEntityId.value());
 				
@@ -57,12 +103,47 @@ public:
 
 				auto transformedCameraTarget = worldMatrix * target;
 
-				eyeTarget = glm::vec3(transformedCameraTarget.x, transformedCameraTarget.y, transformedCameraTarget.z);
+				m_cameraTarget = glm::vec3(transformedCameraTarget.x, transformedCameraTarget.y, transformedCameraTarget.z);
+				targetChanged = true;
 			}
 		}
 
-		return glm::lookAt(cameraCenter,eyeTarget, cameraUpVector);
+		m_cameraEntityLastTick = cameraEntityId;
+		m_cameraTargetLastTick = cameraTargetEntityId;
+
+		if (cameraChanged || targetChanged || !m_viewMatrixEverSet)
+		{
+			m_viewMatrix = glm::lookAt(m_cameraCenter,m_cameraTarget,m_defaultCameraUpVector); //TODO: are these backward?
+
+			if (!m_viewMatrixEverSet)
+			{
+				m_viewMatrixEverSet = true;
+			}
+
+			m_viewMatrixDirty = true;
+		}
 	}
+
+private:
+	glm::mat4 m_viewMatrix;
+	glm::mat4 m_projectionMatrix;
+
+	bool m_viewMatrixEverSet = false;
+	bool m_projectionMatrixEverSet = false;
+
+	bool m_viewMatrixDirty = true;
+	bool m_projectionMatrixDirty = true;
+
+	std::optional<int> m_cameraEntityLastTick = std::nullopt;
+	std::optional<int> m_cameraTargetLastTick = std::nullopt;
+
+	glm::vec3 m_cameraCenter = glm::vec3(0.f,10.f,-10.f);
+	glm::vec3 m_cameraTarget = glm::vec3(0.f, 0.f, 0.f);
+
+	const glm::vec3 m_defaultCameraCenter = glm::vec3(0.f,10.f,-10.f);
+	const glm::vec3 m_defaultCameraTarget = glm::vec3(0.f, 0.f, 0.f);
+	const glm::vec3 m_defaultCameraUpVector = glm::vec3(0.f, 1.f, 0.f);
+
 };
 
 #endif
