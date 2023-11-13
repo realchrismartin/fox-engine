@@ -14,8 +14,6 @@
 #include "src/components/ModelComponent.hpp"
 #include "src/components/WorldTransformComponent.hpp"
 
-#include "src/graphics/MVPMatrix.hpp"
-
 /// @brief A collection of static functions that are "systems", functions that operate on specific associations of components in a scene to update them.
 /// @brief The update and render meta-systems are the core of the game. 
 class Systems
@@ -160,16 +158,18 @@ private:
 		ComponentPool& verticesComponentPool = scene.getComponentPool<VerticesComponent>();
 		ComponentPool& worldTransformComponentPool = scene.getComponentPool<WorldTransformComponent>();
 
-		//Upstream, we guaranteed that if an entity has a model, it has a transform, vertices, and indices
-		//This means we can iterate over the model pool and it will be in the correct / same order as the other pools
-		//We use this property of the pools to guarantee that the WorldTransform ordering matches the vertices ordering when we updated the mvp indices earlier.
 		std::vector<Vertex> vertices;
 		std::vector<GLuint> indices;
 		for (auto const& entity : modelComponentPool.getRegisteredEntityUIDs())
 		{
+			//Upstream, we guaranteed that if an entity has a model, it has a transform, vertices, and indices
+			//This means we can iterate over the model pool and it will be in the correct / same order as the other pools
+			//We use this property of the pools to guarantee that the WorldTransform ordering matches the vertices ordering when we updated the mvp indices earlier.
+			
+			//We also know that each entity with a model component has a vertex component, transform component, etc.
+
 			ModelComponent& model = scene.getComponent<ModelComponent>(entity);
 			VerticesComponent& verticesComponent = scene.getComponent<VerticesComponent>(entity);
-			Vertex* verticesArray = (Vertex*)verticesComponent.getVertices();
 
 			//Copy the index data to a temporary vector to remove the gaps
 			//It would be ideal to not have to rebuild this list constantly, but we are not allowed to have gaps in the indices list.
@@ -178,6 +178,7 @@ private:
 			//Copy the vertex data to a temporary vector to remove the gaps
 			//As much as I want to not do this, I just can't be OK with sending meaningless dead vertices to the GPU either.
 			//TODO: stop doing this once we dynamically resize the vertices component pool and have (mostly) similar meshes?
+			Vertex* verticesArray = (Vertex*)verticesComponent.getVertices();
 			for (size_t i = 0; i < model.getVertexCount(); i++)
 			{
 				vertices.push_back(verticesArray[i]);
