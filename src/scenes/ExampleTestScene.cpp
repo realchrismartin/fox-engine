@@ -30,18 +30,18 @@ void ExampleTestScene::createPlayer()
 
 		addComponent<InputComponent>(uid);
 
+		ModelConfig model;
+
 		MeshConfig frame1;
 		frame1.meshFilePath = "../../img/badbird.obj";
-		frame1.spriteSize = { 256,256 };
+		frame1.spriteSize = { 1024,1024 };
 		frame1.spriteOffsetOnTexture = { 228,513 };
+		model.meshes.push_back(frame1);
 
 		MeshConfig frame2;
 		frame2.meshFilePath = "../../img/badbird_2.obj";
-		frame2.spriteSize = { 256,256 };
-		frame2.spriteOffsetOnTexture = { 483,513 };
-
-		ModelConfig model;
-		model.meshes.push_back(frame1);
+		frame2.spriteSize = { 1024,1024 };
+		frame2.spriteOffsetOnTexture = { 1252,513 };
 		model.meshes.push_back(frame2);
 
 		loadModel(model, uid);
