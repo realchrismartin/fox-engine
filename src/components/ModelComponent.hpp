@@ -2,21 +2,30 @@
 #define MODELCOMPONENT_HPP
 
 struct ModelConfig;
-class VerticesComponent;
+struct MeshConfig;
+
+#include "src/graphics/Vertex.hpp"
 
 class ModelComponent
 {
 public:
+	size_t getNumMeshes() const;
+	size_t getActiveMeshIndex() const;
+	void setActiveMesh(size_t meshIndex);
 	size_t getVertexCount() const;
 	size_t getIndexCount() const;
 	const std::vector<GLuint>& getIndices() const;
-	void recalculateIndices(size_t offset);
-	void loadModel(const ModelConfig& modelData, VerticesComponent& verticesComponent);
+	const std::vector<Vertex>& getVertices() const;
+	void setTransformPoolIndex(size_t transformPoolIndex);
+	void loadModel(const ModelConfig& modelData);
 private:
-	void loadFace(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec3>& vertexNormals, const std::vector<std::string>& faceData, std::map<std::string, GLuint>& faceMap, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor, VerticesComponent& verticesComponent);
-	size_t m_numVertices = 0;
-	std::vector<GLuint> m_indices;
-	std::vector<GLuint> m_localIndices;
+	void loadMesh(size_t meshIndex, const MeshConfig& meshData);
+	void loadFace(size_t meshIndex, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec3>& vertexNormals, const std::vector<std::string>& faceData, std::map<std::string, GLuint>& faceMap, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor);
+
+	size_t m_activeMeshIndex = 0;
+
+	std::vector<std::vector<GLuint>> m_indices;
+	std::vector<std::vector<Vertex>> m_vertices;
 };
 
 #endif

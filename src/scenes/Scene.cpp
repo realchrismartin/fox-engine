@@ -2,22 +2,28 @@
 
 #include "src/util/Logger.hpp"
 #include "src/components/ModelComponent.hpp"
-#include "src/components/VerticesComponent.hpp"
 #include "src/components/TransformComponent.hpp"
 #include "src/components/MVPTransformComponent.hpp"
+#include "src/graphics/ModelConfig.hpp"
 
 void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 {
+	if (modelData.meshes.empty())
+	{
+		Logger::log("No meshes provided to load in this model data! Skipping load.");
+		return;
+	}
+
 	if (!m_gameEntityMap.count(entityUID))
 	{
 		//This entity was never registered.
 		return;
 	}
 	
-	if (hasComponent<ModelComponent>(entityUID) || hasComponent<TransformComponent>(entityUID) || hasComponent<VerticesComponent>(entityUID))
+	if (hasComponent<ModelComponent>(entityUID) || hasComponent<TransformComponent>(entityUID) || hasComponent<MVPTransformComponent>(entityUID))
 	{
 		//For now, don't reload model data after it's set the first time.
-		Logger::log("This entity already has a model/transform/vertices/indices component. Refusing to add more.");
+		Logger::log("This entity already has  model/transform/mvp component. Refusing to add more.");
 		return;
 	}
 
@@ -25,13 +31,11 @@ void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 	addComponentPrivate<ModelComponent>(entityUID);
 	addComponentPrivate<TransformComponent>(entityUID);
 	addComponentPrivate<MVPTransformComponent>(entityUID);
-	addComponentPrivate<VerticesComponent>(entityUID);
 
 	//Do an (expensive) sanity check that all of the indices match
 	ComponentPool& modelPool = getComponentPool<ModelComponent>();
 	ComponentPool& transformPool = getComponentPool<TransformComponent>();
 	ComponentPool& mvpTransformPool = getComponentPool<MVPTransformComponent>();
-	ComponentPool& verticesPool = getComponentPool<VerticesComponent>();
 
 	//Check to confirm that all of the indices match correctly. If they don't something is wrong
 	//This should always be the last index in the pool given how pools work.
@@ -39,24 +43,22 @@ void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 	std::optional<size_t> modelPoolIndex = modelPool.getIndexOfRegisteredEntity(entityUID);
 	std::optional<size_t> transformPoolIndex = transformPool.getIndexOfRegisteredEntity(entityUID);
 	std::optional<size_t> mvpTransformPoolIndex = mvpTransformPool.getIndexOfRegisteredEntity(entityUID);
-	std::optional<size_t> verticesPoolIndex = verticesPool.getIndexOfRegisteredEntity(entityUID);
 
-	if (!modelPoolIndex.has_value() || !transformPoolIndex.has_value() || !mvpTransformPoolIndex.has_value() || !verticesPoolIndex.has_value())
+	if (!modelPoolIndex.has_value() || !transformPoolIndex.has_value() || !mvpTransformPoolIndex.has_value())
 	{
 		assert(false); //Something broke!
 	}
 
-	if (modelPoolIndex.value() != transformPoolIndex.value() || transformPoolIndex.value() != mvpTransformPoolIndex.value() || mvpTransformPoolIndex.value() != verticesPoolIndex.value() || verticesPoolIndex.value() != modelPoolIndex.value())
+	if (modelPoolIndex.value() != transformPoolIndex.value() || transformPoolIndex.value() != mvpTransformPoolIndex.value() || mvpTransformPoolIndex.value() != modelPoolIndex.value())
 	{
 		assert(false); //Something broke!
 	}
 
 	//Now that we have all of the components, get access to them and load them up
 	ModelComponent& modelComponent = getComponent<ModelComponent>(entityUID);
-	VerticesComponent& verticesComponent = getComponent<VerticesComponent>(entityUID);
 
 	//Load the model with the local indices and the vertices component with the local vertices
-	modelComponent.loadModel(modelData, verticesComponent);
+	modelComponent.loadModel(modelData);
 
 	//TODO: later, this specific call could be cheaper than the one in removeEntity since it's adding to the end of the pool always.
 	updateAllModelComponentAssociations();
@@ -260,7 +262,6 @@ void Scene::removeEntity(int uid)
 	bool hadModelComponent = hasComponent<ModelComponent>(uid);
 	bool hadTransformComponent = hasComponent<TransformComponent>(uid);
 	bool hadMVPTransformComponent = hasComponent<MVPTransformComponent>(uid);
-	bool hadVerticesComponent = hasComponent<VerticesComponent>(uid);
 
 	for (auto& pool : m_componentPools)
 	{
@@ -286,11 +287,11 @@ void Scene::removeEntity(int uid)
 	m_gameEntityMap.erase(uid); //Remove the original entity from the map
 
 	//If we removed an indices component, we assume that we also removed a model/transform/vertex component
-	if (hadTransformComponent && hadModelComponent && hadVerticesComponent && hadMVPTransformComponent)
+	if (hadTransformComponent && hadModelComponent && hadMVPTransformComponent)
 	{
 		updateAllModelComponentAssociations();
 	}
-	else if (!hadTransformComponent && !hadModelComponent && !hadVerticesComponent && !hadMVPTransformComponent)
+	else if (!hadTransformComponent && !hadModelComponent && !hadMVPTransformComponent)
 	{
 		//noop
 	}
@@ -324,30 +325,21 @@ void Scene::applyFunctorToSceneGraph(std::optional<int> parentEntityID, int enti
 
 void Scene::updateAllModelComponentAssociations()
 {
-	//This fn is called when any one of the four model involved pools is modified.
+	//This fn is called when any one of the model involved pools is modified.
 	//Upstream, we guaranteed that if an entity has a model, it has a transform, vertices, and indices
 	//This means we can iterate over the model pool and it will be in the correct / same order as the other pools
 
 	ComponentPool& modelPool = getComponentPool<ModelComponent>();
 
 	size_t entityCount = 0;
-	size_t vertexCount = 0;
 
 	for (auto const& entityUID : modelPool.getRegisteredEntityUIDs())
 	{
 		ModelComponent& modelComponent = getComponent<ModelComponent>(entityUID);
-		VerticesComponent& verticesComponent = getComponent<VerticesComponent>(entityUID);
-
-		//Update the indices to match their position in the pool. 
-		//TODO: if we reeenable the full pool upload, uncomment here
-		//modelComponent.recalculateIndices(entityCount * VerticesComponent::MAX_VERTICES);
-		modelComponent.recalculateIndices(vertexCount);
-		vertexCount += modelComponent.getVertexCount();
-
 		//The vertex buffer element for "mvp" is relative to the pool of transforms.
 		//We have one transform per model, not per vertex.
 		//We need to tell all vertices which MVP they each need to use
-		verticesComponent.setTransformPoolIndex(modelComponent.getVertexCount(), entityCount);
+		modelComponent.setTransformPoolIndex(entityCount);
 
 		entityCount++;
 	}

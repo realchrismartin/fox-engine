@@ -23,8 +23,9 @@ public:
 	static const void update(Window& window, Scene& scene, Camera& camera, float elapsedTime)
 	{
 		runWindowEventSystem(window, scene);
-		runSceneGraphUpdateSystem(scene, camera);
 		runInputProcessingSystem(scene, elapsedTime);
+		runAnimationSystem(scene, elapsedTime);
+		runSceneGraphUpdateSystem(scene, camera);
 	};
 
 	//Run all of the game systems that pertain to rendering
@@ -52,6 +53,33 @@ private:
 			for (auto const& event : window.getEvents())
 			{
 				input.informOfWindowEvent(event);
+			}
+		}
+	}
+
+	static const void runAnimationSystem(Scene& scene, float elapsedTime)
+	{
+		//World's dumbest animation system: just constantly cycle meshes at warp speed
+		for (auto const& entity : EntityFilter<ModelComponent>(scene))
+		{
+			ModelComponent& model = scene.getComponent<ModelComponent>(entity);
+
+			size_t numMeshes = model.getNumMeshes();
+
+			if (numMeshes <= 1)
+			{
+				continue;
+			}
+
+			size_t nextMesh = model.getActiveMeshIndex() + 1;
+
+			if (nextMesh < numMeshes)
+			{
+				model.setActiveMesh(nextMesh);
+			}
+			else 
+			{
+				model.setActiveMesh(0);
 			}
 		}
 	}
@@ -176,12 +204,10 @@ private:
 		std::vector<Vertex> vertices;
 		std::vector<GLuint> indices;
 
-		//Get a ref to the model component pool so we can iterate over the entities that have models in the order they are registered.
-		//Upstream, we guaranteed that if an entity has a model, it has a transform, vertices, and indices
+		//Get a ref to the model component pool so we can iterate over the entities that have models and move their data to the buffer in the correct order.
+		//Upstream, we guaranteed that if an entity has a model, it has a transform
 		//This means we can iterate over the model pool and it will be in the correct / same order as the other pools
 		//We use this property of the pools to guarantee that the MVPTransform ordering matches the vertices ordering when we updated the mvp indices earlier.
-		//We also know that each entity with a model component has a vertex component, transform component, etc.
-		//We use this property to not have to check for safety before we getComponent of these types in the loop
 		ComponentPool& modelComponentPool = scene.getComponentPool<ModelComponent>();
 
 		//Get a ref to the mvp transform pool so we can send the entire pool data to the GPU
@@ -191,20 +217,16 @@ private:
 		for (auto const& entity : entityIds)
 		{
 			ModelComponent& model = scene.getComponent<ModelComponent>(entity);
-			VerticesComponent& verticesComponent = scene.getComponent<VerticesComponent>(entity);
 
-			//Copy the index data to a temporary vector to remove the gaps
-			//It would be ideal to not have to rebuild this list constantly, but we are not allowed to have gaps in the indices list.
-			indices.insert(indices.end(), model.getIndices().begin(), model.getIndices().end());
+			//It would be ideal to not have to rebuild this list constantly, but we are not allowed to have gaps in the indices list, and we don't like gaps in the vertices either.
+			//Also, the index position changes because the meshes don't all have the same vertex count :(
+			for (auto index : model.getIndices())
+			{
+				indices.push_back(index + (GLuint)vertices.size());
+			}
 
 			//Copy the vertex data to a temporary vector to remove the gaps
-			//As much as I want to not do this, I just can't be OK with sending meaningless dead vertices to the GPU either.
-			//TODO: stop doing this once we dynamically resize the vertices component pool and have (mostly) similar meshes?
-			Vertex* verticesArray = (Vertex*)verticesComponent.getVertices();
-			for (size_t i = 0; i < model.getVertexCount(); i++)
-			{
-				vertices.push_back(verticesArray[i]);
-			}
+			vertices.insert(vertices.end(), model.getVertices().begin(), model.getVertices().end());
 		}
 
 		//Send vertices, indices, and MVPs, then draw them.

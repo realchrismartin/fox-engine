@@ -6,7 +6,6 @@
 #include "src/components/MVPTransformComponent.hpp" //Why is this here? TODO
 
 class System;
-class VerticesComponent;
 class TransformComponent;
 class MVPTransformComponent;
 class ModelComponent;
@@ -140,10 +139,6 @@ protected:
 		else if (std::is_same_v<T, MVPTransformComponent> == true)
 		{
 			throw std::invalid_argument("Cannot manually add a MVPTransformComponent.");
-		}
-		else if (std::is_same_v<T, VerticesComponent> == true)
-		{
-			throw std::invalid_argument("Cannot manually add a VerticesComponent.");
 		}
 
 		addComponentPrivate<T>(entityUID);

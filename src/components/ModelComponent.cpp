@@ -1,43 +1,86 @@
 #include "src/components/ModelComponent.hpp"
 
 #include "src/graphics/ModelConfig.hpp"
-#include "src/components/VerticesComponent.hpp"
 
 #include <fstream>
 #include <sstream>
 
+size_t ModelComponent::getNumMeshes() const
+{
+	//NB: assumes the number of meshes is constant across vertices,indices lists
+	return m_vertices.size();
+}
+
+size_t ModelComponent::getActiveMeshIndex() const
+{
+	return m_activeMeshIndex;
+}
+
+void ModelComponent::setActiveMesh(size_t meshIndex)
+{
+	//NB: assumes the number of meshes is constant across vertices,indices lists
+	if (meshIndex < 0 || meshIndex >= m_vertices.size())
+	{
+		return;
+	}
+
+	m_activeMeshIndex = meshIndex;
+}
+
 size_t ModelComponent::getVertexCount() const
 {
-	return m_numVertices;
+	return m_vertices[m_activeMeshIndex].size();
 }
 
 size_t ModelComponent::getIndexCount() const
 {
-	return m_indices.size();
+	return m_indices[m_activeMeshIndex].size();
 }
 
 const std::vector<GLuint>& ModelComponent::getIndices() const
 {
-	return m_indices;
+	return m_indices[m_activeMeshIndex];
 }
 
-void ModelComponent::recalculateIndices(size_t offset)
+const std::vector<Vertex>& ModelComponent::getVertices() const
 {
-	m_indices.clear();
+	return m_vertices[m_activeMeshIndex];
+}
 
-	for (GLuint i : m_localIndices)
+void ModelComponent::setTransformPoolIndex(size_t transformPoolIndex)
+{
+	for (size_t i = 0; i < m_vertices.size(); i++)
 	{
-		m_indices.push_back(offset + i);
+		for (size_t j = 0; j < m_vertices[i].size(); j++)
+		{
+			m_vertices[i][j].mvpIndex = (GLfloat)transformPoolIndex;
+		}
 	}
 }
 
-void ModelComponent::loadModel(const ModelConfig& modelData, VerticesComponent& verticesComponent)
+void ModelComponent::loadModel(const ModelConfig& modelData)
 {
-	m_localIndices.clear();
-	m_numVertices = 0;
+	m_activeMeshIndex = 0;
 
+	m_indices.clear();
+	m_vertices.clear();
+
+	size_t meshIndex = 0;
+
+	for (auto const& meshData : modelData.meshes)
+	{
+		m_indices.push_back({});
+		m_vertices.push_back({});
+
+		loadMesh(meshIndex, meshData);
+		meshIndex++;
+	}
+}
+
+void ModelComponent::loadMesh(size_t meshIndex, const MeshConfig& meshData)
+{
 	std::ifstream input;
-	input.open(modelData.modelFilePath);
+	input.open(meshData.meshFilePath);
 
 	if (!input.is_open())
 	{
@@ -136,22 +179,26 @@ void ModelComponent::loadModel(const ModelConfig& modelData, VerticesComponent& 
 
 	std::map<std::string, GLuint> faceMap;
 
-	glm::vec2 textureCoordinateRatio = glm::vec2((float)modelData.spriteSize.x / (float)modelData.textureSize.x, (float)modelData.spriteSize.y / (float)modelData.textureSize.y);
+	glm::vec2 textureCoordinateRatio = glm::vec2((float)meshData.spriteSize.x / (float)meshData.textureSize.x, (float)meshData.spriteSize.y / (float)meshData.textureSize.y);
 
 	//Find the amount to add to each texture coordinate to offset it correctly in the overall texture
-	glm::vec2 textureOffsetFactor = glm::vec2((float)modelData.spriteOffsetOnTexture.x / (float)modelData.textureSize.x, (float)modelData.spriteOffsetOnTexture.y / (float)modelData.textureSize.y);
+	glm::vec2 textureOffsetFactor = glm::vec2((float)meshData.spriteOffsetOnTexture.x / (float)meshData.textureSize.x, (float)meshData.spriteOffsetOnTexture.y / (float)meshData.textureSize.y);
 
 	// Now that other data is loaded, load faces
 	for (auto const& faceString : faceLineTokens)
 	{
-		loadFace(vertices, textureCoordinates, vertexNormals, faceString, faceMap, textureCoordinateRatio, textureOffsetFactor, verticesComponent);
+		loadFace(meshIndex,vertices, textureCoordinates, vertexNormals, faceString, faceMap, textureCoordinateRatio, textureOffsetFactor);
 	}
-
-	//These will be wrong, but doing it anyway just to have data.
-	recalculateIndices(0);
 }
 
-void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec3>& vertexNormals, const std::vector<std::string>& faceData, std::map<std::string,GLuint>& faceMap, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor, VerticesComponent& verticesComponent)
+void ModelComponent::loadFace(
+	size_t meshIndex,
+	const std::vector<glm::vec3>& vertices, 
+	const std::vector<glm::vec2>& textureCoordinates, 
+	const std::vector<glm::vec3>& vertexNormals, 
+	const std::vector<std::string>& faceData, std::map<std::string,GLuint>& faceMap, 
+	const glm::vec2& textureCoordinateRatio, 
+	const glm::vec2& textureOffsetFactor)
 {
 	for (auto const& faceComponent : faceData)
 	{
@@ -206,16 +253,10 @@ void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std:
 
 		if (faceMap.count(mapKey))
 		{
-			m_localIndices.push_back(faceMap.at(mapKey));
+			m_indices[meshIndex].push_back(faceMap.at(mapKey));
 		}
 		else
 		{
-			if (m_numVertices >= VerticesComponent::MAX_VERTICES)
-			{
-				Logger::log("This model can't hold more vertices. Skipping adding it.");
-				return;
-			}
-
 			// We need to push both vertex data and index data
 			// We also need to update our map
 			auto v = vertices.at(vertexIndex - 1);
@@ -232,12 +273,11 @@ void ModelComponent::loadFace(const std::vector<glm::vec3>& vertices, const std:
 			vertex.t = textureOffsetFactor.y + (t.y * textureCoordinateRatio.y);
 			vertex.mvpIndex = 0.f; //This is updated as soon as this method completes in void Scene::updateAllModelComponentAssociations()
 
-			verticesComponent.addVertex(m_numVertices, vertex);
-			m_numVertices++;
+			m_vertices[meshIndex].push_back(vertex);
 
 			GLuint index = (GLuint)faceMap.size();    // This is the "next" face - first one is index 0, etc.
 			faceMap[mapKey] = index;          // Update map to specify index for this face - map size changes, so next index is + 1
-			m_localIndices.push_back(index);
+			m_indices[meshIndex].push_back(index);
 		}
 	}
 }

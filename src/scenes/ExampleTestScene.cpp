@@ -29,10 +29,23 @@ void ExampleTestScene::createPlayer()
 		int uid = m_playerUID.value();
 
 		addComponent<InputComponent>(uid);
+
+		MeshConfig frame1;
+		frame1.meshFilePath = "../../img/badbird.obj";
+		frame1.spriteSize = { 256,256 };
+		frame1.spriteOffsetOnTexture = { 228,513 };
+
+		MeshConfig frame2;
+		frame2.meshFilePath = "../../img/badbird_2.obj";
+		frame2.spriteSize = { 256,256 };
+		frame2.spriteOffsetOnTexture = { 483,513 };
+
 		ModelConfig model;
-		model.modelFilePath = "../../img/untitled.obj";
+		model.meshes.push_back(frame1);
+		model.meshes.push_back(frame2);
+
 		loadModel(model, uid);
-		getComponent<TransformComponent>(uid).setScale({ .2f,.2f,.2f});
+		getComponent<TransformComponent>(uid).setScale({ 2.f,2.f,2.f});
 		setCameraTargetEntity(uid);
 	}
 
@@ -50,10 +63,14 @@ void ExampleTestScene::createFloor()
 	if (m_floorUID.has_value()) 
 	{
 		int uid = m_floorUID.value();
+		MeshConfig mesh;
+		mesh.meshFilePath = "../../img/cube.obj";
+		mesh.spriteSize = { 512,512 };
+		mesh.spriteOffsetOnTexture = { 511,0 };
+
 		ModelConfig model;
-		model.modelFilePath = "../../img/cube.obj";
-		model.spriteSize = { 512,512 };
-		model.spriteOffsetOnTexture = { 511,0 };
+		model.meshes.push_back(mesh);
+
 		loadModel(model, uid);
 		getComponent<TransformComponent>(uid).setScale({ 100.f,1.f,100.f });
 		getComponent<TransformComponent>(uid).setTranslation({ 0.f,-2.f,0.f});
@@ -73,7 +90,10 @@ void ExampleTestScene::createWindmill()
 	if (m_windmillUID.has_value()) 
 	{
 		int uid = m_windmillUID.value();
+		MeshConfig mesh;
 		ModelConfig model;
+		model.meshes.push_back(mesh);
+
 		loadModel(model, uid);
 		getComponent<TransformComponent>(uid).setRotation({ 0.f,180.f,0.f});
 	}
@@ -86,10 +106,13 @@ void ExampleTestScene::createBush()
 	if (m_bushUID.has_value())
 	{
 		int uid = m_bushUID.value();
+		MeshConfig mesh;
+		mesh.meshFilePath = "../../img/quoteunquote-bush.obj";
+		mesh.spriteSize = { 228,228 };
+		mesh.spriteOffsetOnTexture = { 0,513 };
 		ModelConfig model;
-		model.modelFilePath = "../../img/quoteunquote-bush.obj";
-		model.spriteSize = { 228,228 };
-		model.spriteOffsetOnTexture = { 0,513 };
+		model.meshes.push_back(mesh);
+
 		loadModel(model, uid);
 		getComponent<TransformComponent>(uid).setTranslation({ 10.f,0.f,5.f});
 		addChild(m_windmillUID.value(), uid);
