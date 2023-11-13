@@ -1,7 +1,6 @@
 #include "src/components/TransformComponent.hpp"
 
 #include "glm/glm/gtc/matrix_transform.hpp"
-#include "src/components/WorldTransformComponent.hpp"
 
 glm::mat4 TransformComponent::getLocalMatrix()
 {
@@ -15,7 +14,12 @@ glm::mat4 TransformComponent::getLocalMatrix()
 	return matrix;
 }
 
-void TransformComponent::updateLocalAndWorldMatrix(WorldTransformComponent& worldTransformComponent)
+const glm::mat4& TransformComponent::getWorldMatrix() const
+{
+	return m_worldMatrix;
+}
+
+void TransformComponent::updateLocalAndWorldMatrix()
 {
 	if (m_localDirty)
 	{
@@ -23,13 +27,13 @@ void TransformComponent::updateLocalAndWorldMatrix(WorldTransformComponent& worl
 		m_localDirty = false;
 
 		//If we updated the local matrix, update the world matrix too
-		worldTransformComponent.setWorldMatrix(m_localMatrix);
+		m_worldMatrix = m_localMatrix;
 		m_worldDirty = true;
 	}
 }
 
 
-void TransformComponent::updateLocalAndWorldMatrix(TransformComponent& parentComponent, WorldTransformComponent& parentWorldTransform, WorldTransformComponent& worldTransform)
+void TransformComponent::updateLocalAndWorldMatrix(TransformComponent& parentComponent)
 {
 	bool localDirty = m_localDirty;
 
@@ -43,7 +47,7 @@ void TransformComponent::updateLocalAndWorldMatrix(TransformComponent& parentCom
 	//If we updated the local matrix, or the parent's world matrix is dirty, update the world matrix too
 	if (localDirty || parentComponent.isWorldMatrixDirty())
 	{
-		worldTransform.setWorldMatrix(parentWorldTransform.getWorldMatrix() * m_localMatrix);
+		m_worldMatrix = parentComponent.getWorldMatrix() * m_localMatrix;
 		m_worldDirty = true; //If the parent's matrix is dirty, it means this transform's matrix is now too.
 	}
 }

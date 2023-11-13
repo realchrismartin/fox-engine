@@ -3,15 +3,13 @@
 
 #include "src/entities/GameEntity.hpp"
 #include "src/components/ComponentPool.hpp"
-#include "src/components/ModelComponent.hpp"
-
-#include "src/components/WorldTransformComponent.hpp" //Why is this here? TODO
 #include "src/components/MVPTransformComponent.hpp" //Why is this here? TODO
 
 class System;
 class VerticesComponent;
 class TransformComponent;
 class MVPTransformComponent;
+class ModelComponent;
 struct ModelConfig;
 
 /// @brief An association of Entities with their Components.
@@ -139,15 +137,10 @@ protected:
 		{
 			throw std::invalid_argument("Cannot manually add a TransformComponent.");
 		}
-		else if (std::is_same_v<T, WorldTransformComponent> == true)
-		{
-			throw std::invalid_argument("Cannot manually add a TransformComponent.");
-		}
 		else if (std::is_same_v<T, MVPTransformComponent> == true)
 		{
 			throw std::invalid_argument("Cannot manually add a MVPTransformComponent.");
 		}
-
 		else if (std::is_same_v<T, VerticesComponent> == true)
 		{
 			throw std::invalid_argument("Cannot manually add a VerticesComponent.");

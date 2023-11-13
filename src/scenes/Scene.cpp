@@ -1,13 +1,13 @@
 #include "src/scenes/Scene.hpp"
-#include "src/util/Logger.hpp"
 
+#include "src/util/Logger.hpp"
 #include "src/components/ModelComponent.hpp"
 #include "src/components/VerticesComponent.hpp"
 #include "src/components/TransformComponent.hpp"
+#include "src/components/MVPTransformComponent.hpp"
 
 void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 {
-
 	if (!m_gameEntityMap.count(entityUID))
 	{
 		//This entity was never registered.
@@ -24,14 +24,12 @@ void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 	//Since these pools are de facto protected from being added to any other way, the indices for this entity UID match across them. This is important!
 	addComponentPrivate<ModelComponent>(entityUID);
 	addComponentPrivate<TransformComponent>(entityUID);
-	addComponentPrivate<WorldTransformComponent>(entityUID);
 	addComponentPrivate<MVPTransformComponent>(entityUID);
 	addComponentPrivate<VerticesComponent>(entityUID);
 
 	//Do an (expensive) sanity check that all of the indices match
 	ComponentPool& modelPool = getComponentPool<ModelComponent>();
 	ComponentPool& transformPool = getComponentPool<TransformComponent>();
-	ComponentPool& worldTransformPool = getComponentPool<WorldTransformComponent>();
 	ComponentPool& mvpTransformPool = getComponentPool<MVPTransformComponent>();
 	ComponentPool& verticesPool = getComponentPool<VerticesComponent>();
 
@@ -40,16 +38,15 @@ void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 	//If it isn't just crash.
 	std::optional<size_t> modelPoolIndex = modelPool.getIndexOfRegisteredEntity(entityUID);
 	std::optional<size_t> transformPoolIndex = transformPool.getIndexOfRegisteredEntity(entityUID);
-	std::optional<size_t> worldTransformPoolIndex = worldTransformPool.getIndexOfRegisteredEntity(entityUID);
 	std::optional<size_t> mvpTransformPoolIndex = mvpTransformPool.getIndexOfRegisteredEntity(entityUID);
 	std::optional<size_t> verticesPoolIndex = verticesPool.getIndexOfRegisteredEntity(entityUID);
 
-	if (!modelPoolIndex.has_value() || !transformPoolIndex.has_value() || !worldTransformPoolIndex.has_value() || !mvpTransformPoolIndex.has_value() || !verticesPoolIndex.has_value())
+	if (!modelPoolIndex.has_value() || !transformPoolIndex.has_value() || !mvpTransformPoolIndex.has_value() || !verticesPoolIndex.has_value())
 	{
 		assert(false); //Something broke!
 	}
 
-	if (modelPoolIndex.value() != transformPoolIndex.value() || transformPoolIndex.value() != worldTransformPoolIndex.value() || worldTransformPoolIndex.value() != mvpTransformPoolIndex.value() || mvpTransformPoolIndex.value() != verticesPoolIndex.value() || verticesPoolIndex.value() != modelPoolIndex.value())
+	if (modelPoolIndex.value() != transformPoolIndex.value() || transformPoolIndex.value() != mvpTransformPoolIndex.value() || mvpTransformPoolIndex.value() != verticesPoolIndex.value() || verticesPoolIndex.value() != modelPoolIndex.value())
 	{
 		assert(false); //Something broke!
 	}
@@ -262,7 +259,6 @@ void Scene::removeEntity(int uid)
 	//Save whether there are model components. Use this to recalculate model component associations after updates are done.
 	bool hadModelComponent = hasComponent<ModelComponent>(uid);
 	bool hadTransformComponent = hasComponent<TransformComponent>(uid);
-	bool hadWorldTransformComponent = hasComponent<WorldTransformComponent>(uid);
 	bool hadMVPTransformComponent = hasComponent<MVPTransformComponent>(uid);
 	bool hadVerticesComponent = hasComponent<VerticesComponent>(uid);
 
@@ -290,11 +286,11 @@ void Scene::removeEntity(int uid)
 	m_gameEntityMap.erase(uid); //Remove the original entity from the map
 
 	//If we removed an indices component, we assume that we also removed a model/transform/vertex component
-	if (hadTransformComponent && hadModelComponent && hadVerticesComponent && hadMVPTransformComponent && hadWorldTransformComponent)
+	if (hadTransformComponent && hadModelComponent && hadVerticesComponent && hadMVPTransformComponent)
 	{
 		updateAllModelComponentAssociations();
 	}
-	else if (!hadTransformComponent && !hadModelComponent && !hadVerticesComponent && !hadMVPTransformComponent && !hadWorldTransformComponent)
+	else if (!hadTransformComponent && !hadModelComponent && !hadVerticesComponent && !hadMVPTransformComponent)
 	{
 		//noop
 	}

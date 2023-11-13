@@ -3,7 +3,6 @@
 
 #include "src/scenes/Scene.hpp"
 #include "src/components/TransformComponent.hpp"
-#include "src/components/WorldTransformComponent.hpp"
 
 #include "glm/glm/ext/matrix_transform.hpp"
 #include "glm/glm/ext/matrix_clip_space.hpp"
@@ -64,18 +63,16 @@ public:
 		bool cameraChanged = false;
 		bool targetChanged = false;
 
-		if (cameraEntityId.has_value() && scene.hasComponent<TransformComponent>(cameraEntityId.value()) && scene.hasComponent<WorldTransformComponent>(cameraEntityId.value()))
+		if (cameraEntityId.has_value() && scene.hasComponent<TransformComponent>(cameraEntityId.value()))
 		{
-			TransformComponent& cameraLocalTransform = scene.getComponent<TransformComponent>(cameraEntityId.value());
+			TransformComponent& cameraTransform = scene.getComponent<TransformComponent>(cameraEntityId.value());
 
-			if (m_cameraEntityLastTick.has_value() && m_cameraEntityLastTick.value() == cameraEntityId.value() && !cameraLocalTransform.isWorldMatrixDirty())
+			if (m_cameraEntityLastTick.has_value() && m_cameraEntityLastTick.value() == cameraEntityId.value() && !cameraTransform.isWorldMatrixDirty())
 			{
 				//We don't need to update the camera center.
 			}
 			else 
 			{
-				WorldTransformComponent& cameraTransform = scene.getComponent<WorldTransformComponent>(cameraEntityId.value());
-
 				glm::mat4 worldMatrix = cameraTransform.getWorldMatrix();
 				glm::vec4 center = glm::vec4(0.f, 0.f, 0.f, 1.f);
 
@@ -86,18 +83,16 @@ public:
 			}
 		}
 
-		if (cameraTargetEntityId.has_value() && scene.hasComponent<TransformComponent>(cameraTargetEntityId.value()) && scene.hasComponent<WorldTransformComponent>(cameraTargetEntityId.value()))
+		if (cameraTargetEntityId.has_value() && scene.hasComponent<TransformComponent>(cameraTargetEntityId.value()))
 		{
-			TransformComponent& cameraTargetLocalTransform = scene.getComponent<TransformComponent>(cameraTargetEntityId.value());
+			TransformComponent& cameraTargetTransform = scene.getComponent<TransformComponent>(cameraTargetEntityId.value());
 
-			if (m_cameraTargetLastTick.has_value() && m_cameraTargetLastTick.value() == cameraTargetEntityId.value() && !cameraTargetLocalTransform.isWorldMatrixDirty())
+			if (m_cameraTargetLastTick.has_value() && m_cameraTargetLastTick.value() == cameraTargetEntityId.value() && !cameraTargetTransform.isWorldMatrixDirty())
 			{
 				//We don't need to update the camera center.
 			}
 			else
 			{
-				WorldTransformComponent& cameraTargetTransform = scene.getComponent<WorldTransformComponent>(cameraTargetEntityId.value());
-				
 				glm::mat4 worldMatrix = cameraTargetTransform.getWorldMatrix();
 				glm::vec4 target = glm::vec4(0.f, 0.f, 0.f, 1.f);
 
