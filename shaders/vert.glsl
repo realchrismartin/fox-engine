@@ -15,6 +15,8 @@ out vec2 TexCoord;
 
 void main() 
 {
+    //TODO: at some point later, condense the mvp matrix into the scene graph update.
+
     gl_Position = projectionViewMatrix * modelMatrix[int(modelMatrixIndex)] * vec4(position, 1.0);
 
     TexCoord = texCoords;
