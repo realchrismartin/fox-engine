@@ -5,6 +5,7 @@
 #include "src/components/InputComponent.hpp"
 #include "src/components/TransformComponent.hpp"
 #include "src/graphics/ModelConfig.hpp"
+#include <format>
 
 ExampleTestScene::ExampleTestScene()
 {
@@ -23,7 +24,7 @@ void ExampleTestScene::createPlayer()
 
 	m_playerUID = createEntity();
 
-	if (m_playerUID.has_value()) 
+	if (m_playerUID.has_value())
 	{
 		int uid = m_playerUID.value();
 
@@ -31,17 +32,15 @@ void ExampleTestScene::createPlayer()
 
 		ModelConfig model;
 
-		MeshConfig frame1;
-		frame1.meshFilePath = "../../img/badbird.obj";
-		frame1.spriteSize = { 1024,1024 };
-		frame1.spriteOffsetOnTexture = { 228,513 };
-		model.meshes.push_back(frame1);
 
-		MeshConfig frame2;
-		frame2.meshFilePath = "../../img/badbird_2.obj";
-		frame2.spriteSize = { 1024,1024 };
-		frame2.spriteOffsetOnTexture = { 1252,513 };
-		model.meshes.push_back(frame2);
+		for (int i = 0; i < 21; i++)
+		{
+			MeshConfig mesh;
+			mesh.spriteSize = { 1024.f,1024.f };
+			mesh.spriteOffsetOnTexture = { 1023.f,0 };
+			mesh.meshFilePath = std::format("../../img/mushroom/mushroom{}.obj", i);
+			model.meshes.push_back(mesh);
+		}
 
 		loadModel(model, uid);
 		getComponent<TransformComponent>(uid).setScale({ 2.f,2.f,2.f});
