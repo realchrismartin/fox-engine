@@ -13,7 +13,7 @@ void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 		Logger::log("No meshes provided to load in this model data! Skipping load.");
 		return;
 	}
-
+	
 	if (!m_gameEntityMap.count(entityUID))
 	{
 		//This entity was never registered.

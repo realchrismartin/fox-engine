@@ -8,7 +8,7 @@
 size_t ModelComponent::getNumMeshes() const
 {
 	//NB: assumes the number of meshes is constant across vertices,indices lists
-	return m_vertices.size();
+	return m_meshVertices.size();
 }
 
 size_t ModelComponent::getActiveMeshIndex() const
@@ -19,7 +19,7 @@ size_t ModelComponent::getActiveMeshIndex() const
 void ModelComponent::setActiveMesh(size_t meshIndex)
 {
 	//NB: assumes the number of meshes is constant across vertices,indices lists
-	if (meshIndex < 0 || meshIndex >= m_vertices.size())
+	if (meshIndex < 0 || meshIndex >= m_meshVertices.size())
 	{
 		return;
 	}
@@ -29,31 +29,31 @@ void ModelComponent::setActiveMesh(size_t meshIndex)
 
 size_t ModelComponent::getVertexCount() const
 {
-	return m_vertices[m_activeMeshIndex].size();
+	return m_meshVertices[m_activeMeshIndex].size();
 }
 
 size_t ModelComponent::getIndexCount() const
 {
-	return m_indices[m_activeMeshIndex].size();
+	return m_meshIndices[m_activeMeshIndex].size();
 }
 
 const std::vector<GLuint>& ModelComponent::getIndices() const
 {
-	return m_indices[m_activeMeshIndex];
+	return m_meshIndices[m_activeMeshIndex];
 }
 
 const std::vector<Vertex>& ModelComponent::getVertices() const
 {
-	return m_vertices[m_activeMeshIndex];
+	return m_meshVertices[m_activeMeshIndex];
 }
 
 void ModelComponent::setTransformPoolIndex(size_t transformPoolIndex)
 {
-	for (size_t i = 0; i < m_vertices.size(); i++)
+	for (size_t i = 0; i < m_meshVertices.size(); i++)
 	{
-		for (size_t j = 0; j < m_vertices[i].size(); j++)
+		for (size_t j = 0; j < m_meshVertices[i].size(); j++)
 		{
-			m_vertices[i][j].mvpIndex = (GLfloat)transformPoolIndex;
+			m_meshVertices[i][j].mvpIndex = (GLfloat)transformPoolIndex;
 		}
 	}
 }
@@ -62,22 +62,28 @@ void ModelComponent::loadModel(const ModelConfig& modelData)
 {
 	m_activeMeshIndex = 0;
 
-	m_indices.clear();
-	m_vertices.clear();
+	m_meshIndices.clear();
+	m_meshVertices.clear();
 
 	size_t meshIndex = 0;
 
+	//Find the ratio by which we will be adjusting the model's texture coordinates to fit the mesh, since the sprite is going to be smaller than the texture atlas (it's IN the texture atlas)
+	glm::vec2 textureCoordinateRatio = glm::vec2((float)modelData.spriteSize.x / (float)modelData.textureSize.x, (float)modelData.spriteSize.y / (float)modelData.textureSize.y);
+
+	//Find the amount to add to each texture coordinate to offset it correctly in the overall texture
+	glm::vec2 textureOffsetFactor = glm::vec2((float)modelData.spriteOffsetOnTexture.x / (float)modelData.textureSize.x, (float)modelData.spriteOffsetOnTexture.y / (float)modelData.textureSize.y);
+
 	for (auto const& meshData : modelData.meshes)
 	{
-		m_indices.push_back({});
-		m_vertices.push_back({});
+		m_meshIndices.push_back({});
+		m_meshVertices.push_back({});
 
-		loadMesh(meshIndex, meshData);
+		loadMesh(meshIndex, meshData, textureCoordinateRatio, textureOffsetFactor);
 		meshIndex++;
 	}
 }
 
-void ModelComponent::loadMesh(size_t meshIndex, const MeshConfig& meshData)
+void ModelComponent::loadMesh(size_t meshIndex, const MeshConfig& meshData, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor)
 {
 	std::ifstream input;
 	input.open(meshData.meshFilePath);
@@ -154,7 +160,11 @@ void ModelComponent::loadMesh(size_t meshIndex, const MeshConfig& meshData)
 			{
 				break;
 			}
-			textureCoordinates.push_back(glm::vec2((float)std::stof(lineTokens[0]), (float)std::stof(lineTokens[1])));
+
+			float s = (float)std::stof(lineTokens[0]);
+			float t = (float)std::stof(lineTokens[1]);
+
+			textureCoordinates.push_back(glm::vec2(textureOffsetFactor.x + (s * textureCoordinateRatio.x), textureOffsetFactor.y + (t * textureCoordinateRatio.y)));
 			break;
 		}
 		case(2):
@@ -179,15 +189,10 @@ void ModelComponent::loadMesh(size_t meshIndex, const MeshConfig& meshData)
 
 	std::map<std::string, GLuint> faceMap;
 
-	glm::vec2 textureCoordinateRatio = glm::vec2((float)meshData.spriteSize.x / (float)meshData.textureSize.x, (float)meshData.spriteSize.y / (float)meshData.textureSize.y);
-
-	//Find the amount to add to each texture coordinate to offset it correctly in the overall texture
-	glm::vec2 textureOffsetFactor = glm::vec2((float)meshData.spriteOffsetOnTexture.x / (float)meshData.textureSize.x, (float)meshData.spriteOffsetOnTexture.y / (float)meshData.textureSize.y);
-
 	// Now that other data is loaded, load faces
 	for (auto const& faceString : faceLineTokens)
 	{
-		loadFace(meshIndex,vertices, textureCoordinates, vertexNormals, faceString, faceMap, textureCoordinateRatio, textureOffsetFactor);
+		loadFace(meshIndex,vertices, textureCoordinates, vertexNormals, faceString, faceMap);
 	}
 }
 
@@ -196,9 +201,7 @@ void ModelComponent::loadFace(
 	const std::vector<glm::vec3>& vertices, 
 	const std::vector<glm::vec2>& textureCoordinates, 
 	const std::vector<glm::vec3>& vertexNormals, 
-	const std::vector<std::string>& faceData, std::map<std::string,GLuint>& faceMap, 
-	const glm::vec2& textureCoordinateRatio, 
-	const glm::vec2& textureOffsetFactor)
+	const std::vector<std::string>& faceData, std::map<std::string,GLuint>& faceMap)
 {
 	for (auto const& faceComponent : faceData)
 	{
@@ -253,7 +256,7 @@ void ModelComponent::loadFace(
 
 		if (faceMap.count(mapKey))
 		{
-			m_indices[meshIndex].push_back(faceMap.at(mapKey));
+			m_meshIndices[meshIndex].push_back(faceMap.at(mapKey));
 		}
 		else
 		{
@@ -269,15 +272,15 @@ void ModelComponent::loadFace(
 			vertex.x = v.x;
 			vertex.y = v.y;
 			vertex.z = v.z;
-			vertex.s = textureOffsetFactor.x + (t.x * textureCoordinateRatio.x);
-			vertex.t = textureOffsetFactor.y + (t.y * textureCoordinateRatio.y);
+			vertex.s = t.x;
+			vertex.t = t.y;
 			vertex.mvpIndex = 0.f; //This is updated as soon as this method completes in void Scene::updateAllModelComponentAssociations()
 
-			m_vertices[meshIndex].push_back(vertex);
+			m_meshVertices[meshIndex].push_back(vertex);
 
 			GLuint index = (GLuint)faceMap.size();    // This is the "next" face - first one is index 0, etc.
 			faceMap[mapKey] = index;          // Update map to specify index for this face - map size changes, so next index is + 1
-			m_indices[meshIndex].push_back(index);
+			m_meshIndices[meshIndex].push_back(index);
 		}
 	}
 }

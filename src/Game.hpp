@@ -13,6 +13,7 @@ public:
 private:
 	Window m_window;
 	sf::Clock m_clock;
+	static const float TIMESTEP;
 };
 
 #endif

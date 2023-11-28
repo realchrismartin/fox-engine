@@ -4,6 +4,8 @@
 #include "src/systems/Systems.hpp"
 #include "src/scenes/ExampleTestScene.hpp"
 
+const float Game::TIMESTEP = .0167f;
+
 Game::Game()
 {
 	//Say hi!
@@ -18,11 +20,28 @@ void Game::play()
 	 //For now, we create an example scene on the stack
 	 Scene scene = ExampleTestScene();
 
+	 float currentTime = m_clock.getElapsedTime().asSeconds();
+	
+	 float accumulator = 0.f;
+
  	 //This is the main game loop.
      //TODO: we need some semblance of a constant time tick per update here.
 	 while (m_window.isOpen())
 	 {
-		 Systems::update(m_window, scene, camera, (float)m_clock.restart().asMilliseconds());
+		 float newTime = m_clock.getElapsedTime().asSeconds();
+
+		 float frameTime = newTime - currentTime;
+
+		 currentTime = newTime;
+
+		 accumulator += frameTime;
+
+		 while (accumulator >= TIMESTEP)
+		 {
+			 Systems::update(m_window, scene, camera, TIMESTEP);
+			 accumulator -= TIMESTEP;
+		 }
+			
 		 Systems::render(m_window, scene, camera);
 	 }
 }

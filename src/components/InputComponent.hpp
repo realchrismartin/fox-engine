@@ -21,7 +21,7 @@ public:
 	bool anyInputActive() const;
 private:
 	std::set<UserInputActionsEnum> m_activeInputs;
-	float m_translationFactor = .01f; //TODO
+	float m_translationFactor = .25f; //TODO
 };
 
 #endif
