@@ -60,7 +60,7 @@ void ModelComponent::setTransformPoolIndex(size_t transformPoolIndex)
 
 void ModelComponent::loadModel(const ModelConfig& modelData)
 {
-	if (modelData.meshes.empty())
+	if (modelData.keyframeFilePaths.empty())
 	{
 		return;
 	}
@@ -76,9 +76,9 @@ void ModelComponent::loadModel(const ModelConfig& modelData)
 	glm::vec2 textureOffsetFactor = glm::vec2((float)modelData.spriteOffsetOnTexture.x / (float)modelData.textureSize.x, (float)modelData.spriteOffsetOnTexture.y / (float)modelData.textureSize.y);
 	
 	//Ensure frame count is >= mesh count
-	size_t frameCount = modelData.meshes.size() > modelData.frameCount ? modelData.meshes.size() : modelData.frameCount;
+	size_t frameCount = modelData.keyframeFilePaths.size() > modelData.frameCount ? modelData.keyframeFilePaths.size() : modelData.frameCount;
 
-	size_t framesPerMesh = (float)frameCount / (float)modelData.meshes.size();
+	size_t framesPerMesh = (float)frameCount / (float)modelData.keyframeFilePaths.size();
 
 	if (framesPerMesh < 1)
 	{
@@ -86,18 +86,37 @@ void ModelComponent::loadModel(const ModelConfig& modelData)
 		return;
 	}
 
-	size_t keyframeIndex = 0;
-	for (auto const& meshData : modelData.meshes)
+	//Create a place we will be storing our raw OBJ datas
+	std::vector<std::vector<glm::vec3>> keyframeVertices;
+	std::vector<std::vector<glm::vec3>> keyframeVertexNormals;
+	std::vector<std::vector<glm::vec2>> keyframeTexCoords;
+
+	size_t keyframesToStore = modelData.keyframeFilePaths.size();
+
+	while (keyframesToStore > 0)
 	{
-		loadKeyframe(keyframeIndex, modelData.meshes.size(), framesPerMesh, meshData, textureCoordinateRatio, textureOffsetFactor);
+		keyframeVertices.push_back({});
+		keyframeVertexNormals.push_back({});
+		keyframeTexCoords.push_back({});
+		
+		keyframesToStore--;
+	}
+
+	size_t keyframeIndex = 0;
+
+	for (auto const& keyframePath : modelData.keyframeFilePaths)
+	{
+		loadKeyframe(keyframeIndex, framesPerMesh, keyframePath, keyframeVertices,keyframeVertexNormals,keyframeTexCoords, textureCoordinateRatio, textureOffsetFactor);
 		keyframeIndex++;
 	}
 }
 
-void ModelComponent::loadKeyframe(size_t currentKeyframe, size_t keyframeCount, size_t framesPerMesh, const MeshConfig& meshData, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor)
+void ModelComponent::loadKeyframe(size_t currentKeyframe, size_t framesPerMesh, const std::string& keyframePath,
+	std::vector<std::vector<glm::vec3>>& keyframeVertices, std::vector<std::vector<glm::vec3>>& keyframeVertexNormals, std::vector<std::vector<glm::vec2>>& keyframeTexCoords,
+	const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor)
 {
 	std::ifstream input;
-	input.open(meshData.meshFilePath);
+	input.open(keyframePath);
 
 	if (!input.is_open())
 	{
@@ -106,10 +125,6 @@ void ModelComponent::loadKeyframe(size_t currentKeyframe, size_t keyframeCount, 
 
 	std::string currentLine;
 	std::vector<std::vector<std::string>> faceLineTokens;
-
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec3> vertexNormals;
-	std::vector<glm::vec2> textureCoordinates;
 
 	bool first = true;
 	int lineType = -1;
@@ -158,14 +173,14 @@ void ModelComponent::loadKeyframe(size_t currentKeyframe, size_t keyframeCount, 
 
 		switch (lineType)
 		{
-		case (0): 
+		case (0):
 			if (lineTokens.size() != (size_t)3)
 			{
 				break;
 			}
-			vertices.push_back(glm::vec3((float)std::stof(lineTokens[0]), (float)std::stof(lineTokens[1]), (float)std::stof(lineTokens[2])));
+			keyframeVertices[currentKeyframe].push_back(glm::vec3((float)std::stof(lineTokens[0]), (float)std::stof(lineTokens[1]), (float)std::stof(lineTokens[2])));
 			break;
-		case (1):                                
+		case (1):
 		{
 			if (lineTokens.size() != (size_t)2)
 			{
@@ -175,7 +190,7 @@ void ModelComponent::loadKeyframe(size_t currentKeyframe, size_t keyframeCount, 
 			float s = (float)std::stof(lineTokens[0]);
 			float t = (float)std::stof(lineTokens[1]);
 
-			textureCoordinates.push_back(glm::vec2(textureOffsetFactor.x + (s * textureCoordinateRatio.x), textureOffsetFactor.y + (t * textureCoordinateRatio.y)));
+			keyframeTexCoords[currentKeyframe].push_back(glm::vec2(textureOffsetFactor.x + (s * textureCoordinateRatio.x), textureOffsetFactor.y + (t * textureCoordinateRatio.y)));
 			break;
 		}
 		case(2):
@@ -185,11 +200,11 @@ void ModelComponent::loadKeyframe(size_t currentKeyframe, size_t keyframeCount, 
 			{
 				break;
 			}
-			vertexNormals.push_back(glm::vec3((float)std::stof(lineTokens[0]), (float)std::stof(lineTokens[1]), (float)std::stof(lineTokens[2])));
+			keyframeVertexNormals[currentKeyframe].push_back(glm::vec3((float)std::stof(lineTokens[0]), (float)std::stof(lineTokens[1]), (float)std::stof(lineTokens[2])));
 			break;
 		}
-		case (3): 
-			faceLineTokens.push_back(lineTokens); 
+		case (3):
+			faceLineTokens.push_back(lineTokens);
 			break;
 		default:
 			break;
@@ -200,90 +215,62 @@ void ModelComponent::loadKeyframe(size_t currentKeyframe, size_t keyframeCount, 
 
 	std::map<std::string, GLuint> faceMap;
 
-	// Now that other data is loaded, load faces and update indices/vertices.
+	//Ensure there is at least one frame.
+	framesPerMesh = framesPerMesh <= 0 ? 1 : framesPerMesh;
 
-	for (size_t i = 0; i < framesPerMesh; i++)
+	//Add mesh vertices and indices vecs
+	for (int i = 0; i < framesPerMesh; i++)
 	{
-		m_meshIndices.push_back({});
 		m_meshVertices.push_back({});
+		m_meshIndices.push_back({});
 
-		if (currentKeyframe <= 0)
+		if (currentKeyframe == 0)
 		{
-			//dont add more frames if not lerping
 			break;
 		}
 	}
 
-	for (auto const& faceString : faceLineTokens)
+	//Generate fake vertices for the tween frames if tweening is needed
+	if (framesPerMesh > 1 && currentKeyframe > 0)
 	{
-		//Load the data in to the LAST index in m_meshVertices and m_meshIndices.
-		//Then we add extra data in between below if needed.
-		loadFace(m_meshVertices.size() - 1, vertices, textureCoordinates, vertexNormals, faceString, faceMap);
-	}
-
-	//The keyframe is loaded in indices and vertices lists.
-
-	if (framesPerMesh <= 1)
-	{
-		//Safety.
-		return;
-	}
-
-	if (currentKeyframe <= 0)
-	{
-		//This is the first keyframe. nothing to lerp
-		return;
-	}
-
-	size_t targetKeyframe = currentKeyframe * framesPerMesh; //The frame we just added.
-	size_t priorKeyframe = currentKeyframe == 1 ? 0 : (currentKeyframe - 1) * framesPerMesh; //The prior keyframe
-
-	if (m_meshVertices.at(priorKeyframe).size() != m_meshVertices.at(targetKeyframe).size())
-	{
-		Logger::log("Something is wrong with lerping, target has different verts size than prior. Skipping frame addition");
-		return;
-	}
-
-	if (m_meshIndices.at(priorKeyframe).size() != m_meshIndices.at(targetKeyframe).size())
-	{
-		Logger::log("Something is wrong with lerping, index list sizes differ. Skipping frame addition");
-		return;
-	}
-	
-	for (size_t lerpMeshIndex = currentKeyframe; lerpMeshIndex < targetKeyframe; lerpMeshIndex++)
-	{
-		//Indices are unchanged and copied from keyframe we're expanding
-		for (auto const& index : m_meshIndices.at(priorKeyframe))
-		{
-			m_meshIndices.at(lerpMeshIndex).push_back(index);
-		}
-
-		GLfloat factor = 0.f;
+		std::vector<std::vector<glm::vec3>> tweenFrameVertices;
 		GLfloat increase = 1.f / (GLfloat)framesPerMesh;
 
+		size_t tweenFrameIndex = currentKeyframe == 1 ? 1 : (currentKeyframe * framesPerMesh) - framesPerMesh + 1;
 
-		//TODO: this wont work as is because faces reuse verts, and we dont!!! need to convert back into obj ish format??
+		GLfloat factor = 0.f;
 
-		//Vertices are lerped prior -> target
-		for (size_t vertexIndex = 0; vertexIndex < m_meshVertices.at(priorKeyframe).size(); vertexIndex++)
+		for (int i = 0; i < (framesPerMesh - 1); i++)
 		{
-			//Get ref to the target vertex
-			Vertex& src = m_meshVertices.at(priorKeyframe).at(vertexIndex);
-			Vertex& target = m_meshVertices.at(targetKeyframe).at(vertexIndex);
+			tweenFrameVertices.push_back({});
 
-			//Create a copy of the prior vertex
-			Vertex copy = m_meshVertices.at(priorKeyframe).at(vertexIndex);
+			for (size_t vertexIndex = 0; vertexIndex < keyframeVertices[currentKeyframe - 1].size(); vertexIndex++)
+			{
+				//Get referencs to the source and target vertex lists for lerpin
+				glm::vec3& src = keyframeVertices[currentKeyframe - 1][vertexIndex];
+				glm::vec3& target = keyframeVertices[currentKeyframe][vertexIndex];
 
-			//Adjust the vertex bits in the copy according to the lerp
-			copy.x = std::lerp(src.x, target.x, factor);
-			copy.y = std::lerp(src.y, target.y,factor);
-			copy.z = std::lerp(src.z, target.z,factor);
+				tweenFrameVertices[i].push_back({ std::lerp(src.x, target.x, factor), std::lerp(src.y, target.y, factor), std::lerp(src.z, target.z, factor) });
+			}
 
-			//Add the copy
-			m_meshVertices.at(lerpMeshIndex).push_back(copy);
+			//Load the faces of the tween frames
+			//TODO; inefficient. parses many times... split the face parsing out here.
+			faceMap.clear();
+			for (auto const& faceString : faceLineTokens)
+			{
+				loadFace(tweenFrameIndex, tweenFrameVertices[i], keyframeTexCoords[currentKeyframe - 1], keyframeVertexNormals[currentKeyframe - 1], faceString, faceMap);
+			}
 
+			tweenFrameIndex++;
 			factor += increase;
 		}
+	}
+
+	//Load the faces of the keyframe
+	faceMap.clear();
+	for (auto const& faceString : faceLineTokens)
+	{
+		loadFace(currentKeyframe * framesPerMesh, keyframeVertices[currentKeyframe], keyframeTexCoords[currentKeyframe], keyframeVertexNormals[currentKeyframe], faceString, faceMap);
 	}
 }
 

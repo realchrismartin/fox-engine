@@ -8,9 +8,9 @@
 
 void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 {
-	if (modelData.meshes.empty())
+	if (modelData.keyframeFilePaths.empty())
 	{
-		Logger::log("No meshes provided to load in this model data! Skipping load.");
+		Logger::log("No keyframes provided to load in this model data! Skipping load.");
 		return;
 	}
 	

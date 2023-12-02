@@ -11,7 +11,6 @@ ExampleTestScene::ExampleTestScene()
 {
 	createPlayer();
 	createFloor();
-	createWindmill();
 	createBush();
 }
 
@@ -33,21 +32,14 @@ void ExampleTestScene::createPlayer()
 		ModelConfig model;
 		model.spriteSize = { 1024.f,1024.f };
 		model.spriteOffsetOnTexture = { 1023.f,0 };
-		model.frameCount = 100;
-
-		MeshConfig mesh;
-		mesh.meshFilePath = "../../img/mushroom/mushroom1.obj";
-		model.meshes.push_back(mesh);
-
-		mesh.meshFilePath = "../../img/mushroom/mushroom10.obj";
-		model.meshes.push_back(mesh);
-
-		mesh.meshFilePath = "../../img/mushroom/mushroom15.obj";
-		model.meshes.push_back(mesh);
-
-		mesh.meshFilePath = "../../img/mushroom/mushroom20.obj";
-		model.meshes.push_back(mesh);
-
+		model.frameCount = 60;
+		model.keyframeFilePaths = {
+			"../../img/mushroom/mushroom0.obj",
+			"../../img/mushroom/mushroom5.obj",
+			"../../img/mushroom/mushroom10.obj",
+			"../../img/mushroom/mushroom15.obj",
+			"../../img/mushroom/mushroom20.obj"
+		};
 		loadModel(model, uid);
 		getComponent<TransformComponent>(uid).setScale({ 2.f,2.f,2.f});
 		setCameraTargetEntity(uid);
@@ -71,11 +63,7 @@ void ExampleTestScene::createFloor()
 		ModelConfig model;
 		model.spriteSize = { 512,512 };
 		model.spriteOffsetOnTexture = { 511,0 };
-
-		MeshConfig mesh;
-		mesh.meshFilePath = "../../img/cube.obj";
-
-		model.meshes.push_back(mesh);
+		model.keyframeFilePaths = { "../../img/cube.obj" };
 
 		loadModel(model, uid);
 
@@ -83,28 +71,6 @@ void ExampleTestScene::createFloor()
 		getComponent<TransformComponent>(uid).setTranslation({ 0.f,-2.f,0.f});
 	}
 
-}
-
-void ExampleTestScene::createWindmill()
-{
-	if (m_windmillUID.has_value())
-	{
-		removeEntity(m_windmillUID.value());
-	}
-
-	m_windmillUID = createEntity();
-
-	if (m_windmillUID.has_value()) 
-	{
-		int uid = m_windmillUID.value();
-		MeshConfig mesh;
-		ModelConfig model;
-		model.meshes.push_back(mesh);
-
-		loadModel(model, uid);
-
-		getComponent<TransformComponent>(uid).setRotation({ 0.f,180.f,0.f});
-	}
 }
 
 void ExampleTestScene::createBush()
@@ -118,13 +84,10 @@ void ExampleTestScene::createBush()
 		ModelConfig model;
 		model.spriteSize = { 228,228 };
 		model.spriteOffsetOnTexture = { 0,513 };
-		MeshConfig mesh;
-		mesh.meshFilePath = "../../img/quoteunquote-bush.obj";
-		model.meshes.push_back(mesh);
+		model.keyframeFilePaths = { "../../img/quoteunquote-bush.obj" };
 
 		loadModel(model, uid);
 
 		getComponent<TransformComponent>(uid).setTranslation({ 10.f,0.f,5.f});
-		addChild(m_windmillUID.value(), uid);
 	}
 }

@@ -11,11 +11,9 @@ public:
 protected:
 	void createPlayer();
 	void createFloor();
-	void createWindmill();
 	void createBush();
 private:
 	std::optional<int> m_playerUID;
-	std::optional<int> m_windmillUID;
 	std::optional<int> m_floorUID;
 	std::optional<int> m_bushUID;
 };
