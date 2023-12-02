@@ -8,7 +8,7 @@
 size_t ModelComponent::getNumMeshes() const
 {
 	//NB: assumes the number of meshes is constant across vertices,indices lists
-	return m_meshVertices.size();
+	return m_frameVertices.size();
 }
 
 size_t ModelComponent::getActiveMeshIndex() const
@@ -19,7 +19,7 @@ size_t ModelComponent::getActiveMeshIndex() const
 void ModelComponent::setActiveMesh(size_t meshIndex)
 {
 	//NB: assumes the number of meshes is constant across vertices,indices lists
-	if (meshIndex < 0 || meshIndex >= m_meshVertices.size())
+	if (meshIndex < 0 || meshIndex >= m_frameVertices.size())
 	{
 		return;
 	}
@@ -29,31 +29,31 @@ void ModelComponent::setActiveMesh(size_t meshIndex)
 
 size_t ModelComponent::getVertexCount() const
 {
-	return m_meshVertices[m_activeMeshIndex].size();
+	return m_frameVertices[m_activeMeshIndex].size();
 }
 
 size_t ModelComponent::getIndexCount() const
 {
-	return m_meshIndices[m_activeMeshIndex].size();
+	return m_frameIndices[m_activeMeshIndex].size();
 }
 
 const std::vector<GLuint>& ModelComponent::getIndices() const
 {
-	return m_meshIndices[m_activeMeshIndex];
+	return m_frameIndices[m_activeMeshIndex];
 }
 
 const std::vector<Vertex>& ModelComponent::getVertices() const
 {
-	return m_meshVertices[m_activeMeshIndex];
+	return m_frameVertices[m_activeMeshIndex];
 }
 
 void ModelComponent::setTransformPoolIndex(size_t transformPoolIndex)
 {
-	for (size_t i = 0; i < m_meshVertices.size(); i++)
+	for (size_t i = 0; i < m_frameVertices.size(); i++)
 	{
-		for (size_t j = 0; j < m_meshVertices[i].size(); j++)
+		for (size_t j = 0; j < m_frameVertices[i].size(); j++)
 		{
-			m_meshVertices[i][j].mvpIndex = (GLfloat)transformPoolIndex;
+			m_frameVertices[i][j].mvpIndex = (GLfloat)transformPoolIndex;
 		}
 	}
 }
@@ -66,8 +66,8 @@ void ModelComponent::loadModel(const ModelConfig& modelData)
 	}
 
 	m_activeMeshIndex = 0; //Reset!
-	m_meshIndices.clear();
-	m_meshVertices.clear();
+	m_frameIndices.clear();
+	m_frameVertices.clear();
 
 	//Find the ratio by which we will be adjusting the model's texture coordinates to fit the mesh, since the sprite is going to be smaller than the texture atlas (it's IN the texture atlas)
 	glm::vec2 textureCoordinateRatio = glm::vec2((float)modelData.spriteSize.x / (float)modelData.textureSize.x, (float)modelData.spriteSize.y / (float)modelData.textureSize.y);
@@ -115,6 +115,60 @@ void ModelComponent::loadKeyframe(size_t currentKeyframe, size_t framesPerMesh, 
 	std::vector<std::vector<glm::vec3>>& keyframeVertices, std::vector<std::vector<glm::vec3>>& keyframeVertexNormals, std::vector<std::vector<glm::vec2>>& keyframeTexCoords,
 	const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor)
 {
+	//Ensure there is at least one frame.
+	framesPerMesh = framesPerMesh <= 0 ? 1 : framesPerMesh;
+
+	//Add mesh vertices and indices vecs
+	for (int i = 0; i < framesPerMesh; i++)
+	{
+		m_frameVertices.push_back({});
+		m_frameIndices.push_back({});
+
+		if (currentKeyframe == 0)
+		{
+			break;
+		}
+	}
+
+	std::vector<std::vector<std::string>> faceElementLines;
+
+	//Load the OBJ file for the keyframe, populatign the vectors.
+	loadOBJFile(keyframePath, currentKeyframe, keyframeVertices, keyframeVertexNormals, keyframeTexCoords, faceElementLines, textureCoordinateRatio, textureOffsetFactor);
+
+	std::vector<FaceElement> faceElements;
+
+	//Load all of the faceElement data from strings into faceElements
+	mapFaceElementData(faceElements, faceElementLines);
+
+	//Generate fake vertices for the tween frames if tweening is needed
+	if (currentKeyframe > 0)
+	{
+		std::vector<std::vector<glm::vec3>> tweenFrameVertices;
+
+		generateTweenFrameVertices(tweenFrameVertices, keyframeVertices, framesPerMesh, currentKeyframe);
+
+		size_t tweenFrameIndex = currentKeyframe == 1 ? 1 : (currentKeyframe * framesPerMesh) - framesPerMesh + 1;
+
+		for (int i = 0; i < (framesPerMesh - 1); i++)
+		{
+			//Load the faceElements of the tween frames
+			storeFaceElements(tweenFrameIndex + i, faceElements, tweenFrameVertices[i], keyframeTexCoords[currentKeyframe], keyframeVertexNormals[currentKeyframe]);
+		}
+	}
+
+	//Load the faceElements of the keyframe
+	storeFaceElements(currentKeyframe* framesPerMesh, faceElements, keyframeVertices[currentKeyframe], keyframeTexCoords[currentKeyframe], keyframeVertexNormals[currentKeyframe]);
+}
+
+void ModelComponent::loadOBJFile(const std::string& keyframePath, size_t currentKeyframe, 
+	std::vector<std::vector<glm::vec3>>& keyframeVertices,
+	std::vector<std::vector<glm::vec3>>& keyframeVertexNormals,
+	std::vector<std::vector<glm::vec2>>& keyframeTexCoords, 
+	std::vector<std::vector<std::string>>& faceElementLines,
+	const glm::vec2& textureCoordinateRatio,
+	const glm::vec2& textureOffsetFactor)
+{
+
 	std::ifstream input;
 	input.open(keyframePath);
 
@@ -124,7 +178,6 @@ void ModelComponent::loadKeyframe(size_t currentKeyframe, size_t framesPerMesh, 
 	}
 
 	std::string currentLine;
-	std::vector<std::vector<std::string>> faceLineTokens;
 
 	bool first = true;
 	int lineType = -1;
@@ -204,7 +257,7 @@ void ModelComponent::loadKeyframe(size_t currentKeyframe, size_t framesPerMesh, 
 			break;
 		}
 		case (3):
-			faceLineTokens.push_back(lineTokens);
+			faceElementLines.push_back(lineTokens);
 			break;
 		default:
 			break;
@@ -212,138 +265,109 @@ void ModelComponent::loadKeyframe(size_t currentKeyframe, size_t framesPerMesh, 
 	}
 
 	input.close();
+}
 
-	std::map<std::string, GLuint> faceMap;
+void ModelComponent::generateTweenFrameVertices(std::vector<std::vector<glm::vec3>>& tweenFrameVertices, const std::vector<std::vector<glm::vec3>>& keyframeVertices, size_t framesPerMesh, size_t currentKeyframe)
+{
+	GLfloat increase = 1.f / (GLfloat)framesPerMesh;
+	GLfloat factor = 0.f;
 
-	//Ensure there is at least one frame.
-	framesPerMesh = framesPerMesh <= 0 ? 1 : framesPerMesh;
-
-	//Add mesh vertices and indices vecs
-	for (int i = 0; i < framesPerMesh; i++)
+	for (int i = 0; i < (framesPerMesh - 1); i++)
 	{
-		m_meshVertices.push_back({});
-		m_meshIndices.push_back({});
+		tweenFrameVertices.push_back({});
 
-		if (currentKeyframe == 0)
+		for (size_t vertexIndex = 0; vertexIndex < keyframeVertices[currentKeyframe - 1].size(); vertexIndex++)
 		{
-			break;
+			//Get referencs to the source and target vertex lists for lerpin
+			const glm::vec3& src = keyframeVertices.at(currentKeyframe - 1)[vertexIndex];
+			const glm::vec3& target = keyframeVertices.at(currentKeyframe)[vertexIndex];
+
+			tweenFrameVertices[i].push_back({ std::lerp(src.x, target.x, factor), std::lerp(src.y, target.y, factor), std::lerp(src.z, target.z, factor) });
 		}
-	}
 
-	//Generate fake vertices for the tween frames if tweening is needed
-	if (framesPerMesh > 1 && currentKeyframe > 0)
-	{
-		std::vector<std::vector<glm::vec3>> tweenFrameVertices;
-		GLfloat increase = 1.f / (GLfloat)framesPerMesh;
-
-		size_t tweenFrameIndex = currentKeyframe == 1 ? 1 : (currentKeyframe * framesPerMesh) - framesPerMesh + 1;
-
-		GLfloat factor = 0.f;
-
-		for (int i = 0; i < (framesPerMesh - 1); i++)
-		{
-			tweenFrameVertices.push_back({});
-
-			for (size_t vertexIndex = 0; vertexIndex < keyframeVertices[currentKeyframe - 1].size(); vertexIndex++)
-			{
-				//Get referencs to the source and target vertex lists for lerpin
-				glm::vec3& src = keyframeVertices[currentKeyframe - 1][vertexIndex];
-				glm::vec3& target = keyframeVertices[currentKeyframe][vertexIndex];
-
-				tweenFrameVertices[i].push_back({ std::lerp(src.x, target.x, factor), std::lerp(src.y, target.y, factor), std::lerp(src.z, target.z, factor) });
-			}
-
-			//Load the faces of the tween frames
-			//TODO; inefficient. parses many times... split the face parsing out here.
-			faceMap.clear();
-			for (auto const& faceString : faceLineTokens)
-			{
-				loadFace(tweenFrameIndex, tweenFrameVertices[i], keyframeTexCoords[currentKeyframe - 1], keyframeVertexNormals[currentKeyframe - 1], faceString, faceMap);
-			}
-
-			tweenFrameIndex++;
-			factor += increase;
-		}
-	}
-
-	//Load the faces of the keyframe
-	faceMap.clear();
-	for (auto const& faceString : faceLineTokens)
-	{
-		loadFace(currentKeyframe * framesPerMesh, keyframeVertices[currentKeyframe], keyframeTexCoords[currentKeyframe], keyframeVertexNormals[currentKeyframe], faceString, faceMap);
+		factor += increase;
 	}
 }
 
-void ModelComponent::loadFace(
-	size_t meshIndex,
-	const std::vector<glm::vec3>& vertices, 
-	const std::vector<glm::vec2>& textureCoordinates, 
-	const std::vector<glm::vec3>& vertexNormals, 
-	const std::vector<std::string>& faceData, std::map<std::string,GLuint>& faceMap)
+void ModelComponent::mapFaceElementData(std::vector<FaceElement>& faceElements, const std::vector<std::vector<std::string>>& faceElementLineTokens)
 {
-	size_t vertexCount = 0;
-
-	for (auto const& faceComponent : faceData)
+	for (auto const& faceElementString : faceElementLineTokens)
 	{
-		std::stringstream stream(faceComponent);
-		std::string token;
-
-		int dataType = 0; // Whether this token is a vertex index, vertex texture index
-
-		int vertexIndex = -1;
-		int vertexTextureIndex = -1;
-		int vertexNormalIndex = -1;
-
-		//Faces are defined using lists of vertex, textureand normal indices in the format vertex_index / texture_index / normal_index for which each index starts at 1
-		while (std::getline(stream, token, '/'))
+		for (auto const& faceElement: faceElementString)
 		{
-			// Get the index for whatever data token this is, decrement by 1 due to 1-indexing
-			int index = (int)atoi(token.c_str());
+			std::stringstream stream(faceElement);
+			std::string token;
 
-			switch (dataType)
+			int dataType = 0; // Whether this token is a vertex index, vertex texture index
+
+			int vertexIndex = -1;
+			int vertexTextureIndex = -1;
+			int vertexNormalIndex = -1;
+
+			//FaceElements are defined using lists of vertex, textureand normal indices in the format vertex_index / texture_index / normal_index for which each index starts at 1
+			while (std::getline(stream, token, '/'))
 			{
-			case (0): // Vertex
-				vertexIndex = index;
-				break;
-			case (1): // Vertex texture
-				vertexTextureIndex = index;
-				break;
-			case(2): //Vertex normal
-				vertexNormalIndex = index;
-				break;
-			default: // Unused / extra data
-				break;
+				// Get the index for whatever data token this is, decrement by 1 due to 1-indexing
+				int index = (int)atoi(token.c_str());
+
+				switch (dataType)
+				{
+				case (0): // Vertex
+					vertexIndex = index - 1;
+					break;
+				case (1): // Vertex texture
+					vertexTextureIndex = index - 1;
+					break;
+				case(2): //Vertex normal
+					vertexNormalIndex = index - 1;
+					break;
+				default: // Unused / extra data
+					break;
+				}
+
+				dataType++;
 			}
 
-			dataType++;
-		}
+			if (vertexIndex == -1 || vertexTextureIndex == -1 || vertexNormalIndex == -1)
+			{
+				Logger::log("One of the components of a faceElement is missing - model load failed.");
+				return;
+			}
 
-		if ((vertexIndex -1) >= vertices.size())
-		{
-			std::cout << "ERROR: tried to load vertex " << vertexIndex << " but there were only " << vertices.size() << " vertices!!" << std::endl;
-			return;
+			FaceElement faceElement;
+			faceElement.vertexIndex = vertexIndex;
+			faceElement.vertexTextureIndex = vertexTextureIndex;
+			faceElement.vertexNormalIndex = vertexNormalIndex;
+			faceElements.push_back(faceElement);
 		}
+	}
+}
 
-		if ((vertexTextureIndex - 1) >= textureCoordinates.size())
-		{
-			std::cout << "ERROR: tried to load texture " << vertexTextureIndex << " but there were only " << textureCoordinates.size() << " texture coords!!" << std::endl;
-			return;
-		}
+void ModelComponent::storeFaceElements(
+	size_t frameIndex,
+	const std::vector<FaceElement>& faceElements,
+	const std::vector<glm::vec3>& vertices, 
+	const std::vector<glm::vec2>& textureCoordinates, 
+	const std::vector<glm::vec3>& vertexNormals)
+{
+	std::unordered_map<std::string, GLuint> faceElementMap;
 
-		// Create a map key from the assembled data for this face - look up the data from the model and connect it together
+	for (auto const& faceElement : faceElements)
+	{
+		// Create a map key from the assembled data for this faceElement - look up the data from the model and connect it together
 		// Store the data in the map (if needed) and push vertices if needed, store an index either way
-		std::string mapKey = std::to_string(vertexIndex) + "_" + std::to_string(vertexTextureIndex) + "_" + std::to_string(vertexNormalIndex);
+		std::string mapKey = std::to_string(faceElement.vertexIndex) + "_" + std::to_string(faceElement.vertexTextureIndex) + "_" + std::to_string(faceElement.vertexNormalIndex);
 
-		if (faceMap.count(mapKey))
+		if (faceElementMap.count(mapKey))
 		{
-			m_meshIndices[meshIndex].push_back(faceMap.at(mapKey));
+			m_frameIndices[frameIndex].push_back(faceElementMap.at(mapKey));
 		}
 		else
 		{
 			// We need to push both vertex data and index data
 			// We also need to update our map
-			auto v = vertices.at(vertexIndex - 1);
-			auto t = textureCoordinates.at(vertexTextureIndex - 1);
+			auto v = vertices.at(faceElement.vertexIndex);
+			auto t = textureCoordinates.at(faceElement.vertexTextureIndex);
 
 			// Add vertex data to vertex vector
 			// Note: ordering we push here needs to match the buffer layout
@@ -356,11 +380,11 @@ void ModelComponent::loadFace(
 			vertex.t = t.y;
 			vertex.mvpIndex = 0.f; //This is updated as soon as this method completes in void Scene::updateAllModelComponentAssociations()
 
-			m_meshVertices[meshIndex].push_back(vertex);
+			m_frameVertices[frameIndex].push_back(vertex);
 
-			GLuint index = (GLuint)faceMap.size();    // This is the "next" face - first one is index 0, etc.
-			faceMap[mapKey] = index;          // Update map to specify index for this face - map size changes, so next index is + 1
-			m_meshIndices[meshIndex].push_back(index);
+			GLuint index = (GLuint)faceElementMap.size();    // This is the "next" faceElement - first one is index 0, etc.
+			faceElementMap[mapKey] = index;          // Update map to specify index for this faceElement - map size changes, so next index is + 1
+			m_frameIndices[frameIndex].push_back(index);
 		}
 	}
 }

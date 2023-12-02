@@ -6,13 +6,22 @@ struct KeyframeConfig;
 
 #include "src/graphics/Vertex.hpp"
 
+/// @brief Represents one part of a face of a model.
+/// @brief For now we do not use normal index anywhere
+struct FaceElement
+{
+	unsigned int vertexIndex = 0;
+	unsigned int vertexTextureIndex = 0;
+	unsigned int vertexNormalIndex = 0;
+};
+
 /// @brief A component that contains data required to represent and render a 3D model in the scene.
 /// @brief A model consists of 0 ... n Meshes which are made of vertices and indices. One mesh is drawn at a time to represent an "animation". The Scene controls which mesh is drawn by setting the active mesh index.
 class ModelComponent
 {
 public:
 
-	/// @brief Load the model component with mesh data. This sets up its vertices and indices.
+	/// @brief Load the model component given its keyframe data. This sets up its vertices and indices.
 	/// @param modelData 
 	void loadModel(const ModelConfig& modelData);
 
@@ -48,13 +57,31 @@ public:
 	/// @param transformPoolIndex 
 	void setTransformPoolIndex(size_t transformPoolIndex);
 private:
+	//Load a keyframe, generating vertices and indices for the keyframe and tween frames.
 	void loadKeyframe(size_t currentKeyframe, size_t framesPerMesh, const std::string& keyframePath, std::vector<std::vector<glm::vec3>>& keyframeVertices, std::vector<std::vector<glm::vec3>>& keyframeVertexNormals, std::vector<std::vector<glm::vec2>>& keyframeTexCoords, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor);
-	void loadFace(size_t meshIndex, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec3>& vertexNormals, const std::vector<std::string>& faceData, std::map<std::string, GLuint>& faceMap);
+
+	//Given an OBJ file path, load the data present into the provided vectors at the specified keyframe index.
+	void loadOBJFile(const std::string& keyframePath, size_t currentKeyframe, std::vector<std::vector<glm::vec3>>& keyframeVertices, std::vector<std::vector<glm::vec3>>& keyframeVertexNormals, std::vector<std::vector<glm::vec2>>& keyframeTexCoords, std::vector<std::vector<std::string>>& faceElementLines, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor);
+
+	/// @brief Given keyframe vertices and other data, populate tweenFrameVertices with generated vertex data.
+	void generateTweenFrameVertices(std::vector<std::vector<glm::vec3>>& tweenFrameVertices, const std::vector<std::vector<glm::vec3>>& keyframeVertices, size_t framesPerMesh, size_t currentKeyframe);
+
+	/// @brief Given facelinetokens, generate face elements that represent the tokens
+	void mapFaceElementData(std::vector<FaceElement>& faces,const std::vector<std::vector<std::string>>& faceLineTokens);
+
+	/// @brief Given faces for a frame, populate the m_frameVertices and indices.
+	void storeFaceElements(
+		size_t frameIndex,
+		const std::vector<FaceElement>& faceElements,
+		const std::vector<glm::vec3>& vertices,
+		const std::vector<glm::vec2>& textureCoordinates,
+		const std::vector<glm::vec3>& vertexNormals);
+
 
 	size_t m_activeMeshIndex = 0;
 
-	std::vector<std::vector<GLuint>> m_meshIndices;
-	std::vector<std::vector<Vertex>> m_meshVertices;
+	std::vector<std::vector<GLuint>> m_frameIndices;
+	std::vector<std::vector<Vertex>> m_frameVertices;
 };
 
 #endif
