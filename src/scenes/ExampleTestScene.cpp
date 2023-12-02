@@ -33,18 +33,20 @@ void ExampleTestScene::createPlayer()
 		ModelConfig model;
 		model.spriteSize = { 1024.f,1024.f };
 		model.spriteOffsetOnTexture = { 1023.f,0 };
+		model.frameCount = 100;
 
-		int m = 0;
-		for (int i = 0; i < 60; i++)
-		{
-			MeshConfig mesh;
-			mesh.meshFilePath = std::format("../../img/mushroom/mushroom{}.obj", m);
-			model.meshes.push_back(mesh);
-			if (i % 3 == 0)
-			{
-				m++;
-			}
-		}
+		MeshConfig mesh;
+		mesh.meshFilePath = "../../img/mushroom/mushroom1.obj";
+		model.meshes.push_back(mesh);
+
+		mesh.meshFilePath = "../../img/mushroom/mushroom10.obj";
+		model.meshes.push_back(mesh);
+
+		mesh.meshFilePath = "../../img/mushroom/mushroom15.obj";
+		model.meshes.push_back(mesh);
+
+		mesh.meshFilePath = "../../img/mushroom/mushroom20.obj";
+		model.meshes.push_back(mesh);
 
 		loadModel(model, uid);
 		getComponent<TransformComponent>(uid).setScale({ 2.f,2.f,2.f});

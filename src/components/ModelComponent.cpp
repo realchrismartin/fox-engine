@@ -60,30 +60,41 @@ void ModelComponent::setTransformPoolIndex(size_t transformPoolIndex)
 
 void ModelComponent::loadModel(const ModelConfig& modelData)
 {
-	m_activeMeshIndex = 0;
+	if (modelData.meshes.empty())
+	{
+		return;
+	}
 
+	m_activeMeshIndex = 0; //Reset!
 	m_meshIndices.clear();
 	m_meshVertices.clear();
-
-	size_t meshIndex = 0;
 
 	//Find the ratio by which we will be adjusting the model's texture coordinates to fit the mesh, since the sprite is going to be smaller than the texture atlas (it's IN the texture atlas)
 	glm::vec2 textureCoordinateRatio = glm::vec2((float)modelData.spriteSize.x / (float)modelData.textureSize.x, (float)modelData.spriteSize.y / (float)modelData.textureSize.y);
 
 	//Find the amount to add to each texture coordinate to offset it correctly in the overall texture
 	glm::vec2 textureOffsetFactor = glm::vec2((float)modelData.spriteOffsetOnTexture.x / (float)modelData.textureSize.x, (float)modelData.spriteOffsetOnTexture.y / (float)modelData.textureSize.y);
+	
+	//Ensure frame count is >= mesh count
+	size_t frameCount = modelData.meshes.size() > modelData.frameCount ? modelData.meshes.size() : modelData.frameCount;
 
+	size_t framesPerMesh = (float)frameCount / (float)modelData.meshes.size();
+
+	if (framesPerMesh < 1)
+	{
+		Logger::log("skipping load, too few frames per mesh derived from frame count and meshes vec size.");
+		return;
+	}
+
+	size_t keyframeIndex = 0;
 	for (auto const& meshData : modelData.meshes)
 	{
-		m_meshIndices.push_back({});
-		m_meshVertices.push_back({});
-
-		loadMesh(meshIndex, meshData, textureCoordinateRatio, textureOffsetFactor);
-		meshIndex++;
+		loadKeyframe(keyframeIndex, modelData.meshes.size(), framesPerMesh, meshData, textureCoordinateRatio, textureOffsetFactor);
+		keyframeIndex++;
 	}
 }
 
-void ModelComponent::loadMesh(size_t meshIndex, const MeshConfig& meshData, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor)
+void ModelComponent::loadKeyframe(size_t currentKeyframe, size_t keyframeCount, size_t framesPerMesh, const MeshConfig& meshData, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor)
 {
 	std::ifstream input;
 	input.open(meshData.meshFilePath);
@@ -189,10 +200,90 @@ void ModelComponent::loadMesh(size_t meshIndex, const MeshConfig& meshData, cons
 
 	std::map<std::string, GLuint> faceMap;
 
-	// Now that other data is loaded, load faces
+	// Now that other data is loaded, load faces and update indices/vertices.
+
+	for (size_t i = 0; i < framesPerMesh; i++)
+	{
+		m_meshIndices.push_back({});
+		m_meshVertices.push_back({});
+
+		if (currentKeyframe <= 0)
+		{
+			//dont add more frames if not lerping
+			break;
+		}
+	}
+
 	for (auto const& faceString : faceLineTokens)
 	{
-		loadFace(meshIndex,vertices, textureCoordinates, vertexNormals, faceString, faceMap);
+		//Load the data in to the LAST index in m_meshVertices and m_meshIndices.
+		//Then we add extra data in between below if needed.
+		loadFace(m_meshVertices.size() - 1, vertices, textureCoordinates, vertexNormals, faceString, faceMap);
+	}
+
+	//The keyframe is loaded in indices and vertices lists.
+
+	if (framesPerMesh <= 1)
+	{
+		//Safety.
+		return;
+	}
+
+	if (currentKeyframe <= 0)
+	{
+		//This is the first keyframe. nothing to lerp
+		return;
+	}
+
+	size_t targetKeyframe = currentKeyframe * framesPerMesh; //The frame we just added.
+	size_t priorKeyframe = currentKeyframe == 1 ? 0 : (currentKeyframe - 1) * framesPerMesh; //The prior keyframe
+
+	if (m_meshVertices.at(priorKeyframe).size() != m_meshVertices.at(targetKeyframe).size())
+	{
+		Logger::log("Something is wrong with lerping, target has different verts size than prior. Skipping frame addition");
+		return;
+	}
+
+	if (m_meshIndices.at(priorKeyframe).size() != m_meshIndices.at(targetKeyframe).size())
+	{
+		Logger::log("Something is wrong with lerping, index list sizes differ. Skipping frame addition");
+		return;
+	}
+	
+	for (size_t lerpMeshIndex = currentKeyframe; lerpMeshIndex < targetKeyframe; lerpMeshIndex++)
+	{
+		//Indices are unchanged and copied from keyframe we're expanding
+		for (auto const& index : m_meshIndices.at(priorKeyframe))
+		{
+			m_meshIndices.at(lerpMeshIndex).push_back(index);
+		}
+
+		GLfloat factor = 0.f;
+		GLfloat increase = 1.f / (GLfloat)framesPerMesh;
+
+
+		//TODO: this wont work as is because faces reuse verts, and we dont!!! need to convert back into obj ish format??
+
+		//Vertices are lerped prior -> target
+		for (size_t vertexIndex = 0; vertexIndex < m_meshVertices.at(priorKeyframe).size(); vertexIndex++)
+		{
+			//Get ref to the target vertex
+			Vertex& src = m_meshVertices.at(priorKeyframe).at(vertexIndex);
+			Vertex& target = m_meshVertices.at(targetKeyframe).at(vertexIndex);
+
+			//Create a copy of the prior vertex
+			Vertex copy = m_meshVertices.at(priorKeyframe).at(vertexIndex);
+
+			//Adjust the vertex bits in the copy according to the lerp
+			copy.x = std::lerp(src.x, target.x, factor);
+			copy.y = std::lerp(src.y, target.y,factor);
+			copy.z = std::lerp(src.z, target.z,factor);
+
+			//Add the copy
+			m_meshVertices.at(lerpMeshIndex).push_back(copy);
+
+			factor += increase;
+		}
 	}
 }
 
@@ -203,6 +294,8 @@ void ModelComponent::loadFace(
 	const std::vector<glm::vec3>& vertexNormals, 
 	const std::vector<std::string>& faceData, std::map<std::string,GLuint>& faceMap)
 {
+	size_t vertexCount = 0;
+
 	for (auto const& faceComponent : faceData)
 	{
 		std::stringstream stream(faceComponent);

@@ -48,7 +48,7 @@ public:
 	/// @param transformPoolIndex 
 	void setTransformPoolIndex(size_t transformPoolIndex);
 private:
-	void loadMesh(size_t meshIndex, const MeshConfig& meshData, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor);
+	void loadKeyframe(size_t currentKeyframe, size_t keyframeCount, size_t framesPerMesh, const MeshConfig& meshData, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor);
 	void loadFace(size_t meshIndex, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec2>& textureCoordinates, const std::vector<glm::vec3>& vertexNormals, const std::vector<std::string>& faceData, std::map<std::string, GLuint>& faceMap);
 
 	size_t m_activeMeshIndex = 0;

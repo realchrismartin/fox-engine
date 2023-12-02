@@ -16,6 +16,7 @@ struct ModelConfig
 	glm::vec2 spriteSize = glm::vec2(509, 509); //How big the sprite is in the texture atlas, in pixels
 	glm::vec2 spriteOffsetOnTexture = glm::vec2(0, 0); //Where the sprite is in the texture atlas. //TODO: specify units this is in.
 
+	size_t frameCount = 1; //How many frames are in the animation.
 	std::vector<MeshConfig> meshes; //Contains all of the mesh data associated with this model
 };
 
