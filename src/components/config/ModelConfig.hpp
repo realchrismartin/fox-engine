@@ -1,5 +1,5 @@
-#ifndef MODELDATA_HPP
-#define MODELDATA_HPP
+#ifndef MODELCONFIG_HPP
+#define MODELCONFIG_HPP
 
 /// @brief Defines a configuration for a 3d model that contains 1 ... n keyframes and has a sprite that it maps to itself.
 /// @brief All of the keyframes are assumed to use the same texture.

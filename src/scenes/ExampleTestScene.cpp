@@ -4,7 +4,8 @@
 
 #include "src/components/InputComponent.hpp"
 #include "src/components/TransformComponent.hpp"
-#include "src/graphics/ModelConfig.hpp"
+#include "src/components/config/ModelConfig.hpp"
+#include "src/components/config/TextConfig.hpp"
 #include <format>
 
 ExampleTestScene::ExampleTestScene()
@@ -12,6 +13,7 @@ ExampleTestScene::ExampleTestScene()
 	createPlayer();
 	createFloor();
 	createBush();
+	createText();
 }
 
 void ExampleTestScene::createPlayer()
@@ -31,7 +33,7 @@ void ExampleTestScene::createPlayer()
 
 		ModelConfig model;
 		model.spriteSize = { 1024.f,1024.f };
-		model.spriteOffsetOnTexture = { 1023.f,0 };
+		model.spriteOffsetOnTexture = { 1017,1476 };
 		model.frameCount = 60;
 		model.keyframeFilePaths = {
 			"../../img/mushroom/mushroom0.obj",
@@ -62,7 +64,7 @@ void ExampleTestScene::createFloor()
 
 		ModelConfig model;
 		model.spriteSize = { 512,512 };
-		model.spriteOffsetOnTexture = { 511,0 };
+		model.spriteOffsetOnTexture = { 511,1989 }; //TODO slightly misaligned and inside mushroom //1989
 		model.keyframeFilePaths = { "../../img/cube.obj" };
 
 		loadModel(model, uid);
@@ -83,11 +85,25 @@ void ExampleTestScene::createBush()
 
 		ModelConfig model;
 		model.spriteSize = { 228,228 };
-		model.spriteOffsetOnTexture = { 0,513 };
+		model.spriteOffsetOnTexture = { 0,1761 };
 		model.keyframeFilePaths = { "../../img/quoteunquote-bush.obj" };
 
 		loadModel(model, uid);
 
 		getComponent<TransformComponent>(uid).setTranslation({ 10.f,0.f,5.f});
+	}
+}
+
+void ExampleTestScene::createText()
+{
+	m_textUID = createEntity();
+
+	if (m_textUID.has_value())
+	{
+		int uid = m_textUID.value();
+		TextConfig config;
+		config.textToDisplay = "J is sleepy";
+		loadText(config, uid);
+		getComponent<TransformComponent>(uid).setTranslation({ 0.f,6.f,0.f});
 	}
 }

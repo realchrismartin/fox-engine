@@ -34,6 +34,20 @@ public:
 	{
 		return m_projectionMatrix;
 	}
+
+	const glm::mat4& getOrthographicProjectionMatrix()
+	{
+
+		if (m_orthographicProjectionMatrixDirty)
+		{
+
+			m_orthographicProjectionMatrix = glm::ortho(0.0f, 800.f, 600.f, 0.0f, -1.0f, 1.0f); //TODO siz
+
+			m_orthographicProjectionMatrixDirty = false;
+		}
+
+		return m_orthographicProjectionMatrix;
+	}
 	
 	const glm::mat4& getViewMatrix() const
 	{
@@ -122,12 +136,14 @@ public:
 private:
 	glm::mat4 m_viewMatrix;
 	glm::mat4 m_projectionMatrix;
+	glm::mat4 m_orthographicProjectionMatrix;
 
 	bool m_viewMatrixEverSet = false;
 	bool m_projectionMatrixEverSet = false;
 
 	bool m_viewMatrixDirty = true;
 	bool m_projectionMatrixDirty = true;
+	bool m_orthographicProjectionMatrixDirty = true;
 
 	std::optional<int> m_cameraEntityLastTick = std::nullopt;
 	std::optional<int> m_cameraTargetLastTick = std::nullopt;

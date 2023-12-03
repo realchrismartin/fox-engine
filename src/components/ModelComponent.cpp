@@ -1,6 +1,8 @@
 #include "src/components/ModelComponent.hpp"
 
-#include "src/graphics/ModelConfig.hpp"
+#include "src/components/config/ModelConfig.hpp"
+#include "src/components/config/TextConfig.hpp"
+#include "src/util/FontMapper.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -58,10 +60,102 @@ void ModelComponent::setTransformPoolIndex(size_t transformPoolIndex)
 	}
 }
 
+bool ModelComponent::usesOrthographicProjection() const
+{
+	return m_usesOrthographicProjection;
+}
+
+void ModelComponent::loadText(const TextConfig& textConfig)
+{
+	if (!m_frameVertices.empty() || !m_frameIndices.empty())
+	{
+		Logger::log("Model is already loaded, cannot load text.");
+		return;
+	}
+
+	m_usesOrthographicProjection = true;
+
+	m_frameVertices.push_back({});
+	m_frameIndices.push_back({});
+
+	constexpr size_t indexCountPerCharacter = 4;
+	constexpr glm::vec2 textureSize = glm::vec2(2500.f, 2500.f); //TODO
+
+	float xSpacing = ((float)textConfig.textToDisplay.size() / 2.f); //Enough to fit all characters in 0.5f ... .5f (todo spacing)
+
+	float xAdjustment = -2.f / textConfig.textToDisplay.size(); //Display all characters in -.5f -> .5f on x axis.
+
+	for (size_t characterIndex = 0; characterIndex < textConfig.textToDisplay.size(); characterIndex++)
+	{
+		//TODO: adjust tex coords by atlas size? Or do they already take into account atlas size implicitly?
+
+		glm::vec2 characterSize = FontMapper::getCharacterSpriteSize(textConfig.textToDisplay[characterIndex]);
+		glm::vec2 characterTexCoords = FontMapper::getCharacterTexCoords(textConfig.textToDisplay[characterIndex]); //Analogous to the sprite offset on a texture
+
+		//TODO: these are horribly wrong
+		glm::vec2 textureOffsetFactor = glm::vec2((float)(characterTexCoords.x) / (float)(textureSize.x), (float)(textureSize.y - characterSize.y - characterTexCoords.y) / (float)(textureSize.y));
+		glm::vec2 characterSizeRatio = glm::vec2((float)characterSize.x / (float)textureSize.x, (float)characterSize.y / (float)textureSize.y);
+
+		size_t characterStartIndex = 1 + characterIndex;
+
+		Vertex topRight;
+		topRight.x = .5f * characterStartIndex;
+		topRight.y = .5f;
+		topRight.z = 0.f;
+		topRight.s = textureOffsetFactor.x + characterSizeRatio.x;
+		topRight.t = textureOffsetFactor.y;
+
+		Vertex bottomRight;
+		bottomRight.x = .5f * characterStartIndex;
+		bottomRight.y = -.5f;
+		bottomRight.z = 0.f;
+		bottomRight.s = textureOffsetFactor.x + characterSizeRatio.x;
+		bottomRight.t = textureOffsetFactor.y * characterSizeRatio.y;
+
+		Vertex bottomLeft;
+		bottomLeft.x = -.5f * characterStartIndex;
+		bottomLeft.y = -.5f;
+		bottomLeft.z = 0.f;
+		bottomLeft.s = textureOffsetFactor.x;
+		bottomLeft.t = textureOffsetFactor.y - characterSizeRatio.y;
+
+		Vertex topLeft;
+		topLeft.x = -.5f * characterStartIndex;
+		topLeft.y = .5f;
+		topLeft.z = 0.f;
+		topLeft.s = textureOffsetFactor.x;
+		topLeft.t = textureOffsetFactor.y;
+
+		m_frameVertices[0].push_back(topRight);
+		m_frameVertices[0].push_back(bottomRight);
+		m_frameVertices[0].push_back(bottomLeft);
+		m_frameVertices[0].push_back(topLeft);
+
+		size_t baseIndex = indexCountPerCharacter * characterIndex;
+
+		m_frameIndices[0].push_back(baseIndex); //0
+		m_frameIndices[0].push_back(baseIndex + 1); //0
+		m_frameIndices[0].push_back(baseIndex + 3); //0
+		m_frameIndices[0].push_back(baseIndex + 1); //0
+		m_frameIndices[0].push_back(baseIndex + 2); //0
+		m_frameIndices[0].push_back(baseIndex+ 3); //0
+
+		xAdjustment += xSpacing;
+	}
+		
+	int x = 0;
+}
+
 void ModelComponent::loadModel(const ModelConfig& modelData)
 {
 	if (modelData.keyframeFilePaths.empty())
 	{
+		return;
+	}
+
+	if (!m_frameVertices.empty() || !m_frameIndices.empty())
+	{
+		Logger::log("Model is already loaded, cannot load again.");
 		return;
 	}
 
@@ -73,7 +167,8 @@ void ModelComponent::loadModel(const ModelConfig& modelData)
 	glm::vec2 textureCoordinateRatio = glm::vec2((float)modelData.spriteSize.x / (float)modelData.textureSize.x, (float)modelData.spriteSize.y / (float)modelData.textureSize.y);
 
 	//Find the amount to add to each texture coordinate to offset it correctly in the overall texture
-	glm::vec2 textureOffsetFactor = glm::vec2((float)modelData.spriteOffsetOnTexture.x / (float)modelData.textureSize.x, (float)modelData.spriteOffsetOnTexture.y / (float)modelData.textureSize.y);
+	//NB: this assumes the offset is starting from the top left, + on the Y axis goes down
+	glm::vec2 textureOffsetFactor = glm::vec2((float)(modelData.spriteOffsetOnTexture.x) / (float)(modelData.textureSize.x), (float)(modelData.textureSize.y - modelData.spriteSize.y - modelData.spriteOffsetOnTexture.y) / (float)(modelData.textureSize.y));
 	
 	//Ensure frame count is >= mesh count
 	size_t frameCount = modelData.keyframeFilePaths.size() > modelData.frameCount ? modelData.keyframeFilePaths.size() : modelData.frameCount;
@@ -110,6 +205,7 @@ void ModelComponent::loadModel(const ModelConfig& modelData)
 		keyframeIndex++;
 	}
 }
+
 
 void ModelComponent::loadKeyframe(size_t currentKeyframe, size_t framesPerMesh, const std::string& keyframePath,
 	std::vector<std::vector<glm::vec3>>& keyframeVertices, std::vector<std::vector<glm::vec3>>& keyframeVertexNormals, std::vector<std::vector<glm::vec2>>& keyframeTexCoords,

@@ -4,7 +4,59 @@
 #include "src/components/ModelComponent.hpp"
 #include "src/components/TransformComponent.hpp"
 #include "src/components/MVPTransformComponent.hpp"
-#include "src/graphics/ModelConfig.hpp"
+#include "src/components/config/ModelConfig.hpp"
+
+//TODO: this is a lazy copy paste
+void Scene::loadText(const TextConfig& textConfig, int entityUID)
+{
+	if (!m_gameEntityMap.count(entityUID))
+	{
+		//This entity was never registered.
+		return;
+	}
+	
+	if (hasComponent<ModelComponent>(entityUID) || hasComponent<TransformComponent>(entityUID) || hasComponent<MVPTransformComponent>(entityUID))
+	{
+		//For now, don't reload model data after it's set the first time.
+		Logger::log("This entity already has  model/transform/mvp component. Refusing to add more.");
+		return;
+	}
+
+	//Since these pools are de facto protected from being added to any other way, the indices for this entity UID match across them. This is important!
+	addComponentPrivate<ModelComponent>(entityUID);
+	addComponentPrivate<TransformComponent>(entityUID);
+	addComponentPrivate<MVPTransformComponent>(entityUID);
+
+	//Do an (expensive) sanity check that all of the indices match
+	ComponentPool& modelPool = getComponentPool<ModelComponent>();
+	ComponentPool& transformPool = getComponentPool<TransformComponent>();
+	ComponentPool& mvpTransformPool = getComponentPool<MVPTransformComponent>();
+
+	//Check to confirm that all of the indices match correctly. If they don't something is wrong
+	//This should always be the last index in the pool given how pools work.
+	//If it isn't just crash.
+	std::optional<size_t> modelPoolIndex = modelPool.getIndexOfRegisteredEntity(entityUID);
+	std::optional<size_t> transformPoolIndex = transformPool.getIndexOfRegisteredEntity(entityUID);
+	std::optional<size_t> mvpTransformPoolIndex = mvpTransformPool.getIndexOfRegisteredEntity(entityUID);
+
+	if (!modelPoolIndex.has_value() || !transformPoolIndex.has_value() || !mvpTransformPoolIndex.has_value())
+	{
+		assert(false); //Something broke!
+	}
+
+	if (modelPoolIndex.value() != transformPoolIndex.value() || transformPoolIndex.value() != mvpTransformPoolIndex.value() || mvpTransformPoolIndex.value() != modelPoolIndex.value())
+	{
+		assert(false); //Something broke!
+	}
+
+	//Now that we have all of the components, get access to them and load them up
+	ModelComponent& modelComponent = getComponent<ModelComponent>(entityUID);
+
+	modelComponent.loadText(textConfig);
+
+	//TODO: later, this specific call could be cheaper than the one in removeEntity since it's adding to the end of the pool always.
+	updateAllModelComponentAssociations();
+}
 
 void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 {

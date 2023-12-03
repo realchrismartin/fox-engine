@@ -10,6 +10,7 @@ class TransformComponent;
 class MVPTransformComponent;
 class ModelComponent;
 struct ModelConfig;
+struct TextConfig;
 
 /// @brief An association of Entities with their Components.
 /// @brief Represents the game world and holds all entities and their components that are in the world.
@@ -115,6 +116,7 @@ public:
 	std::optional<int> getCameraTargetEntity() const;
 
 	void loadModel(const ModelConfig& modelData, int entityUID);
+	void loadText(const TextConfig& modelData, int entityUID);
 
 protected:
 	void addChild(int parentEntityUID, int childEntityUID);

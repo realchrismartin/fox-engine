@@ -2,6 +2,7 @@
 #define MODELCOMPONENT_HPP
 
 struct ModelConfig;
+struct TextConfig;
 struct KeyframeConfig;
 
 #include "src/graphics/Vertex.hpp"
@@ -23,7 +24,9 @@ public:
 
 	/// @brief Load the model component given its keyframe data. This sets up its vertices and indices.
 	/// @param modelData 
-	void loadModel(const ModelConfig& modelData);
+	void loadModel(const ModelConfig& modelConfig);
+
+	void loadText(const TextConfig& textConfig);
 
 	/// @brief Get the number of meshes loaded into this model
 	/// @return 
@@ -56,6 +59,8 @@ public:
 	/// @brief Set which MVP transform this model is using. Handled by the Scene, don't touch this!
 	/// @param transformPoolIndex 
 	void setTransformPoolIndex(size_t transformPoolIndex);
+
+	bool usesOrthographicProjection() const;
 private:
 	//Load a keyframe, generating vertices and indices for the keyframe and tween frames.
 	void loadKeyframe(size_t currentKeyframe, size_t framesPerMesh, const std::string& keyframePath, std::vector<std::vector<glm::vec3>>& keyframeVertices, std::vector<std::vector<glm::vec3>>& keyframeVertexNormals, std::vector<std::vector<glm::vec2>>& keyframeTexCoords, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor);
@@ -82,6 +87,7 @@ private:
 
 	std::vector<std::vector<GLuint>> m_frameIndices;
 	std::vector<std::vector<Vertex>> m_frameVertices;
+	bool m_usesOrthographicProjection = false;
 };
 
 #endif

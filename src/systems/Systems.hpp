@@ -139,8 +139,9 @@ private:
 		//Now that we've updated both the world matrices and v/p matrices, update the MVP matrices
 		//Unfortunately we can't do this at the same time as the scene graph traversal b/c the camera view can depend on the world matrices of the targets,
 		//so we waste some efficiency by doing another iteration and component lookup...
-		for (auto const& entity : EntityFilter<TransformComponent, MVPTransformComponent>(scene))
+		for (auto const& entity : EntityFilter<ModelComponent,TransformComponent, MVPTransformComponent>(scene))
 		{
+			ModelComponent& model = scene.getComponent<ModelComponent>(entity);
 			TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
 			MVPTransformComponent& mvpTransform = scene.getComponent<MVPTransformComponent>(entity);
 
@@ -151,7 +152,21 @@ private:
 			//If any of the three matrices is dirty, update the combined MVP matrix.
 			if (modelDirty || viewDirty || projectionDirty)
 			{
+
 				mvpTransform.setMVPMatrix(transform.getWorldMatrix(), camera.getViewMatrix(), camera.getProjectionMatrix());
+
+
+				//TODO
+				/*
+				if (model.usesOrthographicProjection())
+				{
+					mvpTransform.setMVPMatrix(transform.getWorldMatrix(), glm::mat4(1.0), camera.getOrthographicProjectionMatrix());
+				}
+				else
+				{
+					mvpTransform.setMVPMatrix(transform.getWorldMatrix(), camera.getViewMatrix(), camera.getProjectionMatrix());
+				}
+				*/
 			}
 		}
 
