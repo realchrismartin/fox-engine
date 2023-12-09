@@ -153,11 +153,6 @@ private:
 			if (modelDirty || viewDirty || projectionDirty)
 			{
 
-				mvpTransform.setMVPMatrix(transform.getWorldMatrix(), camera.getViewMatrix(), camera.getProjectionMatrix());
-
-
-				//TODO
-				/*
 				if (model.usesOrthographicProjection())
 				{
 					mvpTransform.setMVPMatrix(transform.getWorldMatrix(), glm::mat4(1.0), camera.getOrthographicProjectionMatrix());
@@ -166,7 +161,6 @@ private:
 				{
 					mvpTransform.setMVPMatrix(transform.getWorldMatrix(), camera.getViewMatrix(), camera.getProjectionMatrix());
 				}
-				*/
 			}
 		}
 

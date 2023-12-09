@@ -81,9 +81,8 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 	constexpr size_t indexCountPerCharacter = 4;
 	constexpr glm::vec2 textureSize = glm::vec2(2500.f, 2500.f); //TODO
 
-	float xSpacing = ((float)textConfig.textToDisplay.size() / 2.f); //Enough to fit all characters in 0.5f ... .5f (todo spacing)
-
-	float xAdjustment = -2.f / textConfig.textToDisplay.size(); //Display all characters in -.5f -> .5f on x axis.
+	float characterWidth = textConfig.frameSize.x / 2.f / (float)textConfig.textToDisplay.size(); //TODO: this evenly spaces all characters.
+	float characterHeight = textConfig.frameSize.y / 2.f; //TODO: assumes one row per text
 
 	for (size_t characterIndex = 0; characterIndex < textConfig.textToDisplay.size(); characterIndex++)
 	{
@@ -96,35 +95,35 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 		glm::vec2 textureOffsetFactor = glm::vec2((float)(characterTexCoords.x) / (float)(textureSize.x), (float)(textureSize.y - characterSize.y - characterTexCoords.y) / (float)(textureSize.y));
 		glm::vec2 characterSizeRatio = glm::vec2((float)characterSize.x / (float)textureSize.x, (float)characterSize.y / (float)textureSize.y);
 
-		size_t characterStartIndex = 1 + characterIndex;
+		size_t characterStartIndex = 1 + characterIndex * 2;
 
 		Vertex topRight;
-		topRight.x = .5f * characterStartIndex;
-		topRight.y = .5f;
+		topRight.x = characterWidth * characterStartIndex;
+		topRight.y = characterHeight;
 		topRight.z = 0.f;
 		topRight.s = textureOffsetFactor.x + characterSizeRatio.x;
-		topRight.t = textureOffsetFactor.y;
+		topRight.t = textureOffsetFactor.y + characterSizeRatio.y;
 
 		Vertex bottomRight;
-		bottomRight.x = .5f * characterStartIndex;
-		bottomRight.y = -.5f;
+		bottomRight.x = characterWidth * characterStartIndex;
+		bottomRight.y = -characterHeight;
 		bottomRight.z = 0.f;
 		bottomRight.s = textureOffsetFactor.x + characterSizeRatio.x;
-		bottomRight.t = textureOffsetFactor.y * characterSizeRatio.y;
+		bottomRight.t = textureOffsetFactor.y;
 
 		Vertex bottomLeft;
-		bottomLeft.x = -.5f * characterStartIndex;
-		bottomLeft.y = -.5f;
+		bottomLeft.x = -characterWidth * characterStartIndex;
+		bottomLeft.y = -characterHeight;
 		bottomLeft.z = 0.f;
 		bottomLeft.s = textureOffsetFactor.x;
-		bottomLeft.t = textureOffsetFactor.y - characterSizeRatio.y;
+		bottomLeft.t = textureOffsetFactor.y;
 
 		Vertex topLeft;
-		topLeft.x = -.5f * characterStartIndex;
-		topLeft.y = .5f;
+		topLeft.x = -characterWidth * characterStartIndex;
+		topLeft.y = characterHeight;
 		topLeft.z = 0.f;
 		topLeft.s = textureOffsetFactor.x;
-		topLeft.t = textureOffsetFactor.y;
+		topLeft.t = textureOffsetFactor.y + characterSizeRatio.y;
 
 		m_frameVertices[0].push_back(topRight);
 		m_frameVertices[0].push_back(bottomRight);
@@ -140,10 +139,8 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 		m_frameIndices[0].push_back(baseIndex + 2); //0
 		m_frameIndices[0].push_back(baseIndex+ 3); //0
 
-		xAdjustment += xSpacing;
+		break; //TODO
 	}
-		
-	int x = 0;
 }
 
 void ModelComponent::loadModel(const ModelConfig& modelData)
