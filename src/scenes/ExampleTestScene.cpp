@@ -102,9 +102,8 @@ void ExampleTestScene::createText()
 	{
 		int uid = m_textUID.value();
 		TextConfig config;
-		config.textToDisplay = "J is sleepy";
-		config.frameSize = glm::vec2(1.f, .2f);
+		config.textToDisplay = "j is sleepy and this is quite a long bit of text isnt it";
 		loadText(config, uid);
-		//getComponent<TransformComponent>(uid).setTranslation({ -.5f,-.5f,0.f});
+		//getComponent<TransformComponent>(uid).setTranslation({ -1.f,0.f,0.f});
 	}
 }

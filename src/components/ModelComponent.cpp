@@ -73,54 +73,77 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 		return;
 	}
 
+	if (textConfig.textToDisplay.size() <= 0)
+	{
+		Logger::log("There is no text to display! Cannot load text.");
+		return;
+	}
+
 	m_usesOrthographicProjection = true;
 
 	m_frameVertices.push_back({});
 	m_frameIndices.push_back({});
 
-	constexpr size_t indexCountPerCharacter = 4;
+	//TODO: move elsewhere
 	constexpr glm::vec2 textureSize = glm::vec2(2500.f, 2500.f); //TODO
+	constexpr unsigned int screenXSize = 800;
 
-	float characterWidth = textConfig.frameSize.x / 2.f / (float)textConfig.textToDisplay.size(); //TODO: this evenly spaces all characters.
-	float characterHeight = textConfig.frameSize.y / 2.f; //TODO: assumes one row per text
+	float widest = 0.f;
 
 	for (size_t characterIndex = 0; characterIndex < textConfig.textToDisplay.size(); characterIndex++)
 	{
-		//TODO: adjust tex coords by atlas size? Or do they already take into account atlas size implicitly?
+		glm::vec2 size = FontMapper::getCharacterSpriteSize(textConfig.textToDisplay[characterIndex]);
 
+		widest = widest > size.x ? widest : size.x;
+	}
+
+	//How many character can fit on the screen?
+	unsigned int maxCharactersX = screenXSize / (unsigned int)std::round(widest);
+
+	float widestCharScreenWidth = (2.f / textConfig.fontSize) / maxCharactersX;
+	float charHeight = .1f; //TODO
+
+	float leftCharacterBound = 0.f;
+
+	size_t line = textConfig.maxLines;
+	int lineCounter = textConfig.charactersPerLine;
+
+	for (size_t characterIndex = 0; characterIndex < textConfig.textToDisplay.size(); characterIndex++)
+	{
 		glm::vec2 characterSize = FontMapper::getCharacterSpriteSize(textConfig.textToDisplay[characterIndex]);
 		glm::vec2 characterTexCoords = FontMapper::getCharacterTexCoords(textConfig.textToDisplay[characterIndex]); //Analogous to the sprite offset on a texture
 
-		//TODO: these are horribly wrong
 		glm::vec2 textureOffsetFactor = glm::vec2((float)(characterTexCoords.x) / (float)(textureSize.x), (float)(textureSize.y - characterSize.y - characterTexCoords.y) / (float)(textureSize.y));
 		glm::vec2 characterSizeRatio = glm::vec2((float)characterSize.x / (float)textureSize.x, (float)characterSize.y / (float)textureSize.y);
 
-		size_t characterStartIndex = 1 + characterIndex * 2;
+		float charWidthRatio = characterSize.x / widest;
+
+		float rightCharacterBound = leftCharacterBound + (widestCharScreenWidth * charWidthRatio);
 
 		Vertex topRight;
-		topRight.x = characterWidth * characterStartIndex;
-		topRight.y = characterHeight;
+		topRight.x = rightCharacterBound;
+		topRight.y = charHeight * (line + 1);
 		topRight.z = 0.f;
 		topRight.s = textureOffsetFactor.x + characterSizeRatio.x;
 		topRight.t = textureOffsetFactor.y + characterSizeRatio.y;
 
 		Vertex bottomRight;
-		bottomRight.x = characterWidth * characterStartIndex;
-		bottomRight.y = -characterHeight;
+		bottomRight.x = rightCharacterBound;
+		bottomRight.y = charHeight * line;
 		bottomRight.z = 0.f;
 		bottomRight.s = textureOffsetFactor.x + characterSizeRatio.x;
 		bottomRight.t = textureOffsetFactor.y;
 
 		Vertex bottomLeft;
-		bottomLeft.x = -characterWidth * characterStartIndex;
-		bottomLeft.y = -characterHeight;
+		bottomLeft.x = leftCharacterBound;
+		bottomLeft.y = charHeight * line;
 		bottomLeft.z = 0.f;
 		bottomLeft.s = textureOffsetFactor.x;
 		bottomLeft.t = textureOffsetFactor.y;
 
 		Vertex topLeft;
-		topLeft.x = -characterWidth * characterStartIndex;
-		topLeft.y = characterHeight;
+		topLeft.x = leftCharacterBound;
+		topLeft.y = charHeight * (line + 1);
 		topLeft.z = 0.f;
 		topLeft.s = textureOffsetFactor.x;
 		topLeft.t = textureOffsetFactor.y + characterSizeRatio.y;
@@ -130,7 +153,7 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 		m_frameVertices[0].push_back(bottomLeft);
 		m_frameVertices[0].push_back(topLeft);
 
-		size_t baseIndex = indexCountPerCharacter * characterIndex;
+		size_t baseIndex = 4 * characterIndex;
 
 		m_frameIndices[0].push_back(baseIndex); //0
 		m_frameIndices[0].push_back(baseIndex + 1); //0
@@ -139,7 +162,28 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 		m_frameIndices[0].push_back(baseIndex + 2); //0
 		m_frameIndices[0].push_back(baseIndex+ 3); //0
 
-		break; //TODO
+		leftCharacterBound += (widestCharScreenWidth * charWidthRatio);
+
+		if (lineCounter >= 0)
+		{
+			lineCounter--;
+		}
+
+		if (lineCounter < 0)
+		{
+			if (textConfig.textToDisplay[characterIndex] == ' ')
+			{
+				lineCounter = textConfig.charactersPerLine;
+				line--;
+				leftCharacterBound = 0.f;
+
+				if (line < 0)
+				{
+					//Too long!
+					break;
+				}
+			}
+		}
 	}
 }
 
