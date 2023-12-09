@@ -97,11 +97,10 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 		widest = widest > size.x ? widest : size.x;
 	}
 
-	//How many character can fit on the screen?
-	unsigned int maxCharactersX = screenXSize / (unsigned int)std::round(widest);
-
-	float widestCharScreenWidth = (2.f / textConfig.fontSize) / maxCharactersX;
-	float charHeight = .1f; //TODO
+	//TODO: this stuff ends up wrong if font size increases
+	unsigned int maxCharactersX = screenXSize / ((unsigned int)std::round(widest) * textConfig.fontSize);
+	float widestCharScreenWidth = 2.f / maxCharactersX;
+	float charHeight = .1f * textConfig.fontSize; //TODO: .1f is arbitrary
 
 	float leftCharacterBound = 0.f;
 
