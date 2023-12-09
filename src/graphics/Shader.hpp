@@ -1,39 +1,36 @@
 #ifndef SHADER_HPP
 #define SHADER_HPP
 
+<<<<<<< HEAD
+=======
+/// @brief A shader program which is used by our OpenGL context to render.
+/// @brief Is a wrapper for the GLSL shader program code. 
+>>>>>>> b50e5ef (Add some implementation files)
 class Shader
 {
 public:
+	Shader();
+	~Shader();
 
-	Shader()
-	{
-	}
+	/// @brief Initialize the shader. This will compile the GLSL code and update the OpenGL context.
+	void activate();
 
-	~Shader()
-	{
-		unbind();
-	}
+	/// @brief Bind the shader to the OpenGL context.
+	void bind();
 
-	GLuint getShaderProgramId()
-	{
-		return m_shaderProgramId;
-	}
+	/// @brief Unbind the shader from the OpenGL context.
+	void unbind();
 
-	void activate()
-	{
-		//TODO: perhaps don't always hardcode the same shaders here, chief ;)
-		std::string vertexShader = loadShader("../../shaders/vert.glsl");
-		std::string fragmentShader = loadShader("../../shaders/frag.glsl");
-		m_shaderProgramId = createShader(vertexShader, fragmentShader);
-	}
+	/// @brief Get the ID of the shader program, assuming it has been activated/initialized.
+	/// @return 
+	GLuint getShaderProgramId() const;
 
-	void bind()
-	{
-		if (m_shaderProgramId == 0)
-		{
-			return;
-		}
+	/// @brief Set a uniform with the given name and integer value
+	/// @param uniformBindingName 
+	/// @param value 
+	void updateIntUniform(const std::string& uniformBindingName, GLint value);
 
+<<<<<<< HEAD
 		glUseProgram(m_shaderProgramId);
 	}
 
@@ -167,7 +164,16 @@ public:
 
 		return program;
 	}
+=======
+	/// @brief Set a uniform with the given name and 4D matrix value
+	/// @param uniformBindingName 
+	/// @param value 
+	void updateMat4Uniform(const std::string& uniformBindingName, const glm::mat4& value);
+>>>>>>> b50e5ef (Add some implementation files)
 private:
+	std::string loadShader(const std::string& fname);
+	unsigned int compileShader(unsigned int type, const std::string& source);
+	unsigned int createShader(const std::string& vertexShaderSource, const std::string& fragmentShaderSource);
 	GLuint m_shaderProgramId = 0; //Defaults to "no shader"
 };
 #endif

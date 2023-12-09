@@ -1,140 +1,52 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 
-#include "src/scenes/Scene.hpp"
-#include "src/components/TransformComponent.hpp"
 
+#include "glm/glm/ext/matrix_transform.hpp"
+#include "glm/glm/ext/matrix_clip_space.hpp"
+
+class Scene;
+
+/// @brief The game's camera.
 class Camera
 {
 public:
-	bool isViewMatrixDirty() const
-	{
-		return m_viewMatrixDirty;
-	}
-	
-	bool isProjectionMatrixDirty() const
-	{
-		return m_projectionMatrixDirty;
-	}
+	/// @brief Returns true if the view matrix changed during the camera's last update.
+	/// @return 
+	bool isViewMatrixDirty() const;
 
-	void markViewMatrixClean()
-	{
-		m_viewMatrixDirty = false;
-	}
+	/// @brief Returns true if the projection matrix changed during the camera's last update
+	/// @return 
+	bool isProjectionMatrixDirty() const;
 
-	void markProjectionMatrixClean()
-	{
-		m_projectionMatrixDirty = false;
-	}
+	/// @brief Indicate that the view matrix update is completed.
+	void markViewMatrixClean();
 
-	const glm::mat4& getProjectionMatrix() const
-	{
-		return m_projectionMatrix;
-	}
+	/// @brief Indicate that the projection matrix update is completed.
+	void markProjectionMatrixClean();
 
-	const glm::mat4& getOrthographicProjectionMatrix()
-	{
+	/// @brief Get the current projection matrix 
+	/// @return 
+	const glm::mat4& getProjectionMatrix() const;
 
-		if (m_orthographicProjectionMatrixDirty)
-		{
-			//TODO
-			constexpr float aspectRatio = 1024.f / 768.f;
-			m_orthographicProjectionMatrix = glm::ortho(-aspectRatio,aspectRatio,-1.f,1.f,1.f,-1.f); //TODO siz
+	/// @brief Get the current view matrix
+	/// @return 
+	const glm::mat4& getViewMatrix() const;
 
-			m_orthographicProjectionMatrixDirty = false;
-		}
+	/// @brief Update the projection matrix, possibly marking it dirty if it needs to change.
+	void updateProjectionMatrix();
 
-		return m_orthographicProjectionMatrix;
-	}
-	
-	const glm::mat4& getViewMatrix() const
-	{
-		return m_viewMatrix;
-	}
+	/// @brief Update the view matrix, possibly marking it dirty if it needs to change
+	/// @param scene The scene from which data will be used to update the View matrix, depending on what the camera wants to look at.
+	void updateViewMatrix(Scene& scene);
 
-	void updateProjectionMatrix()
-	{
-		if (m_projectionMatrixEverSet)
-		{
-			return;
-		}
-
-		m_projectionMatrixEverSet = true;
-
-		// Projection matrix : 45 degree Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-		m_projectionMatrix = glm::perspective(glm::radians(90.0f), 1024.f / 768.f, 1.f, 100.f);
-
-		m_projectionMatrixDirty = true;
-	}
-
-	void updateViewMatrix(Scene& scene)
-	{
-		std::optional<int> cameraEntityId = scene.getCameraEntity();
-		std::optional<int> cameraTargetEntityId = scene.getCameraTargetEntity();
-
-		bool cameraChanged = false;
-		bool targetChanged = false;
-
-		if (cameraEntityId.has_value() && scene.hasComponent<TransformComponent>(cameraEntityId.value()))
-		{
-			TransformComponent& cameraTransform = scene.getComponent<TransformComponent>(cameraEntityId.value());
-
-			if (m_cameraEntityLastTick.has_value() && m_cameraEntityLastTick.value() == cameraEntityId.value() && !cameraTransform.isWorldMatrixDirty())
-			{
-				//We don't need to update the camera center.
-			}
-			else 
-			{
-				glm::mat4 worldMatrix = cameraTransform.getWorldMatrix();
-				glm::vec4 center = glm::vec4(0.f, 0.f, 0.f, 1.f);
-
-				auto transformedCameraCenter = worldMatrix * center;
-
-				m_cameraCenter = glm::vec3(transformedCameraCenter.x, transformedCameraCenter.y, transformedCameraCenter.z);
-				cameraChanged = true;
-			}
-		}
-
-		if (cameraTargetEntityId.has_value() && scene.hasComponent<TransformComponent>(cameraTargetEntityId.value()))
-		{
-			TransformComponent& cameraTargetTransform = scene.getComponent<TransformComponent>(cameraTargetEntityId.value());
-
-			if (m_cameraTargetLastTick.has_value() && m_cameraTargetLastTick.value() == cameraTargetEntityId.value() && !cameraTargetTransform.isWorldMatrixDirty())
-			{
-				//We don't need to update the camera center.
-			}
-			else
-			{
-				glm::mat4 worldMatrix = cameraTargetTransform.getWorldMatrix();
-				glm::vec4 target = glm::vec4(0.f, 0.f, 0.f, 1.f);
-
-				auto transformedCameraTarget = worldMatrix * target;
-
-				m_cameraTarget = glm::vec3(transformedCameraTarget.x, transformedCameraTarget.y, transformedCameraTarget.z);
-				targetChanged = true;
-			}
-		}
-
-		m_cameraEntityLastTick = cameraEntityId;
-		m_cameraTargetLastTick = cameraTargetEntityId;
-
-		if (cameraChanged || targetChanged || !m_viewMatrixEverSet)
-		{
-			m_viewMatrix = glm::lookAt(m_cameraCenter,m_cameraTarget,m_defaultCameraUpVector); //TODO: are these backward?
-
-			if (!m_viewMatrixEverSet)
-			{
-				m_viewMatrixEverSet = true;
-			}
-
-			m_viewMatrixDirty = true;
-		}
-	}
+	/// @brief Tell the camera if the scene changed.
+	void informOfSceneChange();
 
 private:
-	glm::mat4 m_viewMatrix;
-	glm::mat4 m_projectionMatrix;
-	glm::mat4 m_orthographicProjectionMatrix;
+
+	glm::mat4 m_viewMatrix = glm::mat4(1.f);
+	glm::mat4 m_projectionMatrix = glm::mat4(1.f);
 
 	bool m_viewMatrixEverSet = false;
 	bool m_projectionMatrixEverSet = false;
