@@ -1,7 +1,5 @@
 #include "src/components/TransformComponent.hpp"
 
-#include "glm/glm/gtc/matrix_transform.hpp"
-
 glm::mat4 TransformComponent::getLocalMatrix()
 {
 	glm::mat4 matrix = glm::mat4(1.0);

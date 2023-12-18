@@ -9,13 +9,15 @@
 #include <optional>
 #include <cmath>
 #include <functional>
+#include <fstream>
+#include <sstream>
 
-//SFML stuff
-#include "SFML/System/Vector2.hpp"
+//Library stuff
+#include "extern/glew/glew.h"
+#include "extern/glm/glm/glm.hpp"
+#include "extern/glm/glm/gtc/type_ptr.hpp"
+#include "extern/glm/glm/gtc/matrix_transform.hpp"
+#include "extern/glm/glm/ext/matrix_clip_space.hpp"
 
 //Utility stuff
 #include "src/util/Logger.hpp"
-
-#include "src/extern/glew/glew.h"
-
-#include "glm/glm/glm.hpp"

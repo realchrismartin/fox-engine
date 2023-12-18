@@ -1,7 +1,7 @@
 #ifndef TEXTURE_HPP
 #define TEXTURE_HPP
 
-#include "src/extern/stb_image.h"
+#include "extern/stb_image.h"
 
 class Texture
 {

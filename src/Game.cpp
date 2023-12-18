@@ -28,36 +28,13 @@ void Game::play()
 		return;
 	}
 
-	/*
-    while (true)
-    {
-        int finished = 0;
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
-            if (event.type == SDL_EVENT_QUIT)
-            {
-                finished = 1;
-                break;
-            }
-        }
-        if (finished) 
-        {
-            break;
-        }
-    }
-
-    SDL_Quit();
-	*/
-
-
 	 //For now, we create our camera on the stack
 	 Camera camera = Camera();
 
 	 //For now, we create an example scene on the stack
 	 Scene scene = ExampleTestScene();
 
-	 float currentTime = m_clock.getElapsedTime().asSeconds();
+	 float currentTime = m_clock.getElapsedTimeInSeconds();
 	
 	 float accumulator = 0.f;
 
@@ -66,7 +43,7 @@ void Game::play()
 	 //Need to be able to exit! TODO
 	 while (true)
 	 {
-		 float newTime = m_clock.getElapsedTime().asSeconds();
+		 float newTime = m_clock.getElapsedTimeInSeconds();
 
 		 float frameTime = newTime - currentTime;
 
@@ -74,12 +51,15 @@ void Game::play()
 
 		 accumulator += frameTime;
 
+		 /*
 		 while (accumulator >= TIMESTEP)
 		 {
 			 Systems::update(m_window, scene, camera, TIMESTEP);
 			 accumulator -= TIMESTEP;
 		 }
+		 */
 			
+		 Systems::update(m_window, scene, camera, TIMESTEP);
 		 Systems::render(m_window, scene, camera);
 	 }
 }

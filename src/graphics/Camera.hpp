@@ -4,9 +4,6 @@
 #include "src/scenes/Scene.hpp"
 #include "src/components/TransformComponent.hpp"
 
-#include "glm/glm/ext/matrix_transform.hpp"
-#include "glm/glm/ext/matrix_clip_space.hpp"
-
 class Camera
 {
 public:

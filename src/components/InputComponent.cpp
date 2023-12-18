@@ -1,90 +1,47 @@
 #include "InputComponent.hpp"
 
-/*
-void InputComponent::informOfWindowEvent(sf::Event e)
+void InputComponent::informOfEvent(const SDL_Event& event)
 {
-	if (e.type != sf::Event::KeyPressed && e.type != sf::Event::KeyReleased)
+	//TODO: add support for mouse events
+	if (event.type != SDL_EVENT_KEY_DOWN && event.type != SDL_EVENT_KEY_UP)
 	{
 		return;
 	}
 
-	switch (e.type)
+	//Make sure to update boolean here if adding mouse events
+	markInputState(getInputActionForScancode(event.key.keysym.scancode), event.type == SDL_EVENT_KEY_DOWN);
+}
+
+UserInputActionsEnum InputComponent::getInputActionForScancode(SDL_Scancode code)
+{
+	switch (code)
 	{
-		case(sf::Event::KeyPressed):
-		{
-			switch (e.key.code)
-			{
-				case(sf::Keyboard::W):
-				{
-					m_activeInputs.insert(UserInputActionsEnum::PRESSING_W);
-					break;
-				}
-				case(sf::Keyboard::S):
-				{
-
-					m_activeInputs.insert(UserInputActionsEnum::PRESSING_S);
-					break;
-				}
-				case(sf::Keyboard::A):
-				{
-					m_activeInputs.insert(UserInputActionsEnum::PRESSING_A);
-					break;
-				}
-				case(sf::Keyboard::D):
-				{
-					m_activeInputs.insert(UserInputActionsEnum::PRESSING_D);
-					break;
-				}
-				default:
-				{
-					//Other keys unhandled for now
-					break;
-				}
-			}
-			break;
-		}
-		case(sf::Event::KeyReleased):
-		{
-			switch (e.key.code)
-			{
-				case(sf::Keyboard::W):
-				{
-					m_activeInputs.erase(UserInputActionsEnum::PRESSING_W);
-					break;
-				}
-				case(sf::Keyboard::S):
-				{
-
-					m_activeInputs.erase(UserInputActionsEnum::PRESSING_S);
-					break;
-				}
-				case(sf::Keyboard::A):
-				{
-					m_activeInputs.erase(UserInputActionsEnum::PRESSING_A);
-					break;
-				}
-				case(sf::Keyboard::D):
-				{
-					m_activeInputs.erase(UserInputActionsEnum::PRESSING_D);
-					break;
-				}
-				default:
-				{
-					//Other keys unhandled for now
-					break;
-				}
-			}
-
-			break;
-		}
+		case(SDL_SCANCODE_W):
+			return UserInputActionsEnum::PRESSING_W;
+		case(SDL_SCANCODE_S):
+			return UserInputActionsEnum::PRESSING_S;
+		case(SDL_SCANCODE_A):
+			return UserInputActionsEnum::PRESSING_A;
+		case(SDL_SCANCODE_D):
+			return UserInputActionsEnum::PRESSING_D;
 		default:
-		{
-			//We only care about press and release events. Just return here.
-			break;
-		}
+			return UserInputActionsEnum::NONE;
+	}
+
+	return UserInputActionsEnum::NONE;
+}
+
+void InputComponent::markInputState(UserInputActionsEnum action, bool pressed)
+{
+	if (pressed)
+	{
+		m_activeInputs.insert(action);
+	}
+	else 
+	{
+		m_activeInputs.erase(action);
 	}
 }
-*/
 
 glm::vec3 InputComponent::getTranslationGivenInput()
 {
@@ -167,4 +124,3 @@ bool InputComponent::anyInputActive() const
 {
 	return !m_activeInputs.empty();
 }
-

@@ -1,8 +1,9 @@
 #ifndef SYSTEMS_HPP
 #define SYSTEMS_HPP
 
-#include "src/Window.hpp"
 #include "src/scenes/Scene.hpp"
+
+#include "src/graphics/Window.hpp"
 #include "src/graphics/Camera.hpp"
 
 #include "src/entities/GameEntity.hpp"
@@ -21,6 +22,7 @@ public:
 	//Run all of the game systems that pertain to updating
 	static const void update(Window& window, Scene& scene, Camera& camera, float elapsedTime)
 	{
+		pollEventSystem(scene);
 		runInputProcessingSystem(scene, elapsedTime);
 		runAnimationSystem(scene, elapsedTime);
 		runSceneGraphUpdateSystem(scene, camera);
@@ -38,6 +40,35 @@ public:
 		window.display();
 	};
 private:
+
+	static const void pollEventSystem(Scene& scene)
+	{
+		SDL_Event event;
+		while (SDL_PollEvent(&event))
+		{
+			if (event.type == SDL_EVENT_QUIT)
+			{
+				break;
+			}
+
+			//Inform the window of window events
+			if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
+			{
+				//TODO
+			}
+
+			//Inform the input components of input events
+
+			//TODO: add mouse events
+			if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
+			{
+				for (auto const& entity : EntityFilter<InputComponent>(scene))
+				{
+					scene.getComponent<InputComponent>(entity).informOfEvent(event);
+				}
+			}
+		}
+	}
 
 	static const void runAnimationSystem(Scene& scene, float elapsedTime)
 	{

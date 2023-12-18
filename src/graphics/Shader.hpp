@@ -1,9 +1,6 @@
 #ifndef SHADER_HPP
 #define SHADER_HPP
 
-#include <fstream>
-#include "glm/glm/gtc/type_ptr.hpp"
-
 class Shader
 {
 public:
@@ -79,7 +76,7 @@ public:
 
 		if (file.is_open()) 
 		{
-			while (getline(file, line)) 
+			while (std::getline(file, line)) 
 			{
 				result += line + '\n';
 			}
