@@ -1,49 +1,47 @@
 #include "Game.hpp"
 
+#include "SDL3/SDL.h"
+
 #include "src/graphics/Camera.hpp"
 #include "src/systems/Systems.hpp"
+#include "src/util/Logger.hpp"
+
 #include "src/scenes/ExampleTestScene.hpp"
-#include "SDL3/SDL.h"
 
 const float Game::TIMESTEP = .0167f;
 
 bool Game::initSDL()
 {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) 
-    {
-        SDL_Log("SDL_Init_VIDEO failed (%s)", SDL_GetError());
-		return false;
-    }
-
 	return true;
 }
 
 void Game::play()
 {
-	bool init = initSDL();
-
-	if (!init)
-	{
+	//Try to initialize our windowing library.
+	//If we can't, bomb out here.
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) 
+    {
+        SDL_Log("SDL_Init_VIDEO failed (%s)", SDL_GetError());
 		SDL_Quit();
 		return;
-	}
-
-	 //For now, we create our camera on the stack
+    }
+	
+	 //Initialize the game elements on the stack now. 
+	 Clock clock = Clock();
+	 Window window = Window();
 	 Camera camera = Camera();
 
 	 //For now, we create an example scene on the stack
 	 Scene scene = ExampleTestScene();
 
-	 float currentTime = m_clock.getElapsedTimeInSeconds();
+	 float currentTime = clock.getElapsedTimeInSeconds();
 	
 	 float accumulator = 0.f;
 
  	 //This is the main game loop.
-
-	 //Need to be able to exit! TODO
-	 while (true)
+	 while (window.isOpen())
 	 {
-		 float newTime = m_clock.getElapsedTimeInSeconds();
+		 float newTime = clock.getElapsedTimeInSeconds();
 
 		 float frameTime = newTime - currentTime;
 
@@ -51,15 +49,14 @@ void Game::play()
 
 		 accumulator += frameTime;
 
-		 /*
 		 while (accumulator >= TIMESTEP)
 		 {
-			 Systems::update(m_window, scene, camera, TIMESTEP);
+			 Systems::update(window, scene, camera, TIMESTEP);
 			 accumulator -= TIMESTEP;
 		 }
-		 */
 			
-		 Systems::update(m_window, scene, camera, TIMESTEP);
-		 Systems::render(m_window, scene, camera);
+		 Systems::render(window, scene, camera);
 	 }
+
+	 Logger::log("See you next time, space fox boy...");
 }

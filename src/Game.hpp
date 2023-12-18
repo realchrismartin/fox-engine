@@ -11,8 +11,6 @@ public:
 	void play();
 private:
 	bool initSDL();
-	Window m_window;
-	Clock m_clock;
 	static const float TIMESTEP;
 };
 

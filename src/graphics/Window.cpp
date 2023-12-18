@@ -112,6 +112,11 @@ void Window::setupOpenGL()
 
 void Window::draw(size_t vertexCount, size_t indexCount, size_t matrixCount, GLvoid* vertices, GLvoid* indices, GLvoid* mvpMatrices)
 {
+	if (!m_open)
+	{
+		//Window is closing or closed.
+		return;
+	}
 
 	if (vertexCount <= (size_t)0 || indexCount <= (size_t)0)
 	{
@@ -159,6 +164,16 @@ void Window::draw(size_t vertexCount, size_t indexCount, size_t matrixCount, GLv
 
 }
 
+void Window::close()
+{
+	m_open = false;
+}
+
+bool Window::isOpen() const
+{
+	return m_open;
+}
+
 void Window::clear()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -168,9 +183,4 @@ void Window::display()
 {
 	//Swap buffers so we display what's up.
 	SDL_GL_SwapWindow(m_window); 
-}
-
-Shader& Window::getBoundShader() 
-{
-	return m_shader;
 }

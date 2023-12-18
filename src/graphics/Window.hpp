@@ -15,11 +15,21 @@ public:
 
 	Window();
 	~Window();
+
+	/// @brief GLClear the window.
 	void clear();
+
+	/// @brief Display whatever's on the backbuffer by flopping the buffers
 	void display();
-	Shader& getBoundShader();
 
 	void draw(size_t vertexCount, size_t indexCount, size_t matrixCount, GLvoid* vertices, GLvoid* indices, GLvoid* mvpMatrices);
+
+	/// @brief Mark the window for closing. No more rendering will be done.
+	void close();
+
+	/// @brief Get whether the window is open.
+	/// @return 
+	bool isOpen() const;
 
 private:
 	void setupOpenGL();
@@ -38,6 +48,7 @@ private:
 	size_t m_maxIndicesPerRender = 0;
 	size_t m_maxSSBOMatricesPerRender = 0;
 
+	bool m_open = true;
 };
 #endif
 

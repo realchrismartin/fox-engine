@@ -22,7 +22,7 @@ public:
 	//Run all of the game systems that pertain to updating
 	static const void update(Window& window, Scene& scene, Camera& camera, float elapsedTime)
 	{
-		pollEventSystem(scene);
+		pollEventSystem(window, scene);
 		runInputProcessingSystem(scene, elapsedTime);
 		runAnimationSystem(scene, elapsedTime);
 		runSceneGraphUpdateSystem(scene, camera);
@@ -41,24 +41,19 @@ public:
 	};
 private:
 
-	static const void pollEventSystem(Scene& scene)
+	static const void pollEventSystem(Window& window, Scene& scene)
 	{
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
-			if (event.type == SDL_EVENT_QUIT)
+			//Inform the window of window events
+			if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED || event.type == SDL_EVENT_QUIT)
 			{
+				window.close();
 				break;
 			}
 
-			//Inform the window of window events
-			if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
-			{
-				//TODO
-			}
-
 			//Inform the input components of input events
-
 			//TODO: add mouse events
 			if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
 			{
