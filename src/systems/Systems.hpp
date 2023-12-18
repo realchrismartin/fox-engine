@@ -21,7 +21,6 @@ public:
 	//Run all of the game systems that pertain to updating
 	static const void update(Window& window, Scene& scene, Camera& camera, float elapsedTime)
 	{
-		runWindowEventSystem(window, scene);
 		runInputProcessingSystem(scene, elapsedTime);
 		runAnimationSystem(scene, elapsedTime);
 		runSceneGraphUpdateSystem(scene, camera);
@@ -31,30 +30,14 @@ public:
 	//Assumes we called update first.
 	static const void render(Window& window, Scene& scene, Camera& camera)
 	{
-		//Clear the window.
 		window.clear();
 
 		//Draw stuff to the window
 		runRenderSystem(window, scene, camera);
 
-		//Display whatever has been drawn to the window since the clear happened, i.e. all of the stuff that was drawn during update.
 		window.display();
 	};
 private:
-	static const void runWindowEventSystem(Window& window, Scene& scene)
-	{
-		window.pollForEvents();
-
-		for (auto const& entity : EntityFilter<InputComponent>(scene))
-		{
-			InputComponent& input = scene.getComponent<InputComponent>(entity.getUID());
-
-			for (auto const& event : window.getEvents())
-			{
-				input.informOfWindowEvent(event);
-			}
-		}
-	}
 
 	static const void runAnimationSystem(Scene& scene, float elapsedTime)
 	{

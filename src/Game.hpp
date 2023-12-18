@@ -11,6 +11,7 @@ public:
 	Game();
 	void play();
 private:
+	bool initSDL();
 	Window m_window;
 	sf::Clock m_clock;
 	static const float TIMESTEP;

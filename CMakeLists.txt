@@ -18,6 +18,7 @@ if(WIN32)
     set (SFML_USE_STATIC_STD_LIBS OFF)
 endif()
 
+add_subdirectory(${CMAKE_SOURCE_DIR}/extern/sdl EXCLUDE_FROM_ALL)
 add_definitions(-DSFML_STATIC)
 add_subdirectory(${CMAKE_SOURCE_DIR}/SFML)
 
@@ -44,6 +45,7 @@ add_executable(Game "${GAME_SOURCES}")
 target_include_directories(Game PUBLIC "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/src")
 
 set(DEPEND_LIBRARIES
+    SDL3::SDL3
 	sfml-system
 	sfml-graphics
 	sfml-window

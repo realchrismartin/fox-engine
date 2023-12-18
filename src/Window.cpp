@@ -1,20 +1,50 @@
 #include "src/Window.hpp"
 
-#include "SFML/Graphics/View.hpp"
 #include "src/graphics/Vertex.hpp"
 
 Window::Window()
 {
-	//Set up the window and define OpenGL version
-	m_renderWindow = std::make_unique<sf::Window>(sf::VideoMode(1920,1080), "FnF", sf::Style::Default, sf::ContextSettings(24, 8, 0, 4, 3));
+
+	if (SDL_CreateWindowAndRenderer(1600,1200, SDL_WINDOW_OPENGL, &m_window, &m_renderer) < 0)
+	{
+		SDL_Log("SDL_CreateWindowAndRenderer failed (%s)", SDL_GetError());
+		return;
+	}
+
+	SDL_SetWindowTitle(m_window, "FnF");
+    SDL_SetRenderDrawColor(m_renderer, 80, 80, 80, SDL_ALPHA_OPAQUE);
+
 
 	//Set up the OpenGL context in the window
 	setupOpenGL();
 }
 
+Window::~Window()
+{
+	if (m_renderer != nullptr)
+	{
+		SDL_DestroyRenderer(m_renderer);
+	}
+
+	if (m_window != nullptr)
+	{
+		SDL_DestroyWindow(m_window);
+	}
+}
+
 void Window::setupOpenGL()
 {
-	m_renderWindow->setActive(true);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+
+	//TODO: do we need to keep this variable?
+	auto gContext = SDL_GL_CreateContext(m_window);
+
+	if (gContext == NULL)
+	{
+		SDL_Log("SDL_OpenGL context could not be created  (%s)", SDL_GetError());
+		return;
+	}
 
 	GLenum err = glewInit();
 
@@ -111,7 +141,6 @@ void Window::draw(size_t vertexCount, size_t indexCount, size_t matrixCount, GLv
 		return;
 	}
 
-
 	m_shader.bind();
 	m_texture.bind();
 
@@ -131,6 +160,7 @@ void Window::draw(size_t vertexCount, size_t indexCount, size_t matrixCount, GLv
 
 	m_shader.unbind();
 	m_texture.unbind();
+
 }
 
 void Window::clear()
@@ -140,37 +170,11 @@ void Window::clear()
 
 void Window::display()
 {
-	m_renderWindow->display();
-}
-
-void Window::pollForEvents()
-{
-	m_events.clear();
-
-	sf::Event event;
-	while (m_renderWindow->pollEvent(event))
-	{
-		if (event.type == sf::Event::Closed)
-		{
-			//Fuck it, we're just gonna close up shop here.
-			m_renderWindow->close();
-		}
-
-		m_events.push_back(event);
-	}
-}
-
-bool Window::isOpen() const
-{
-	return m_renderWindow->isOpen();
+	//Swap buffers so we display what's up.
+	SDL_GL_SwapWindow(m_window); 
 }
 
 Shader& Window::getBoundShader() 
 {
 	return m_shader;
-}
-
-const std::vector<sf::Event>& Window::getEvents() const
-{
-	return m_events;
 }

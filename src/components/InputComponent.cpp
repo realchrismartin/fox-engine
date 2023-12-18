@@ -1,6 +1,6 @@
 #include "InputComponent.hpp"
 
-
+/*
 void InputComponent::informOfWindowEvent(sf::Event e)
 {
 	if (e.type != sf::Event::KeyPressed && e.type != sf::Event::KeyReleased)
@@ -84,6 +84,7 @@ void InputComponent::informOfWindowEvent(sf::Event e)
 		}
 	}
 }
+*/
 
 glm::vec3 InputComponent::getTranslationGivenInput()
 {

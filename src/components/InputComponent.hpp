@@ -1,8 +1,6 @@
 #ifndef INPUTCOMPONENT_HPP
 #define INPUTCOMPONENT_HPP
 
-#include "SFML/Window/Event.hpp"
-
 enum class UserInputActionsEnum
 {
 	PRESSING_W,
@@ -15,7 +13,6 @@ enum class UserInputActionsEnum
 class InputComponent
 {
 public:
-	void informOfWindowEvent(sf::Event event);
 	glm::vec3 getTranslationGivenInput();
 	glm::vec3 getRotationGivenInput();
 	bool anyInputActive() const;

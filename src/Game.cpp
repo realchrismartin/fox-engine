@@ -3,17 +3,54 @@
 #include "src/graphics/Camera.hpp"
 #include "src/systems/Systems.hpp"
 #include "src/scenes/ExampleTestScene.hpp"
+#include "SDL3/SDL.h"
 
 const float Game::TIMESTEP = .0167f;
 
-Game::Game()
+bool Game::initSDL()
 {
-	//Say hi!
-	Logger::log("Welcome to Chris n' J's game, you freak!");
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) 
+    {
+        SDL_Log("SDL_Init_VIDEO failed (%s)", SDL_GetError());
+		return false;
+    }
+
+	return true;
 }
 
 void Game::play()
 {
+	bool init = initSDL();
+
+	if (!init)
+	{
+		SDL_Quit();
+		return;
+	}
+
+	/*
+    while (true)
+    {
+        int finished = 0;
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_EVENT_QUIT)
+            {
+                finished = 1;
+                break;
+            }
+        }
+        if (finished) 
+        {
+            break;
+        }
+    }
+
+    SDL_Quit();
+	*/
+
+
 	 //For now, we create our camera on the stack
 	 Camera camera = Camera();
 
@@ -25,8 +62,9 @@ void Game::play()
 	 float accumulator = 0.f;
 
  	 //This is the main game loop.
-     //TODO: we need some semblance of a constant time tick per update here.
-	 while (m_window.isOpen())
+
+	 //Need to be able to exit! TODO
+	 while (true)
 	 {
 		 float newTime = m_clock.getElapsedTime().asSeconds();
 
