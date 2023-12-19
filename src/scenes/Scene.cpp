@@ -4,58 +4,78 @@
 #include "src/components/ModelComponent.hpp"
 #include "src/components/TransformComponent.hpp"
 #include "src/components/MVPTransformComponent.hpp"
-#include "src/components/config/ModelConfig.hpp"
+#include "src/graphics/ModelConfig.hpp"
+#include "src/entities/GameEntityLibrary.hpp"
+#include "src/scenes/SceneLibrary.hpp"
 
-//TODO: this is a lazy copy paste
-void Scene::loadText(const TextConfig& textConfig, int entityUID)
+Scene::Scene(SceneEnum scene)
 {
-	if (!m_gameEntityMap.count(entityUID))
+	init(SceneLibrary::getSceneConfig(scene));
+}
+
+void Scene::init(const SceneConfig& sceneConfig)
+{
+	//Store IDs as we make them in the prescribed order so that we can associate them in the scene graph.
+	std::vector<int> entityIds;
+
+	//Get a ref to the init fn map
+	const std::unordered_map<int, std::function<void(const GameEntity&, Scene&)>>& initFnMap = sceneConfig.getSceneSpecificInitFnMap();
+
+	for (auto const& entity : sceneConfig.getGameEntities())
 	{
-		//This entity was never registered.
-		return;
+		//For each entity to be added, add it, then use the ID we got to init it
+		std::optional<int> entityId = createEntity();
+
+		if (!entityId.has_value())
+		{
+			Logger::log("Could not create entity during init");
+			return;
+		}
+
+		//Get the entity config from the entity library
+		const GameEntityConfig& config = GameEntityLibrary::getGameEntityConfig(entity);
+
+		//Get the entity to set up
+		GameEntity& gameEntity = getEntity(entityId.value());
+
+		//Run the entity init
+		config.init(gameEntity, *this);
+
+		//Now that the entity is initialized, if there's a scene-specific init for this entity too, run that now.
+		if (initFnMap.count((int)entityIds.size()))
+		{
+			initFnMap.at((int)entityIds.size())(gameEntity, *this);
+		}
+
+		//Store the IDs for scene graph association purposes
+		entityIds.push_back(entityId.value());
 	}
-	
-	if (hasComponent<ModelComponent>(entityUID) || hasComponent<TransformComponent>(entityUID) || hasComponent<MVPTransformComponent>(entityUID))
+
+	//After everything is set up, add the scene graph mappings
+	for (auto const& [parent, children] : sceneConfig.getSceneGraphMap())
 	{
-		//For now, don't reload model data after it's set the first time.
-		Logger::log("This entity already has  model/transform/mvp component. Refusing to add more.");
-		return;
+		//Parent and Child ints are indices into the entityIds vector we made above.
+
+		if (parent >= entityIds.size())
+		{
+
+			Logger::log("Somehow we have a parent that's out of range, skipping");
+			continue;
+		}
+		
+		int parentUID = entityIds[parent];
+
+		for (auto const& child : children)
+		{
+			if (child > entityIds.size())
+			{
+				Logger::log("Somehow we have a child that's out of range, skipping");
+				continue;
+			}
+
+			addChild(parentUID, entityIds[child]);
+		}
 	}
-
-	//Since these pools are de facto protected from being added to any other way, the indices for this entity UID match across them. This is important!
-	addComponentPrivate<ModelComponent>(entityUID);
-	addComponentPrivate<TransformComponent>(entityUID);
-	addComponentPrivate<MVPTransformComponent>(entityUID);
-
-	//Do an (expensive) sanity check that all of the indices match
-	ComponentPool& modelPool = getComponentPool<ModelComponent>();
-	ComponentPool& transformPool = getComponentPool<TransformComponent>();
-	ComponentPool& mvpTransformPool = getComponentPool<MVPTransformComponent>();
-
-	//Check to confirm that all of the indices match correctly. If they don't something is wrong
-	//This should always be the last index in the pool given how pools work.
-	//If it isn't just crash.
-	std::optional<size_t> modelPoolIndex = modelPool.getIndexOfRegisteredEntity(entityUID);
-	std::optional<size_t> transformPoolIndex = transformPool.getIndexOfRegisteredEntity(entityUID);
-	std::optional<size_t> mvpTransformPoolIndex = mvpTransformPool.getIndexOfRegisteredEntity(entityUID);
-
-	if (!modelPoolIndex.has_value() || !transformPoolIndex.has_value() || !mvpTransformPoolIndex.has_value())
-	{
-		assert(false); //Something broke!
-	}
-
-	if (modelPoolIndex.value() != transformPoolIndex.value() || transformPoolIndex.value() != mvpTransformPoolIndex.value() || mvpTransformPoolIndex.value() != modelPoolIndex.value())
-	{
-		assert(false); //Something broke!
-	}
-
-	//Now that we have all of the components, get access to them and load them up
-	ModelComponent& modelComponent = getComponent<ModelComponent>(entityUID);
-
-	modelComponent.loadText(textConfig);
-
-	//TODO: later, this specific call could be cheaper than the one in removeEntity since it's adding to the end of the pool always.
-	updateAllModelComponentAssociations();
 }
 
 void Scene::loadModel(const ModelConfig& modelData, int entityUID)
@@ -396,7 +416,6 @@ void Scene::updateAllModelComponentAssociations()
 		entityCount++;
 	}
 }
-
 bool Scene::entityHasComponents(int entityIndex, std::vector<int>& componentTypeIds) const
 {
 	if (componentTypeIds.empty())

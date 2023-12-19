@@ -4,6 +4,7 @@
 #include "src/entities/GameEntity.hpp"
 #include "src/components/ComponentPool.hpp"
 #include "src/components/MVPTransformComponent.hpp" //Why is this here? TODO
+#include "src/components/ComponentTypes.hpp"
 
 class System;
 class TransformComponent;
@@ -11,12 +12,14 @@ class MVPTransformComponent;
 class ModelComponent;
 struct ModelConfig;
 struct TextConfig;
+struct SceneConfig;
 
 /// @brief An association of Entities with their Components.
 /// @brief Represents the game world and holds all entities and their components that are in the world.
 class Scene
 {
 public:
+	explicit Scene(SceneEnum scene);
 
 	/// @brief Get the component of the specified type T that is associated with the entity with the UID entityUID
 	/// @tparam T The type of component we are asking for
@@ -111,19 +114,18 @@ public:
 	int getEntityCount() const;
 
 	void applyToSceneGraph(std::function<void(Scene&, std::optional<int>, int)>& functor);
-	
+
+	void setCameraEntity(int uid);
+	void setCameraTargetEntity(int uid);
+
 	std::optional<int> getCameraEntity() const;
 	std::optional<int> getCameraTargetEntity() const;
 
+	/// @brief Load the specified model, which implies adding a ModelComponent, TransformComponent, and MVPTransformComponent to the entity.
+	/// @param modelData 
+	/// @param entityUID 
 	void loadModel(const ModelConfig& modelData, int entityUID);
 	void loadText(const TextConfig& modelData, int entityUID);
-
-protected:
-	void addChild(int parentEntityUID, int childEntityUID);
-	std::optional<int> createEntity();
-	void setCameraEntity(int uid);
-	void setCameraTargetEntity(int uid);
-	void removeEntity(int uid);
 
 	//Add a component to the entity specified by the ID
 	//This involves assigning an existing component from our component pools, or allocating a new one.
@@ -145,6 +147,12 @@ protected:
 
 		addComponentPrivate<T>(entityUID);
 	}
+
+protected:
+	void init(const SceneConfig& sceneConfig);
+	void addChild(int parentEntityUID, int childEntityUID);
+	std::optional<int> createEntity();
+	void removeEntity(int uid);
 
 	void applyFunctorToSceneGraph(std::optional<int> parentEntityID, int entityID, std::function<void(Scene&, std::optional<int>, int)>& functor);
 

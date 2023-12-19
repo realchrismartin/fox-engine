@@ -5,8 +5,7 @@
 #include "src/graphics/Camera.hpp"
 #include "src/systems/Systems.hpp"
 #include "src/util/Logger.hpp"
-
-#include "src/scenes/ExampleTestScene.hpp"
+#include "src/scenes/SceneLibrary.hpp"
 
 const float Game::TIMESTEP = .0167f;
 
@@ -32,7 +31,7 @@ void Game::play()
 	 Camera camera = Camera();
 
 	 //For now, we create an example scene on the stack
-	 Scene scene = ExampleTestScene();
+	 Scene scene = Scene(SceneEnum::TEST_SCENE);
 
 	 float currentTime = clock.getElapsedTimeInSeconds();
 	
