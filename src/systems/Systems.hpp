@@ -1,10 +1,14 @@
 #ifndef SYSTEMS_HPP
 #define SYSTEMS_HPP
 
+#include "src/scenes/SceneManager.hpp"
 #include "src/scenes/Scene.hpp"
+#include "src/scenes/SceneEnum.hpp"
+#include "src/util/Logger.hpp"
 
 #include "src/graphics/Window.hpp"
 #include "src/graphics/Camera.hpp"
+#include "src/Clock.hpp"
 
 #include "src/entities/GameEntity.hpp"
 #include "src/entities/EntityFilter.hpp"
@@ -14,14 +18,65 @@
 #include "src/components/ModelComponent.hpp"
 #include "src/components/MVPTransformComponent.hpp"
 
+static const float TIMESTEP = .0167f;
+
 /// @brief A collection of static functions that are "systems", functions that operate on specific associations of components in a scene to update them.
 /// @brief The update and render meta-systems are the core of the game. 
 class Systems
 {
 public:
-	//Run all of the game systems that pertain to updating
-	static const void update(Window& window, Scene& scene, Camera& camera, float elapsedTime)
+
+	static const void runGame()
 	{
+		//Try to initialize our windowing library.
+		//If we can't, bomb out here.
+		if (SDL_Init(SDL_INIT_VIDEO) < 0)
+		{
+			SDL_Log("SDL_Init_VIDEO failed (%s)", SDL_GetError());
+			SDL_Quit();
+			return;
+		}
+
+		//Initialize the game elements on the stack now. 
+		Clock clock;
+		Window window;
+		SceneManager sceneManager;
+		Camera camera;
+
+		float currentTime = clock.getElapsedTimeInSeconds();
+		float accumulator = TIMESTEP;
+
+		sceneManager.loadScene(SceneEnum::MAIN_MENU);
+
+		//This is the main game loop.
+		while (window.isOpen())
+		{
+			float newTime = clock.getElapsedTimeInSeconds();
+
+			float frameTime = newTime - currentTime;
+
+			currentTime = newTime;
+
+			accumulator += frameTime;
+
+			while (accumulator >= TIMESTEP)
+			{
+				Systems::update(window, sceneManager, camera, TIMESTEP);
+				accumulator -= TIMESTEP;
+			}
+
+			Systems::render(window, sceneManager, camera);
+		}
+
+		Logger::log("See you next time, space fox boy...");
+	}
+
+	//Run all of the game systems that pertain to updating
+	static const void update(Window& window, SceneManager& sceneManager, Camera& camera, float elapsedTime)
+	{
+		changeSceneSystem(sceneManager);
+
+		Scene& scene = sceneManager.getCurrentScene();
 		pollEventSystem(window, scene);
 		runInputProcessingSystem(scene, elapsedTime);
 		runAnimationSystem(scene, elapsedTime);
@@ -30,16 +85,28 @@ public:
 
 	//Run all of the game systems that pertain to rendering
 	//Assumes we called update first.
-	static const void render(Window& window, Scene& scene, Camera& camera)
+	static const void render(Window& window, SceneManager& sceneManager, Camera& camera)
 	{
 		window.clear();
 
 		//Draw stuff to the window
-		runRenderSystem(window, scene, camera);
+		runRenderSystem(window, sceneManager.getCurrentScene(), camera);
 
 		window.display();
 	};
+
 private:
+
+	static const void changeSceneSystem(SceneManager& sceneManager)
+	{
+		Scene& scene = sceneManager.getCurrentScene();
+
+		if (scene.getNextSceneRequested() != SceneEnum::NONE)
+		{
+			//Time to load the next scene!
+			sceneManager.loadScene(scene.getNextSceneRequested());
+		}
+	}
 
 	static const void pollEventSystem(Window& window, Scene& scene)
 	{
@@ -60,6 +127,20 @@ private:
 				for (auto const& entity : EntityFilter<InputComponent>(scene))
 				{
 					scene.getComponent<InputComponent>(entity).informOfEvent(event);
+				}
+
+				//TODO
+
+				//For now, P will load the menu
+				if (event.key.keysym.scancode == SDL_SCANCODE_P)
+				{
+					scene.requestSceneChange(SceneEnum::MAIN_MENU);
+				}
+
+				//O will load the test scene
+				if (event.key.keysym.scancode == SDL_SCANCODE_O)
+				{
+					scene.requestSceneChange(SceneEnum::TEST_SCENE);
 				}
 			}
 		}

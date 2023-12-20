@@ -12,6 +12,8 @@
 /// @brief All of the game entities that can be added to a scene.
 enum class GameEntityEnum
 {
+	TITLE_TEXT,
+	START_BUTTON,
 	PLAYER,
 	FLOOR,
 	BUSH,
@@ -19,6 +21,28 @@ enum class GameEntityEnum
 };
 
 //Static definitions for different types of entites go here!
+
+static GameEntityConfig TITLE_TEXT = GameEntityConfig()
+	.whenInit([](auto& entity, auto& scene)
+	{
+		ModelConfig model;
+		model.keyframeFilePaths = { "../../img/cube.obj" };
+		scene.loadModel(model, entity.getUID());
+
+		scene.getComponent<TransformComponent>(entity.getUID()).setScale({ 5.f,5.f,1.f });
+	});
+
+
+static GameEntityConfig START_BUTTON = GameEntityConfig()
+	.whenInit([](auto& entity, auto& scene)
+	{
+		ModelConfig model;
+		model.keyframeFilePaths = { "../../img/cube.obj" };
+		scene.loadModel(model, entity.getUID());
+
+		scene.getComponent<TransformComponent>(entity.getUID()).setScale({ 5.f,5.f,1.f });
+	});
+
 
 static GameEntityConfig PLAYER = GameEntityConfig()
 	.whenInit([](auto& entity, auto& scene)
@@ -80,6 +104,10 @@ namespace GameEntityLibrary
 	{
 		switch (gameEntity)
 		{
+		case(GameEntityEnum::TITLE_TEXT):
+			return TITLE_TEXT;
+		case(GameEntityEnum::START_BUTTON):
+			return START_BUTTON;
 		case(GameEntityEnum::PLAYER):
 			return PLAYER;
 		case(GameEntityEnum::FLOOR):

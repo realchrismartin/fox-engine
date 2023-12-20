@@ -1,17 +1,57 @@
 #ifndef SCENELIBRARY_HPP
 #define SCENELIBRARY_HPP
 
+#include "src/scenes/SceneEnum.hpp"
 #include "src/entities/GameEntityLibrary.hpp"
 #include "src/util/Logger.hpp"
 #include "src/scenes/SceneConfig.hpp"
 
-/// @brief All of the scenes available to us.
-enum class SceneEnum
-{
-	TEST_SCENE
-};
+//Main menu scene
+static const SceneConfig MAIN_MENU = SceneConfig()
+	.addEntity(GameEntityEnum::TITLE_TEXT,
+		[](const auto& entity, auto& scene) 
+		{
+			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 0.f,20.f,15.f });
+		})
+	.addEntity(GameEntityEnum::START_BUTTON,
+		[](const auto& entity, auto& scene) 
+		{
+			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 0.f,5.f,15.f });
+			scene.setCameraTargetEntity(entity.getUID());
+		})
+	.addEntity(GameEntityEnum::MUSHROOM,
+		[](const auto& entity, auto& scene)
+		{
+			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 5.f,-5.f,10.f });
+		})
+	.addEntity(GameEntityEnum::MUSHROOM,
+		[](const auto& entity, auto& scene)
+		{
+			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 0.f,-5.f,10.f });
+		})
+	.addEntity(GameEntityEnum::MUSHROOM,
+		[](const auto& entity, auto& scene)
+		{
+			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ -5.f,-5.f,10.f });
+		})
+	.addEntity(GameEntityEnum::MUSHROOM,
+		[](const auto& entity, auto& scene)
+		{
+			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 5.f,2.f,10.f });
+		})
+	.addEntity(GameEntityEnum::MUSHROOM,
+		[](const auto& entity, auto& scene)
+		{
+			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 0.f,-10.f,10.f });
+		})
+	.addEntity(GameEntityEnum::MUSHROOM,
+		[](const auto& entity, auto& scene)
+		{
+			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ -5.f,2.f,10.f });
+		});
 
-/// @brief A test scene. NB: Any scene-specific configuration goes here. All entity-specific config goes in the GameEntityLibrary!
+
+//Test scene
 static const SceneConfig TEST_SCENE = SceneConfig()
 	.addEntity(GameEntityEnum::FLOOR, //0
 		[](const auto& entity, auto& scene) 
@@ -43,8 +83,10 @@ namespace SceneLibrary
 		switch (scene)
 		{
 			case(SceneEnum::TEST_SCENE):
-			default:
 				return TEST_SCENE;
+			case(SceneEnum::MAIN_MENU):
+			default:
+				return MAIN_MENU;
 		}
 	}
 }

@@ -8,7 +8,7 @@
 #include "src/entities/GameEntityLibrary.hpp"
 #include "src/scenes/SceneLibrary.hpp"
 
-Scene::Scene(SceneEnum scene)
+Scene::Scene(SceneEnum scene) : m_thisSceneEnum(scene)
 {
 	init(SceneLibrary::getSceneConfig(scene));
 }
@@ -448,4 +448,9 @@ bool Scene::entityHasComponents(int entityIndex, std::vector<int>& componentType
 	}
 
 	return true;
+}
+
+SceneEnum Scene::getSceneEnum() const
+{
+	return m_thisSceneEnum;
 }

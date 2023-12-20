@@ -1,9 +1,8 @@
-﻿#include "src/Game.hpp"
+﻿#include "src/systems/Systems.hpp"
 
 int main()
 {
-	Game game;
-	game.play();
+	Systems::runGame();
 
 	return 0;
 }

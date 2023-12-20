@@ -5,6 +5,7 @@
 #include "src/components/ComponentPool.hpp"
 #include "src/components/MVPTransformComponent.hpp" //Why is this here? TODO
 #include "src/components/ComponentTypes.hpp"
+#include "src/scenes/SceneEnum.hpp"
 
 class System;
 class TransformComponent;
@@ -110,6 +111,8 @@ public:
 	/// @return 
 	bool entityHasComponents(int entityIndex, std::vector<int>& componentTypeIds) const;
 
+	SceneEnum getSceneEnum() const;
+
 	GameEntity& getEntity(int entityIndex);
 	int getEntityCount() const;
 
@@ -146,6 +149,21 @@ public:
 		}
 
 		addComponentPrivate<T>(entityUID);
+	}
+
+	SceneEnum getNextSceneRequested() const
+	{
+		return m_nextSceneRequested;
+	}
+
+	void requestSceneChange(SceneEnum scene)
+	{
+		if (scene == m_thisSceneEnum)
+		{
+			return;
+		}
+
+		m_nextSceneRequested = scene;
 	}
 
 protected:
@@ -198,6 +216,9 @@ private:
 
 	std::optional<int> m_cameraEntityId;
 	std::optional<int> m_cameraTargetEntityId;
+
+	SceneEnum m_nextSceneRequested = SceneEnum::NONE;
+	SceneEnum m_thisSceneEnum = SceneEnum::NONE;
 };
 
 #endif
