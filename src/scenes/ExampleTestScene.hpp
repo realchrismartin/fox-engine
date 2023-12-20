@@ -18,6 +18,7 @@ private:
 	std::optional<int> m_floorUID;
 	std::optional<int> m_bushUID;
 	std::optional<int> m_textUID;
+	std::optional<int> m_text2UID;
 };
 
 #endif

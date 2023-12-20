@@ -6,7 +6,7 @@
 Window::Window()
 {
 	//Set up the window and define OpenGL version
-	m_renderWindow = std::make_unique<sf::Window>(sf::VideoMode(800,600), "FnF", sf::Style::Default, sf::ContextSettings(24, 8, 0, 4, 3));
+	m_renderWindow = std::make_unique<sf::Window>(sf::VideoMode(1920,1080), "FnF", sf::Style::Default, sf::ContextSettings(24, 8, 0, 4, 3));
 
 	//Set up the OpenGL context in the window
 	setupOpenGL();

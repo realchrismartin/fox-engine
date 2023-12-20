@@ -1,13 +1,14 @@
 #ifndef TEXTCONFIG_HPP
 #define TEXTCONFIG_HPP
 
+#include "src/graphics/TextureMapper.hpp"
+
 struct TextConfig
 {
+	TextureEnum texture = TextureEnum::SPRITE_SHEET_1;
 	std::string textToDisplay = "J is sleepy";
-	unsigned int fontSize = 1;
-	size_t charactersPerLine = 10;
-	size_t maxLines = 5;
-	//TODO: which texture atlas is being used?
+	unsigned int fontSize = 5;
+	size_t charactersPerLine = 20;
 };
 
 #endif

@@ -90,7 +90,7 @@ void ExampleTestScene::createBush()
 
 		loadModel(model, uid);
 
-		getComponent<TransformComponent>(uid).setTranslation({ 10.f,0.f,5.f});
+		getComponent<TransformComponent>(uid).setTranslation({ 0.f,0.f,0.f});
 	}
 }
 
@@ -102,8 +102,22 @@ void ExampleTestScene::createText()
 	{
 		int uid = m_textUID.value();
 		TextConfig config;
-		config.textToDisplay = "j is sleepy and this is quite a long bit of text isnt it";
+		config.textToDisplay = "j is sleepy and this is quite a long bit of text isnt it? why yes i do beleive that it is. it is quite longe. in fact we could write a whole essay in here and im sure it would FIT ON THE SCREEN am i right";
 		loadText(config, uid);
-		//getComponent<TransformComponent>(uid).setTranslation({ -1.f,0.f,0.f});
+		getComponent<TransformComponent>(uid).setTranslation({ -1.f,0.f,0.f});
 	}
+
+	m_text2UID = createEntity();
+
+	if (m_text2UID.has_value())
+	{
+		int uid = m_text2UID.value();
+		TextConfig config;
+		config.fontSize = 4;
+		config.textToDisplay = "and lo and behoold heere is an otehr text! but it is slightly smaller is it not";
+		config.charactersPerLine = 10;
+		loadText(config, uid);
+		getComponent<TransformComponent>(uid).setTranslation({ .5f,.5f,0.f});
+	}
+
 }

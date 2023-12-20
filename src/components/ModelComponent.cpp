@@ -3,6 +3,7 @@
 #include "src/components/config/ModelConfig.hpp"
 #include "src/components/config/TextConfig.hpp"
 #include "src/util/FontMapper.hpp"
+#include "src/graphics/TextureMapper.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -84,68 +85,64 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 	m_frameVertices.push_back({});
 	m_frameIndices.push_back({});
 
-	//TODO: move elsewhere
-	constexpr glm::vec2 textureSize = glm::vec2(2500.f, 2500.f); //TODO
-	constexpr unsigned int screenXSize = 800;
+	glm::vec2 textureSize = TextureMapper::getTextureDimensionsInPixels(textConfig.texture);
 
-	float widest = 0.f;
-
-	for (size_t characterIndex = 0; characterIndex < textConfig.textToDisplay.size(); characterIndex++)
-	{
-		glm::vec2 size = FontMapper::getCharacterSpriteSize(textConfig.textToDisplay[characterIndex]);
-
-		widest = widest > size.x ? widest : size.x;
-	}
-
-	//TODO: this stuff ends up wrong if font size increases
-	unsigned int maxCharactersX = screenXSize / ((unsigned int)std::round(widest) * textConfig.fontSize);
-	float widestCharScreenWidth = 2.f / maxCharactersX;
-	float charHeight = .1f * textConfig.fontSize; //TODO: .1f is arbitrary
+	float bottommostBound = 0.f;
+	float rightmostBound = 0.f;
 
 	float leftCharacterBound = 0.f;
+	float bottomCharacterBound = 0.f;
 
-	size_t line = textConfig.maxLines;
-	int lineCounter = textConfig.charactersPerLine;
+	size_t line = 0;
+	size_t characterCounter = 0;
 
+	float tallestCharacterHeight = 0.f;
+
+	std::unordered_map<int, glm::vec2> characterSizes;
+	std::unordered_map<int, glm::vec2> characterTextureOffsetFactors;
+
+	//Derive and save character sizes and texture offset factors.
+	//While doing so, calculate the tallest character of 'em all. It will be used to right-size the box around all the text.
 	for (size_t characterIndex = 0; characterIndex < textConfig.textToDisplay.size(); characterIndex++)
 	{
 		glm::vec2 characterSize = FontMapper::getCharacterSpriteSize(textConfig.textToDisplay[characterIndex]);
-		glm::vec2 characterTexCoords = FontMapper::getCharacterTexCoords(textConfig.textToDisplay[characterIndex]); //Analogous to the sprite offset on a texture
+		glm::vec2 characterTexCoords = FontMapper::getCharacterTexCoords(textConfig.textToDisplay[characterIndex]); 
 
-		glm::vec2 textureOffsetFactor = glm::vec2((float)(characterTexCoords.x) / (float)(textureSize.x), (float)(textureSize.y - characterSize.y - characterTexCoords.y) / (float)(textureSize.y));
-		glm::vec2 characterSizeRatio = glm::vec2((float)characterSize.x / (float)textureSize.x, (float)characterSize.y / (float)textureSize.y);
+		characterSizes[characterIndex] = glm::vec2((float)characterSize.x / (float)textureSize.x, (float)characterSize.y / (float)textureSize.y);
+		characterTextureOffsetFactors[characterIndex] = glm::vec2((float)(characterTexCoords.x) / (float)(textureSize.x), (float)(textureSize.y - characterSize.y - characterTexCoords.y) / (float)(textureSize.y));
+			
+		tallestCharacterHeight = std::max(tallestCharacterHeight, characterSizes[characterIndex].y * textConfig.fontSize);
+	}
 
-		float charWidthRatio = characterSize.x / widest;
-
-		float rightCharacterBound = leftCharacterBound + (widestCharScreenWidth * charWidthRatio);
-
+	for (size_t characterIndex = 0; characterIndex < textConfig.textToDisplay.size(); characterIndex++)
+	{
 		Vertex topRight;
-		topRight.x = rightCharacterBound;
-		topRight.y = charHeight * (line + 1);
+		topRight.x = leftCharacterBound + characterSizes[characterIndex].x * textConfig.fontSize;
+		topRight.y = bottomCharacterBound + characterSizes[characterIndex].y * textConfig.fontSize;
 		topRight.z = 0.f;
-		topRight.s = textureOffsetFactor.x + characterSizeRatio.x;
-		topRight.t = textureOffsetFactor.y + characterSizeRatio.y;
+		topRight.s = characterTextureOffsetFactors[characterIndex].x + characterSizes[characterIndex].x;
+		topRight.t = characterTextureOffsetFactors[characterIndex].y + characterSizes[characterIndex].y;
 
 		Vertex bottomRight;
-		bottomRight.x = rightCharacterBound;
-		bottomRight.y = charHeight * line;
+		bottomRight.x = leftCharacterBound + characterSizes[characterIndex].x * textConfig.fontSize;
+		bottomRight.y = bottomCharacterBound;
 		bottomRight.z = 0.f;
-		bottomRight.s = textureOffsetFactor.x + characterSizeRatio.x;
-		bottomRight.t = textureOffsetFactor.y;
+		bottomRight.s = characterTextureOffsetFactors[characterIndex].x + characterSizes[characterIndex].x;
+		bottomRight.t = characterTextureOffsetFactors[characterIndex].y;
 
 		Vertex bottomLeft;
 		bottomLeft.x = leftCharacterBound;
-		bottomLeft.y = charHeight * line;
+		bottomLeft.y = bottomCharacterBound;
 		bottomLeft.z = 0.f;
-		bottomLeft.s = textureOffsetFactor.x;
-		bottomLeft.t = textureOffsetFactor.y;
+		bottomLeft.s = characterTextureOffsetFactors[characterIndex].x;
+		bottomLeft.t = characterTextureOffsetFactors[characterIndex].y;
 
 		Vertex topLeft;
 		topLeft.x = leftCharacterBound;
-		topLeft.y = charHeight * (line + 1);
+		topLeft.y = bottomCharacterBound + characterSizes[characterIndex].y * textConfig.fontSize;
 		topLeft.z = 0.f;
-		topLeft.s = textureOffsetFactor.x;
-		topLeft.t = textureOffsetFactor.y + characterSizeRatio.y;
+		topLeft.s = characterTextureOffsetFactors[characterIndex].x;
+		topLeft.t = characterTextureOffsetFactors[characterIndex].y + characterSizes[characterIndex].y;
 
 		m_frameVertices[0].push_back(topRight);
 		m_frameVertices[0].push_back(bottomRight);
@@ -154,36 +151,72 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 
 		size_t baseIndex = 4 * characterIndex;
 
-		m_frameIndices[0].push_back(baseIndex); //0
-		m_frameIndices[0].push_back(baseIndex + 1); //0
-		m_frameIndices[0].push_back(baseIndex + 3); //0
-		m_frameIndices[0].push_back(baseIndex + 1); //0
-		m_frameIndices[0].push_back(baseIndex + 2); //0
-		m_frameIndices[0].push_back(baseIndex+ 3); //0
+		m_frameIndices[0].push_back(baseIndex); 
+		m_frameIndices[0].push_back(baseIndex + 1); 
+		m_frameIndices[0].push_back(baseIndex + 3); 
+		m_frameIndices[0].push_back(baseIndex + 1); 
+		m_frameIndices[0].push_back(baseIndex + 2); 
+		m_frameIndices[0].push_back(baseIndex+ 3); 
 
-		leftCharacterBound += (widestCharScreenWidth * charWidthRatio);
-
-		if (lineCounter >= 0)
+		if (characterCounter >= textConfig.charactersPerLine && textConfig.textToDisplay[characterIndex] == ' ')
 		{
-			lineCounter--;
+			//Skip the next char since it's a space, convert it to a linebreak per se
+			//TODO
+
+			//Update the rightmost bound
+			rightmostBound = std::max(rightmostBound, leftCharacterBound + (characterSizes[characterIndex].x * textConfig.fontSize));
+
+			leftCharacterBound = 0.f; //Reset the left bound
+			characterCounter = 0; //Reset the counter
+			bottomCharacterBound -= tallestCharacterHeight;
+
+			//Update the bottommost bound
+			bottommostBound = std::min(bottommostBound, bottomCharacterBound);
+		}
+		else
+		{
+			//Keep placing characters on this line.
+			leftCharacterBound += (textConfig.fontSize * characterSizes[characterIndex].x);
 		}
 
-		if (lineCounter < 0)
-		{
-			if (textConfig.textToDisplay[characterIndex] == ' ')
-			{
-				lineCounter = textConfig.charactersPerLine;
-				line--;
-				leftCharacterBound = 0.f;
-
-				if (line < 0)
-				{
-					//Too long!
-					break;
-				}
-			}
-		}
+		characterCounter++;
 	}
+
+	//Add one long rectangle underneath everything to make it look nice.
+	Vertex topRight;
+	topRight.x = rightmostBound;
+	topRight.y = tallestCharacterHeight;
+	topRight.z = 0.f;
+
+	Vertex bottomRight;
+	bottomRight.x = rightmostBound;
+	bottomRight.y = bottommostBound;
+	bottomRight.z = 0.f;
+
+	Vertex bottomLeft;
+	bottomLeft.x = 0.f; //always leftmost
+	bottomLeft.y = bottommostBound;
+	bottomLeft.z = 0.f;
+
+	Vertex topLeft;
+	topLeft.x = 0.f; //always leftmost
+	topLeft.y = tallestCharacterHeight;
+	topLeft.z = 0.f;
+
+	m_frameVertices[0].push_back(topRight);
+	m_frameVertices[0].push_back(bottomRight);
+	m_frameVertices[0].push_back(bottomLeft);
+	m_frameVertices[0].push_back(topLeft);
+
+	size_t baseIndex = 4 * textConfig.textToDisplay.size();
+
+	m_frameIndices[0].push_back(baseIndex); //0
+	m_frameIndices[0].push_back(baseIndex + 1); //0
+	m_frameIndices[0].push_back(baseIndex + 3); //0
+	m_frameIndices[0].push_back(baseIndex + 1); //0
+	m_frameIndices[0].push_back(baseIndex + 2); //0
+	m_frameIndices[0].push_back(baseIndex+ 3); //0
+
 }
 
 void ModelComponent::loadModel(const ModelConfig& modelData)
