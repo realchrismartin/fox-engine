@@ -4,7 +4,7 @@
 Window::Window()
 {
 
-	m_window = SDL_CreateWindow("FnF", 1600, 1200, SDL_WINDOW_OPENGL);
+	m_window = SDL_CreateWindow("FnF", 1024, 768, SDL_WINDOW_OPENGL);
 
 	if (m_window == NULL)
 	{

@@ -89,15 +89,14 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 		auto title = config.addEntity(GameEntityEnum::TITLE_TEXT);
 		title.addInitFn([](const auto& entity, auto& scene)
 		{
-			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 0.f,20.f,15.f });
+			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 0.f,1.f,0.f });
 		});
 
 		//Start button
 		auto startButton = config.addEntity(GameEntityEnum::START_BUTTON);
 		startButton.addInitFn([](const auto& entity, auto& scene)
 		{
-			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 0.f,5.f,15.f });
-			scene.setCameraTargetEntity(entity.getUID());
+			scene.getComponent<TransformComponent>(entity.getUID()).setScale({ 2.f,2.f,0.f });
 		});
 
 		break;

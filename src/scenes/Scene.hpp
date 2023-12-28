@@ -172,6 +172,7 @@ protected:
 	void applyFunctorToSceneGraph(std::optional<int> parentEntityID, int entityID, std::function<void(Scene&, std::optional<int>, int)>& functor);
 
 private:
+	void addModelComponentDependencies(int entityUID);
 	void updateAllModelComponentAssociations();
 
 	//Add a component to the entity specified by the ID

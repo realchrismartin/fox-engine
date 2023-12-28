@@ -37,8 +37,8 @@ public:
 
 		if (m_orthographicProjectionMatrixDirty)
 		{
-
-			constexpr float aspectRatio = 1920.f / 1080.f;
+			//TODO
+			constexpr float aspectRatio = 1024.f / 768.f;
 			m_orthographicProjectionMatrix = glm::ortho(-aspectRatio,aspectRatio,-1.f,1.f,1.f,-1.f); //TODO siz
 
 			m_orthographicProjectionMatrixDirty = false;
