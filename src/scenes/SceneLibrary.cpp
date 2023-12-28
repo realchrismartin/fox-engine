@@ -41,6 +41,7 @@ const SceneConfig& SceneLibrary::getSceneConfig(SceneEnum scene)
 const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 {
 	SceneConfig config;
+	config.id = scene;
 
 	switch(scene)
 	{

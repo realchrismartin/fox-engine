@@ -30,6 +30,7 @@ void Scene::init(const SceneConfig& sceneConfig)
 	m_nextSceneRequested = SceneEnum::NONE;
 
 	//Now, we make the scene.
+	m_sceneID = sceneConfig.id;
 
 	//Store IDs as we make them in the prescribed order so that we can associate them in the scene graph.
 	std::vector<int> entityIds;
@@ -39,7 +40,7 @@ void Scene::init(const SceneConfig& sceneConfig)
 
 	for (auto const& entity : sceneConfig.getGameEntities())
 	{
-		//For each entity to be added, add it, then use the ID we got to init itinline 
+		//For each entity to be added, add it, then use the ID we got to init it inline 
 		std::optional<int> entityId = createEntity();
 
 		if (!entityId.has_value())

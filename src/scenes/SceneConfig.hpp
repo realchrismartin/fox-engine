@@ -2,6 +2,7 @@
 #define SCENECONFIG_HPP
 
 #include "src/entities/GameEntityEnum.hpp"
+#include "src/scenes/SceneEnum.hpp"
 
 struct ConfiguredEntity;
 class Scene;
@@ -9,6 +10,8 @@ class GameEntity;
 
 struct SceneConfig
 {
+	SceneEnum id = SceneEnum::NONE;
+
 	ConfiguredEntity addEntity(GameEntityEnum entity);
 
 	void addInitFnForEntity(size_t index, std::function<void(const GameEntity&, Scene&)> initFn);

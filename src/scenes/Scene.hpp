@@ -161,6 +161,11 @@ public:
 
 	void requestSceneChange(SceneEnum scene)
 	{
+		if (scene == m_sceneID)
+		{
+			return;
+		}
+
 		m_nextSceneRequested = scene;
 	}
 
@@ -215,6 +220,7 @@ private:
 	std::optional<int> m_cameraEntityId;
 	std::optional<int> m_cameraTargetEntityId;
 
+	SceneEnum m_sceneID = SceneEnum::NONE;
 	SceneEnum m_nextSceneRequested = SceneEnum::NONE;
 };
 
