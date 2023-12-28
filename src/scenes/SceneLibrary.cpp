@@ -64,9 +64,6 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 10.f,0.f,5.f });
 		});
 
-		//Add the bush as a child of the player
-		config.addChild(player, bush);
-
 		//Mushroom
 		auto mushroom1 = config.addEntity(GameEntityEnum::MUSHROOM);
 		mushroom1.addInitFn([](const auto& entity, auto& scene)
@@ -99,7 +96,6 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 		{
 			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({0.f,-.3f,0.f });
 		});
-
 
 		//Floor
 		auto floor = config.addEntity(GameEntityEnum::FLOOR);
