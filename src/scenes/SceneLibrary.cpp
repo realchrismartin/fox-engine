@@ -3,14 +3,15 @@
 #include "src/scenes/SceneConfig.hpp"
 #include "src/scenes/SceneEnum.hpp"
 #include "src/entities/GameEntityLibrary.hpp"
+#include "src/entities/GameEntityEnum.hpp"
 #include "src/util/Logger.hpp"
 #include "src/entities/ConfiguredEntity.hpp"
 
-//Main menu scene
-static const SceneConfig MAIN_MENU = SceneLibrary::initSceneConfig(SceneEnum::MAIN_MENU);
-
-//Test scene
-static const SceneConfig LEVEL_1 = SceneLibrary::initSceneConfig(SceneEnum::LEVEL_1);
+namespace Scenes
+{
+	static const SceneConfig MAIN_MENU = SceneLibrary::initSceneConfig(SceneEnum::MAIN_MENU);
+	static const SceneConfig LEVEL_1 = SceneLibrary::initSceneConfig(SceneEnum::LEVEL_1);
+}
 
 /// @brief Get a statically allocated scene configuration. This will be called from Scene:: when a new scene is requested.
 /// @brief It will always return a reference to the single statically allocated config for the scene enum specified.
@@ -21,10 +22,10 @@ const SceneConfig& SceneLibrary::getSceneConfig(SceneEnum scene)
 	switch (scene)
 	{
 		case(SceneEnum::LEVEL_1):
-			return LEVEL_1;
+			return Scenes::LEVEL_1;
 		case(SceneEnum::MAIN_MENU):
 		default:
-			return MAIN_MENU;
+			return Scenes::MAIN_MENU;
 	}
 }
 

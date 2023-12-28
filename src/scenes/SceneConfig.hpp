@@ -2,6 +2,7 @@
 #define SCENECONFIG_HPP
 
 #include "src/entities/GameEntityLibrary.hpp"
+#include "src/entities/GameEntityEnum.hpp"
 
 struct ConfiguredEntity;
 
