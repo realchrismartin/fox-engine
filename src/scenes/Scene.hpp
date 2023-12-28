@@ -20,7 +20,10 @@ struct SceneConfig;
 class Scene
 {
 public:
-	explicit Scene(SceneEnum scene);
+
+	/// @brief Reset and initialize the scene with this config
+	/// @param sceneConfig 
+	void init(const SceneConfig& sceneConfig);
 
 	/// @brief Get the component of the specified type T that is associated with the entity with the UID entityUID
 	/// @tparam T The type of component we are asking for
@@ -158,16 +161,10 @@ public:
 
 	void requestSceneChange(SceneEnum scene)
 	{
-		if (scene == m_thisSceneEnum)
-		{
-			return;
-		}
-
 		m_nextSceneRequested = scene;
 	}
 
 protected:
-	void init(const SceneConfig& sceneConfig);
 	void addChild(int parentEntityUID, int childEntityUID);
 	std::optional<int> createEntity();
 	void removeEntity(int uid);
@@ -218,7 +215,6 @@ private:
 	std::optional<int> m_cameraTargetEntityId;
 
 	SceneEnum m_nextSceneRequested = SceneEnum::NONE;
-	SceneEnum m_thisSceneEnum = SceneEnum::NONE;
 };
 
 #endif

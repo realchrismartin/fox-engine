@@ -158,6 +158,14 @@ public:
 		return m_data;
 	}
 
+	void reset()
+	{
+		//Reset the pool. Its memory is still there, but it won't be used - whenever a new component is registered, the memory will be overwritten.
+		m_componentsUsedCount = 0;
+		m_entityToComponentMap.clear();
+		m_componentToEntityMap.clear();
+	}
+
 	~ComponentPool()
 	{
 		delete[] m_data;

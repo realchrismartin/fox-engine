@@ -5,7 +5,7 @@
 enum class SceneEnum
 {
 	MAIN_MENU,
-	TEST_SCENE,
+	LEVEL_1,
 	NONE
 };
 

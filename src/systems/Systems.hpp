@@ -1,9 +1,9 @@
 #ifndef SYSTEMS_HPP
 #define SYSTEMS_HPP
 
-#include "src/scenes/SceneManager.hpp"
 #include "src/scenes/Scene.hpp"
 #include "src/scenes/SceneEnum.hpp"
+#include "src/scenes/SceneLibrary.hpp"
 #include "src/util/Logger.hpp"
 
 #include "src/graphics/Window.hpp"
@@ -40,13 +40,13 @@ public:
 		//Initialize the game elements on the stack now. 
 		Clock clock;
 		Window window;
-		SceneManager sceneManager;
+		Scene scene;
 		Camera camera;
 
 		float currentTime = clock.getElapsedTimeInSeconds();
 		float accumulator = TIMESTEP;
 
-		sceneManager.loadScene(SceneEnum::MAIN_MENU);
+		scene.init(SceneLibrary::getSceneConfig(SceneEnum::MAIN_MENU));
 
 		//This is the main game loop.
 		while (window.isOpen())
@@ -61,22 +61,22 @@ public:
 
 			while (accumulator >= TIMESTEP)
 			{
-				Systems::update(window, sceneManager, camera, TIMESTEP);
+				update(window, scene, camera, TIMESTEP);
 				accumulator -= TIMESTEP;
 			}
 
-			Systems::render(window, sceneManager, camera);
+			render(window, scene, camera);
 		}
 
 		Logger::log("See you next time, space fox boy...");
 	}
 
-	//Run all of the game systems that pertain to updating
-	static const void update(Window& window, SceneManager& sceneManager, Camera& camera, float elapsedTime)
-	{
-		changeSceneSystem(sceneManager);
+private:
 
-		Scene& scene = sceneManager.getCurrentScene();
+	//Run all of the game systems that pertain to updating
+	static const void update(Window& window, Scene& scene, Camera& camera, float elapsedTime)
+	{
+		changeSceneSystem(scene);
 		pollEventSystem(window, scene);
 		runInputProcessingSystem(scene, elapsedTime);
 		runAnimationSystem(scene, elapsedTime);
@@ -85,26 +85,23 @@ public:
 
 	//Run all of the game systems that pertain to rendering
 	//Assumes we called update first.
-	static const void render(Window& window, SceneManager& sceneManager, Camera& camera)
+	static const void render(Window& window, Scene& scene, Camera& camera)
 	{
 		window.clear();
 
 		//Draw stuff to the window
-		runRenderSystem(window, sceneManager.getCurrentScene(), camera);
+		runRenderSystem(window, scene, camera);
 
 		window.display();
 	};
 
-private:
 
-	static const void changeSceneSystem(SceneManager& sceneManager)
+	static const void changeSceneSystem(Scene& scene)
 	{
-		Scene& scene = sceneManager.getCurrentScene();
-
 		if (scene.getNextSceneRequested() != SceneEnum::NONE)
 		{
 			//Time to load the next scene!
-			sceneManager.loadScene(scene.getNextSceneRequested());
+			scene.init(SceneLibrary::getSceneConfig(scene.getNextSceneRequested()));
 		}
 	}
 
@@ -129,18 +126,18 @@ private:
 					scene.getComponent<InputComponent>(entity).informOfEvent(event);
 				}
 
-				//TODO
+				//Also inform the scene if a change is needed, for now
 
-				//For now, P will load the menu
-				if (event.key.keysym.scancode == SDL_SCANCODE_P)
+				//For now, 0 will load the menu
+				if (event.key.keysym.scancode == SDL_SCANCODE_0)
 				{
 					scene.requestSceneChange(SceneEnum::MAIN_MENU);
 				}
 
-				//O will load the test scene
-				if (event.key.keysym.scancode == SDL_SCANCODE_O)
+				//1 will load the level 1
+				if (event.key.keysym.scancode == SDL_SCANCODE_1)
 				{
-					scene.requestSceneChange(SceneEnum::TEST_SCENE);
+					scene.requestSceneChange(SceneEnum::LEVEL_1);
 				}
 			}
 		}

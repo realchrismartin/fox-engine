@@ -1,5 +1,6 @@
 #include "src/scenes/Scene.hpp"
 
+#include "src/scenes/SceneConfig.hpp"
 #include "src/util/Logger.hpp"
 #include "src/components/ModelComponent.hpp"
 #include "src/components/TransformComponent.hpp"
@@ -8,13 +9,26 @@
 #include "src/entities/GameEntityLibrary.hpp"
 #include "src/scenes/SceneLibrary.hpp"
 
-Scene::Scene(SceneEnum scene) : m_thisSceneEnum(scene)
-{
-	init(SceneLibrary::getSceneConfig(scene));
-}
-
 void Scene::init(const SceneConfig& sceneConfig)
 {
+	//Dump whatever's in the existing pools, if there are any
+	for (auto& pool : m_componentPools)
+	{
+		pool->reset();
+	}
+
+	//Clear out the existing entities and state
+	m_sceneGraph.clear();
+	m_rootNodes.clear();
+	m_gameEntityMap.clear();
+	m_gameEntities.clear();
+	m_availableEntityUID = 0;
+	m_cameraEntityId = std::nullopt;
+	m_cameraTargetEntityId = std::nullopt;
+	m_nextSceneRequested = SceneEnum::NONE;
+
+	//Now, we make the scene.
+
 	//Store IDs as we make them in the prescribed order so that we can associate them in the scene graph.
 	std::vector<int> entityIds;
 
@@ -23,7 +37,7 @@ void Scene::init(const SceneConfig& sceneConfig)
 
 	for (auto const& entity : sceneConfig.getGameEntities())
 	{
-		//For each entity to be added, add it, then use the ID we got to init it
+		//For each entity to be added, add it, then use the ID we got to init itinline 
 		std::optional<int> entityId = createEntity();
 
 		if (!entityId.has_value())
@@ -448,9 +462,4 @@ bool Scene::entityHasComponents(int entityIndex, std::vector<int>& componentType
 	}
 
 	return true;
-}
-
-SceneEnum Scene::getSceneEnum() const
-{
-	return m_thisSceneEnum;
 }
