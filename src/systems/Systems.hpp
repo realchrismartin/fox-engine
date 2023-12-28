@@ -127,6 +127,7 @@ private:
 				}
 
 				//Also inform the scene if a change is needed, for now
+				//NOTE: This will request a reload even if the current scene is the same. Fix this later.
 
 				//For now, 0 will load the menu
 				if (event.key.keysym.scancode == SDL_SCANCODE_0)

@@ -1,10 +1,10 @@
 #include "src/entities/GameEntityLibrary.hpp"
 
 #include "src/entities/GameEntityEnum.hpp"
-#include "src/components/ComponentPool.hpp"
-#include "src/scenes/Scene.hpp"
 #include "src/entities/GameEntityConfig.hpp"
 
+#include "src/components/ComponentPool.hpp"
+#include "src/scenes/Scene.hpp"
 #include "src/components/InputComponent.hpp"
 #include "src/components/TransformComponent.hpp"
 #include "src/graphics/ModelConfig.hpp"
@@ -86,25 +86,22 @@ namespace GameEntities
 		});
 }
 
-/// @brief Get a reference to the static game entity config for a given entity type
-/// @param gameEntity 
-/// @return 
 const GameEntityConfig& GameEntityLibrary::getGameEntityConfig(GameEntityEnum gameEntity)
 {
 	switch (gameEntity)
 	{
-	case(GameEntityEnum::TITLE_TEXT):
-		return GameEntities::TITLE_TEXT;
-	case(GameEntityEnum::START_BUTTON):
-		return GameEntities::START_BUTTON;
-	case(GameEntityEnum::PLAYER):
-		return GameEntities::PLAYER;
-	case(GameEntityEnum::FLOOR):
-		return GameEntities::FLOOR;
-	case(GameEntityEnum::BUSH):
-		return GameEntities::BUSH;
-	case(GameEntityEnum::MUSHROOM):
-	default:
-		return GameEntities::MUSHROOM;
+		case(GameEntityEnum::TITLE_TEXT):
+			return GameEntities::TITLE_TEXT;
+		case(GameEntityEnum::START_BUTTON):
+			return GameEntities::START_BUTTON;
+		case(GameEntityEnum::PLAYER):
+			return GameEntities::PLAYER;
+		case(GameEntityEnum::FLOOR):
+			return GameEntities::FLOOR;
+		case(GameEntityEnum::BUSH):
+			return GameEntities::BUSH;
+		case(GameEntityEnum::MUSHROOM):
+		default:
+			return GameEntities::MUSHROOM;
 	}
 }

@@ -1,13 +1,15 @@
 #include "src/scenes/Scene.hpp"
 
-#include "src/scenes/SceneConfig.hpp"
 #include "src/util/Logger.hpp"
+
+#include "src/scenes/SceneConfig.hpp"
+#include "src/entities/GameEntityConfig.hpp"
+#include "src/entities/GameEntityLibrary.hpp"
+#include "src/graphics/ModelConfig.hpp"
+
 #include "src/components/ModelComponent.hpp"
 #include "src/components/TransformComponent.hpp"
 #include "src/components/MVPTransformComponent.hpp"
-#include "src/graphics/ModelConfig.hpp"
-#include "src/entities/GameEntityLibrary.hpp"
-#include "src/scenes/SceneLibrary.hpp"
 
 void Scene::init(const SceneConfig& sceneConfig)
 {

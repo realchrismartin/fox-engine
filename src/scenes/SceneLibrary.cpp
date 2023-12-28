@@ -2,10 +2,15 @@
 
 #include "src/scenes/SceneConfig.hpp"
 #include "src/scenes/SceneEnum.hpp"
-#include "src/entities/GameEntityLibrary.hpp"
+#include "src/scenes/Scene.hpp"
+
 #include "src/entities/GameEntityEnum.hpp"
-#include "src/util/Logger.hpp"
+#include "src/entities/GameEntityLibrary.hpp"
 #include "src/entities/ConfiguredEntity.hpp"
+
+#include "src/components/TransformComponent.hpp"
+
+#include "src/util/Logger.hpp"
 
 namespace Scenes
 {

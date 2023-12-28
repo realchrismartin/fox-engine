@@ -1,10 +1,11 @@
 #ifndef SCENECONFIG_HPP
 #define SCENECONFIG_HPP
 
-#include "src/entities/GameEntityLibrary.hpp"
 #include "src/entities/GameEntityEnum.hpp"
 
 struct ConfiguredEntity;
+class Scene;
+class GameEntity;
 
 struct SceneConfig
 {

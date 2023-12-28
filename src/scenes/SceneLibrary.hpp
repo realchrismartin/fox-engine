@@ -6,8 +6,9 @@ struct SceneConfig;
 
 //To add a new scene:
 // 0) Update SceneEnum.hpp to add an ID for your scene
-// 1) Add a mapping in getSceneConfig() for your enum (below)
-// 2) Add a mapping and definition in initSceneConfig() for your enum (below)
+// 1) Add a mapping in getSceneConfig() for your enum
+// 3) Add a static SceneConfig variable for your enum to the Scenes namespace in SceneLibrary.cpp
+// 3) Add a mapping and definition in initSceneConfig() for your enum
 namespace SceneLibrary
 {
 	/// @brief Get a statically allocated scene configuration. This will be called from Scene:: when a new scene is requested.
