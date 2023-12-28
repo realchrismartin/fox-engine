@@ -25,7 +25,7 @@ namespace GameEntities
 		.whenInit([](auto& entity, auto& scene)
 		{
 			TextConfig config;
-			config.textToDisplay = "preeeeeeeeeeeeeeess";
+			config.textToDisplay = "press start to begin";
 			scene.loadText(config, entity.getUID());
 		});
 
@@ -60,6 +60,7 @@ namespace GameEntities
 			model.keyframeFilePaths = { "../../img/quoteunquote-bush.obj" };
 
 			scene.loadModel(model, entity.getUID());
+			scene.getComponent<TransformComponent>(entity.getUID()).setScale({ 2.f,2.f,2.f});
 		});
 
 	static const GameEntityConfig MUSHROOM = GameEntityConfig()

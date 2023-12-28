@@ -95,6 +95,24 @@ void Scene::init(const SceneConfig& sceneConfig)
 	}
 }
 
+void Scene::loadText(const TextConfig& textConfig, int entityUID)
+{
+	if (textConfig.textToDisplay.size() <= 0)
+	{
+		Logger::log("No text was provided. Skipping loading text.");
+		return;
+	}
+
+	addModelComponentDependencies(entityUID);
+
+	//Now a model component exists. 
+	ModelComponent& modelComponent = getComponent<ModelComponent>(entityUID);
+	modelComponent.loadText(textConfig);
+
+	//TODO: later, this specific call could be cheaper than the one in removeEntity since it's adding to the end of the pool always.
+	updateAllModelComponentAssociations();
+}
+
 void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 {
 	if (modelData.keyframeFilePaths.empty())
@@ -102,7 +120,19 @@ void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 		Logger::log("No keyframes provided to load in this model data! Skipping load.");
 		return;
 	}
-	
+
+	addModelComponentDependencies(entityUID);
+
+	//Now a model component exists.
+	ModelComponent& modelComponent = getComponent<ModelComponent>(entityUID);
+	modelComponent.loadModel(modelData);
+
+	//TODO: later, this specific call could be cheaper than the one in removeEntity since it's adding to the end of the pool always.
+	updateAllModelComponentAssociations();
+}
+
+void Scene::addModelComponentDependencies(int entityUID)
+{
 	if (!m_gameEntityMap.count(entityUID))
 	{
 		//This entity was never registered.
@@ -142,6 +172,7 @@ void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 	{
 		assert(false); //Something broke!
 	}
+<<<<<<< HEAD
 
 	//Now that we have all of the components, get access to them and load them up
 	ModelComponent& modelComponent = getComponent<ModelComponent>(entityUID);
@@ -151,6 +182,8 @@ void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 
 	//TODO: later, this specific call could be cheaper than the one in removeEntity since it's adding to the end of the pool always.
 	updateAllModelComponentAssociations();
+=======
+>>>>>>> 05955e8 (lil ruff)
 }
 
 GameEntity& Scene::getEntity(int entityIndex)

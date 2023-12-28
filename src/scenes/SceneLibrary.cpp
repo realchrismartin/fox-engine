@@ -74,14 +74,12 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 10.f,0.f,5.f });
 		});
 
-		/*
 		//Another mushroom
 		auto mushroom2 = config.addEntity(GameEntityEnum::MUSHROOM);
 		mushroom2.addInitFn([](const auto& entity, auto& scene)
 		{
 			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 0.f,0.f,10.f });
 		});
-		*/
 
 		break;
 	}
@@ -92,14 +90,14 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 		auto title = config.addEntity(GameEntityEnum::TITLE_TEXT);
 		title.addInitFn([](const auto& entity, auto& scene)
 		{
-			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 0.f,1.f,0.f });
+			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ -.1f,.5f,0.f });
 		});
 
 		//Start button
 		auto startButton = config.addEntity(GameEntityEnum::START_BUTTON);
 		startButton.addInitFn([](const auto& entity, auto& scene)
 		{
-			scene.getComponent<TransformComponent>(entity.getUID()).setScale({ 2.f,2.f,0.f });
+			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ -.1,-.5f,0.f });
 		});
 
 		break;
