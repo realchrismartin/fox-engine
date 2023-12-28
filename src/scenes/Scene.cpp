@@ -103,7 +103,10 @@ void Scene::loadText(const TextConfig& textConfig, int entityUID)
 		return;
 	}
 
-	addModelComponentDependencies(entityUID);
+	if (!hasComponent<ModelComponent>(entityUID) && !hasComponent<TransformComponent>(entityUID) && !hasComponent<MVPTransformComponent>(entityUID))
+	{
+		addModelComponentDependencies(entityUID);
+	}
 
 	//Now a model component exists. 
 	ModelComponent& modelComponent = getComponent<ModelComponent>(entityUID);
@@ -121,7 +124,10 @@ void Scene::loadModel(const ModelConfig& modelData, int entityUID)
 		return;
 	}
 
-	addModelComponentDependencies(entityUID);
+	if (!hasComponent<ModelComponent>(entityUID) && !hasComponent<TransformComponent>(entityUID) && !hasComponent<MVPTransformComponent>(entityUID))
+	{
+		addModelComponentDependencies(entityUID);
+	}
 
 	//Now a model component exists.
 	ModelComponent& modelComponent = getComponent<ModelComponent>(entityUID);
@@ -138,13 +144,7 @@ void Scene::addModelComponentDependencies(int entityUID)
 		//This entity was never registered.
 		return;
 	}
-	
-	if (hasComponent<ModelComponent>(entityUID) || hasComponent<TransformComponent>(entityUID) || hasComponent<MVPTransformComponent>(entityUID))
-	{
-		//For now, don't reload model data after it's set the first time.
-		Logger::log("This entity already has  model/transform/mvp component. Refusing to add more.");
-		return;
-	}
+
 
 	//Since these pools are de facto protected from being added to any other way, the indices for this entity UID match across them. This is important!
 	addComponentPrivate<ModelComponent>(entityUID);

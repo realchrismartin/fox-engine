@@ -18,6 +18,7 @@ namespace GameEntities
 		{
 			TextConfig config;
 			config.textToDisplay = "fox n fowl";
+			config.centered = true;
 			scene.loadText(config, entity.getUID());
 		});
 
@@ -26,6 +27,7 @@ namespace GameEntities
 		{
 			TextConfig config;
 			config.textToDisplay = "press start to begin";
+			config.centered = true;
 			scene.loadText(config, entity.getUID());
 		});
 

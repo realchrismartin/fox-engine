@@ -90,14 +90,23 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 		auto title = config.addEntity(GameEntityEnum::TITLE_TEXT);
 		title.addInitFn([](const auto& entity, auto& scene)
 		{
-			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ -.1f,.5f,0.f });
+			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({0.f,.5f,0.f });
 		});
 
 		//Start button
 		auto startButton = config.addEntity(GameEntityEnum::START_BUTTON);
 		startButton.addInitFn([](const auto& entity, auto& scene)
 		{
-			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ -.1,-.5f,0.f });
+			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({0.f,-.3f,0.f });
+		});
+
+
+		//Floor
+		auto floor = config.addEntity(GameEntityEnum::FLOOR);
+		floor.addInitFn([](const auto& entity, auto& scene)
+		{
+			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 0.f,-2.f,-2.f });
+			scene.getComponent<TransformComponent>(entity.getUID()).setRotation({ 45.f,0.f,0.f });
 		});
 
 		break;

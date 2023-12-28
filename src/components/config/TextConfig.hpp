@@ -9,6 +9,7 @@ struct TextConfig
 	std::string textToDisplay = "J is sleepy";
 	unsigned int fontSize = 5;
 	size_t charactersPerLine = 20;
+	bool centered = false;
 };
 
 #endif

@@ -68,17 +68,19 @@ bool ModelComponent::usesOrthographicProjection() const
 
 void ModelComponent::loadText(const TextConfig& textConfig)
 {
-	if (!m_frameVertices.empty() || !m_frameIndices.empty())
-	{
-		Logger::log("Model is already loaded, cannot load text.");
-		return;
-	}
-
 	if (textConfig.textToDisplay.size() <= 0)
 	{
 		Logger::log("There is no text to display! Cannot load text.");
 		return;
 	}
+
+	if (!m_frameVertices.empty() || !m_frameIndices.empty())
+	{
+		m_frameVertices.clear();
+		m_frameIndices.clear();
+	}
+
+	m_activeMeshIndex = 0; //Reset!
 
 	m_usesOrthographicProjection = true;
 
@@ -114,8 +116,13 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 		tallestCharacterHeight = std::max(tallestCharacterHeight, characterSizes[characterIndex].y * textConfig.fontSize);
 	}
 
+	float currentLineWidth = 0.f;
+	float maxLineWidth = 0.f;
+
 	for (size_t characterIndex = 0; characterIndex < textConfig.textToDisplay.size(); characterIndex++)
 	{
+		currentLineWidth += characterSizes[characterIndex].x * textConfig.fontSize;
+
 		Vertex topRight;
 		topRight.x = leftCharacterBound + characterSizes[characterIndex].x * textConfig.fontSize;
 		topRight.y = bottomCharacterBound + characterSizes[characterIndex].y * textConfig.fontSize;
@@ -161,7 +168,10 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 		if (characterCounter >= textConfig.charactersPerLine && textConfig.textToDisplay[characterIndex] == ' ')
 		{
 			//Skip the next char since it's a space, convert it to a linebreak per se
-			//TODO
+
+			//Update the max line width
+			maxLineWidth = std::max(maxLineWidth, currentLineWidth);
+			currentLineWidth = 0.f;
 
 			//Update the rightmost bound
 			rightmostBound = std::max(rightmostBound, leftCharacterBound + (characterSizes[characterIndex].x * textConfig.fontSize));
@@ -181,6 +191,13 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 
 		characterCounter++;
 	}
+
+
+	//Do final updates in case we didn't exceed the line boundary	
+	maxLineWidth = std::max(maxLineWidth, currentLineWidth);
+	rightmostBound = std::max(rightmostBound, currentLineWidth);
+	bottommostBound = std::min(bottommostBound, bottomCharacterBound);
+
 
 	//Add one long rectangle underneath everything to make it look nice.
 	Vertex topRight;
@@ -217,10 +234,21 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 	m_frameIndices[0].push_back(baseIndex + 2); //0
 	m_frameIndices[0].push_back(baseIndex+ 3); //0
 
+	//If the text is supposed to be centered, adjust all of the x bounds by the longest line width * .5f
+	if (textConfig.centered)
+	{
+		float halfLongestLineWidth = maxLineWidth * .5f;
+
+		for (auto& vertex : m_frameVertices[0])
+		{
+			vertex.x -= halfLongestLineWidth;
+		}
+	}
 }
 
 void ModelComponent::loadModel(const ModelConfig& modelData)
 {
+
 	if (modelData.keyframeFilePaths.empty())
 	{
 		return;
@@ -228,13 +256,13 @@ void ModelComponent::loadModel(const ModelConfig& modelData)
 
 	if (!m_frameVertices.empty() || !m_frameIndices.empty())
 	{
-		Logger::log("Model is already loaded, cannot load again.");
+		m_frameIndices.clear();
+		m_frameVertices.clear();
 		return;
 	}
 
 	m_activeMeshIndex = 0; //Reset!
-	m_frameIndices.clear();
-	m_frameVertices.clear();
+	m_usesOrthographicProjection = false;
 
 	//Find the ratio by which we will be adjusting the model's texture coordinates to fit the mesh, since the sprite is going to be smaller than the texture atlas (it's IN the texture atlas)
 	glm::vec2 textureCoordinateRatio = glm::vec2((float)modelData.spriteSize.x / (float)modelData.textureSize.x, (float)modelData.spriteSize.y / (float)modelData.textureSize.y);
