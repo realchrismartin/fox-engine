@@ -26,7 +26,7 @@ namespace GameEntities
 		.whenInit([](auto& entity, auto& scene)
 		{
 			TextConfig config;
-			config.textToDisplay = "press start to begin";
+			config.textToDisplay = "press one to begin";
 			config.centered = true;
 			scene.loadText(config, entity.getUID());
 		});
