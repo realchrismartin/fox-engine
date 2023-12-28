@@ -8,11 +8,11 @@ struct ModelConfig
 	//TODO: allow for specification of alternate texture atlases?
 	glm::vec2 textureSize = glm::vec2(2500, 2500); //How big the texture atlas is, in pixels.
 	glm::vec2 spriteSize = glm::vec2(509, 509); //How big the sprite is in the texture atlas, in pixels
-	glm::vec2 spriteOffsetOnTexture = glm::vec2(0, 0); //Where the sprite is in the texture atlas. //TODO: specify units this is in.
+	glm::vec2 spriteOffsetOnTexture = glm::vec2(1023,1476); //Where the sprite is in the texture atlas in pixels
 
 	size_t frameCount = 1; //How many frames are in the animation.
 
-	std::vector<std::string> keyframeFilePaths = { "../../img/windmill.obj" };
+	std::vector<std::string> keyframeFilePaths = { "../../img/mushroom.obj" };
 };
 
 #endif
