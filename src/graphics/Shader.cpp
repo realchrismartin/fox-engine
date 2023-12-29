@@ -1,8 +1,6 @@
 #include "src/graphics/Shader.hpp"
 
-#include <fstream>
-#include <sstream>
-#include "glm/glm/gtc/type_ptr.hpp"
+#include "extern/glm/glm/gtc/type_ptr.hpp"
 
 Shader::Shader()
 {

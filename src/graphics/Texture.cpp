@@ -1,6 +1,6 @@
 #include "src/graphics/Texture.hpp"
 
-#include "src/extern/stb_image.h"
+#include "extern/stb_image.h"
 
 Texture::Texture()
 {
