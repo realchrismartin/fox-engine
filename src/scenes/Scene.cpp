@@ -23,6 +23,8 @@ void Scene::onMessageReceived(const SceneChangeMessage& message)
 	init(SceneLibrary::getSceneConfig(message.requestedScene));
 }
 
+const std::set<int> Scene::EMPTY_OWNED_SET = {};
+
 void Scene::init(const SceneConfig& sceneConfig)
 {
 	//Dump whatever's in the existing pools, if there are any
@@ -45,7 +47,7 @@ void Scene::init(const SceneConfig& sceneConfig)
 	std::vector<int> entityIds;
 
 	//Get a ref to the init fn map
-	const std::unordered_map<size_t, std::function<void(int, Scene&)>>& initFnMap = sceneConfig.getSceneSpecificInitFnMap();
+	const std::unordered_map<int, std::function<void(int, Scene&)>>& initFnMap = sceneConfig.getSceneSpecificInitFnMap();
 
 	for (auto const& entity : sceneConfig.getGameEntities())
 	{
@@ -58,20 +60,25 @@ void Scene::init(const SceneConfig& sceneConfig)
 			return;
 		}
 
+		//Store the IDs for scene graph association purposes
+		entityIds.push_back(entityId.value());
+
 		//Get the entity config from the entity library
 		const GameEntityConfig& config = GameEntityLibrary::getGameEntityConfig(entity);
 
-		//Use the config to initialize the entity
+		//Update the activity status of the entity to whatever the config says
+		m_entityActivityMap[entityId.value()] = config.getDefaultActiveState();
+
+		int entityIndex = (int)entityIds.size() - 1;
+
+		//Run the entity init
 		config.init(entityId.value(), *this);
 
 		//Now that the entity is initialized, if there's a scene-specific init for this entity too, run that now.
-		if (initFnMap.count(entityIds.size()))
+		if (initFnMap.count(entityIndex))
 		{
-			initFnMap.at(entityIds.size())(entityId.value(), *this);
+			initFnMap.at(entityIndex)(entityId.value(), *this);
 		}
-
-		//Store the IDs for scene graph association purposes
-		entityIds.push_back(entityId.value());
 	}
 
 	//After everything is set up, add the scene graph mappings
@@ -120,6 +127,39 @@ void Scene::loadText(const TextConfig& textConfig, int entityUID)
 
 	//TODO: later, this specific call could be cheaper than the one in removeEntity since it's adding to the end of the pool always.
 	updateAllModelComponentAssociations();
+}
+
+bool Scene::isEntityAtIndexActive(int entityIndex) const
+{
+	if (entityIndex < 0 || entityIndex >= m_gameEntities.size())
+	{
+		return false; //Entity index out of bounds failsafe
+	}
+
+	return m_entityActivityMap.at(m_gameEntities[entityIndex].getUID());
+
+
+	return false;
+}
+
+bool Scene::isEntityActive(int entityUID) const
+{
+	if (!m_entityActivityMap.contains(entityUID))
+	{
+		return false;
+	}
+
+	return m_entityActivityMap.at(entityUID);
+}
+
+void Scene::setEntityActiveStatus(int entityUID, bool state)
+{
+	if (!m_entityActivityMap.contains(entityUID))
+	{
+		return;
+	}
+
+	m_entityActivityMap[entityUID] = state;
 }
 
 void Scene::loadModel(const ModelConfig& modelData, int entityUID)
@@ -257,6 +297,51 @@ void Scene::addChild(int parentEntityUID, int childEntityUID)
 	m_rootNodes.erase(childEntityUID);
 }
 
+void Scene::addOwnedEntity(int owningEntityUID, int ownedEntity)
+{
+	if (!m_gameEntityMap.count(owningEntityUID))
+	{
+		//This entity was never registered.
+		return;
+	}
+
+	//Condition: this entity can't already be owned
+	for (auto const& [owners,owned] : m_entityOwnerships)
+	{
+		if (owned.count(ownedEntity))
+		{
+			return;
+		}
+	}
+
+	//All good - we can add this entity as a child of this parent
+	if (!m_entityOwnerships.count(owningEntityUID))
+	{
+		m_entityOwnerships.insert({ owningEntityUID , { ownedEntity } });
+	}
+	else
+	{
+		m_entityOwnerships.at(owningEntityUID).insert(ownedEntity);
+	}
+}
+
+const std::set<int>& Scene::getOwnedEntities(int owningEntityUID) const
+{
+	if (!m_gameEntityMap.count(owningEntityUID))
+	{
+		//This entity was never registered.
+		return EMPTY_OWNED_SET;
+	}
+
+	if (!m_entityOwnerships.count(owningEntityUID))
+	{
+		//The owning entity has no owned entities
+		return EMPTY_OWNED_SET;
+	}
+
+	return m_entityOwnerships.at(owningEntityUID);
+}
+
 std::optional<int> Scene::createEntity()
 {
 	if (m_gameEntities.size() >= m_maxEntities)
@@ -269,6 +354,7 @@ std::optional<int> Scene::createEntity()
 	m_gameEntities.emplace_back(uid);
 	m_gameEntityMap[uid] = (int)m_gameEntities.size() - 1; //Map the UID to the slot we're using for the entity
 	m_rootNodes.insert(uid); //By default, the entity has no parents, so it is a root node.
+	m_entityActivityMap[uid] = true; //By default, the entity is active. init() might override this imemdiately.
 
 	m_availableEntityUID++;
 

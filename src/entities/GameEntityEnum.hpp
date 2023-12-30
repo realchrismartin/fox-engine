@@ -8,7 +8,8 @@ enum class GameEntityEnum
 	PLAYER,
 	FLOOR,
 	BUSH,
-	MUSHROOM
+	MUSHROOM,
+	BLOCK_EMITTER
 };
 
 #endif

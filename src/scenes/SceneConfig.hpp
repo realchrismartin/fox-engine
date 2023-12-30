@@ -14,7 +14,7 @@ struct SceneConfig
 
 	EntityInstanceConfig addEntity(GameEntityEnum entity);
 
-	void addInitFnForEntity(const EntityInstanceConfig& entity, const std::function<void(int, Scene&)>& initFn);
+	void addInitFnForEntity(size_t index, std::function<void(int, Scene&)> initFn);
 
 	void addChild(const EntityInstanceConfig& parent, const EntityInstanceConfig& child);
 
@@ -29,6 +29,13 @@ private:
 	std::unordered_map<size_t, std::set<size_t>> m_sceneGraphConfig;
 	std::unordered_map<size_t, std::function<void(int, Scene&)>> m_sceneSpecificInitFnMap;
 	std::set<size_t> m_existingChildren;
+	const std::unordered_map<int, std::function<void(int, Scene&)>>& getSceneSpecificInitFnMap() const;
+	
+private:
+	std::vector<GameEntityEnum> m_entities;
+	std::unordered_map<int, std::set<int>> m_sceneGraphConfig;
+	std::unordered_map<int, std::function<void(int, Scene&)>> m_sceneSpecificInitFnMap;
+	std::set<int> m_existingChildren;
 };
 
 #endif

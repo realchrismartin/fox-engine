@@ -49,6 +49,10 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 	{
 		//Player
 		auto player = config.addEntity(GameEntityEnum::PLAYER);
+		player.addInitFn([](int entityUID, auto& scene)
+		{
+			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,5.f,0.f });
+		});
 
 		//Floor
 		auto floor = config.addEntity(GameEntityEnum::FLOOR);
@@ -84,6 +88,10 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,0.f,10.f });
 		});
 
+<<<<<<< HEAD
+=======
+		auto emitter = config.addEntity(GameEntityEnum::BLOCK_EMITTER);
+>>>>>>> 3607be4 (shipit)
 
 		break;
 	}
@@ -95,10 +103,14 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 		title.addInitFn([](int entityUID, auto& scene)
 		{
 <<<<<<< HEAD
+<<<<<<< HEAD
 			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({0.f,.5f,0.f });
 =======
 			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,20.f,15.f });
 >>>>>>> 014ca54 (j's pr review)
+=======
+			scene.getComponent<TransformComponent>(entityUID).setTranslation({0.f,.5f,0.f });
+>>>>>>> 3607be4 (shipit)
 		});
 
 		//Start button
@@ -106,13 +118,18 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 		startButton.addInitFn([](int entityUID, auto& scene)
 		{
 <<<<<<< HEAD
+<<<<<<< HEAD
 			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({0.f,-.3f,0.f });
+=======
+			scene.getComponent<TransformComponent>(entityUID).setTranslation({0.f,-.3f,0.f });
+>>>>>>> 3607be4 (shipit)
 		});
 
 		//Floor
 		auto floor = config.addEntity(GameEntityEnum::FLOOR);
-		floor.addInitFn([](const auto& entity, auto& scene)
+		floor.addInitFn([](int entityUID, auto& scene)
 		{
+<<<<<<< HEAD
 			scene.getComponent<TransformComponent>(entity.getUID()).setScale({ 1000.f,1000.f,1.f });
 			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 0.f,-2.f,-2.f });
 			scene.getComponent<TransformComponent>(entity.getUID()).setRotation({ 45.f,0.f,0.f });
@@ -120,6 +137,10 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,5.f,15.f });
 			scene.setCameraTargetEntity(entityUID);
 >>>>>>> 014ca54 (j's pr review)
+=======
+			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,-2.f,-2.f });
+			scene.getComponent<TransformComponent>(entityUID).setRotation({ 45.f,0.f,0.f });
+>>>>>>> 3607be4 (shipit)
 		});
 
 		break;

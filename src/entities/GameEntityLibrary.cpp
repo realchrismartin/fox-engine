@@ -21,6 +21,7 @@ namespace GameEntities
 			config.textToDisplay = "fox n fowl";
 			config.charactersPerLine = 10;
 			config.centered = true;
+<<<<<<< HEAD
 			config.margin = { .15f,.15f };
 			config.fontSize = 15;
 			scene.loadText(config, entity.getUID());
@@ -31,6 +32,9 @@ namespace GameEntities
 
 			scene.getComponent<TransformComponent>(entityUID).setScale({ 5.f,5.f,1.f });
 >>>>>>> d220627 (oops)
+=======
+			scene.loadText(config, entityUID);
+>>>>>>> 3607be4 (shipit)
 		});
 
 	static const GameEntityConfig START_BUTTON = GameEntityConfig()
@@ -40,6 +44,7 @@ namespace GameEntities
 			TextConfig config;
 			config.textToDisplay = "press one to begin";
 			config.centered = true;
+<<<<<<< HEAD
 			config.animated = true;
 			config.margin = { .05f,.05f };
 			config.fontSize = 5;
@@ -51,6 +56,9 @@ namespace GameEntities
 
 			scene.getComponent<TransformComponent>(entityUID).setScale({ 5.f,5.f,1.f });
 >>>>>>> d220627 (oops)
+=======
+			scene.loadText(config, entityUID);
+>>>>>>> 3607be4 (shipit)
 		});
 
 	static const GameEntityConfig PLAYER = GameEntityConfig()
@@ -83,11 +91,16 @@ namespace GameEntities
 			model.keyframeFilePaths = { "../../img/quoteunquote-bush.obj" };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 			scene.loadModel(model, entity.getUID());
 			scene.getComponent<TransformComponent>(entity.getUID()).setScale({ 2.f,2.f,2.f});
 =======
 			scene.loadModel(model, entityUID);
 >>>>>>> d220627 (oops)
+=======
+			scene.loadModel(model, entityUID);
+			scene.getComponent<TransformComponent>(entityUID).setScale({ 2.f,2.f,2.f});
+>>>>>>> 3607be4 (shipit)
 		});
 
 	static const GameEntityConfig MUSHROOM = GameEntityConfig()
@@ -108,6 +121,40 @@ namespace GameEntities
 			scene.loadModel(model, entityUID);
 			scene.getComponent<TransformComponent>(entityUID).setScale({ 2.f,2.f,2.f});
 		});
+
+	static const GameEntityConfig BLOCK_EMITTER = GameEntityConfig()
+		.whenInit([](int entityUID, auto& scene)
+		{
+			//The emitter itself
+			ModelConfig model;
+			model.keyframeFilePaths = { "../../img/cube.obj" };
+			scene.loadModel(model, entityUID);
+
+			//The cubes that get emitted
+			for (int i = 0; i < 10; i++)
+			{
+				std::optional<int> id = scene.createEntity();
+
+				if (!id.has_value())
+				{
+					continue;
+				}
+				
+				scene.addChild(entityUID, id.value());
+				scene.addOwnedEntity(entityUID, id.value());
+
+				scene.loadModel(model, id.value());
+				scene.getComponent<TransformComponent>(id.value()).setScale({ .5f,.5f,.5f });
+				scene.getComponent<TransformComponent>(id.value()).setTranslation({ (float)(rand() % 4),(float)(rand() % 4),(float)(rand() % 4)});
+
+				for (auto const& entity : scene.getOwnedEntities(entityUID))
+				{
+					scene.setEntityActiveStatus(entity,false);
+				}
+			}
+
+		});
+
 }
 
 const GameEntityConfig& GameEntityLibrary::getGameEntityConfig(GameEntityEnum gameEntity)
@@ -125,7 +172,10 @@ const GameEntityConfig& GameEntityLibrary::getGameEntityConfig(GameEntityEnum ga
 		case(GameEntityEnum::BUSH):
 			return GameEntities::BUSH;
 		case(GameEntityEnum::MUSHROOM):
-		default:
 			return GameEntities::MUSHROOM;
+		case(GameEntityEnum::BLOCK_EMITTER):
+			return GameEntities::BLOCK_EMITTER;
+		default:
+			return GameEntities::BUSH; //quote unqoute
 	}
 }

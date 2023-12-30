@@ -315,6 +315,12 @@ private:
 		auto entityIds = modelComponentPool.getRegisteredEntityUIDs();
 		for (auto const& entity : entityIds)
 		{
+			if (!scene.isEntityActive(entity))
+			{
+				//Skip including these indices and vertices. Note that the MVPs will still all be copied over.
+				continue;
+			}
+
 			ModelComponent& model = scene.getComponent<ModelComponent>(entity);
 
 			//It would be ideal to not have to rebuild this list constantly, but we are not allowed to have gaps in the indices list, and we don't like gaps in the vertices either.
@@ -329,6 +335,7 @@ private:
 		}
 
 		//Send vertices, indices, and MVPs, then draw them.
+		//NB: as above, we send all of the MVP data even if we're not drawing everything in the scene
 		window.draw(vertices.size(), indices.size(), mvpTransformComponentPool.getComponentsInUse(), &vertices[0], &indices[0], (GLvoid*)mvpTransformComponentPool.getData());
 	}
 };

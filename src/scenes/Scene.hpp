@@ -136,6 +136,18 @@ public:
 	void loadModel(const ModelConfig& modelData, int entityUID);
 	void loadText(const TextConfig& modelData, int entityUID);
 
+	void addChild(int parentEntityUID, int childEntityUID);
+
+	std::optional<int> createEntity();
+	void removeEntity(int uid);
+
+	bool isEntityAtIndexActive(int entityIndex) const;
+	bool isEntityActive(int entityUID) const;
+	void setEntityActiveStatus(int entityUID, bool state);
+
+	void addOwnedEntity(int owningEntityUID, int ownedEntity);
+	const std::set<int>& getOwnedEntities(int owningEntityUID) const;
+ 
 	//Add a component to the entity specified by the ID
 	//This involves assigning an existing component from our component pools, or allocating a new one.
 	template<typename T>
@@ -158,15 +170,9 @@ public:
 	}
 
 protected:
-	/// @brief Reset and initialize the scene with this config
-	/// @param sceneConfig 
-	void init(const SceneConfig& sceneConfig);
-
-	void addChild(int parentEntityUID, int childEntityUID);
-	std::optional<int> createEntity();
-	void removeEntity(int uid);
-
 	void applyFunctorToSceneGraph(std::optional<int> parentEntityID, int entityID, std::function<void(Scene&, std::optional<int>, int)>& functor);
+
+	static const std::set<int> EMPTY_OWNED_SET;
 
 private:
 	void addModelComponentDependencies(int entityUID);
@@ -200,11 +206,13 @@ private:
 		m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)]->registerEntity<T>(entityUID);
 	};
 
-	size_t m_maxEntities = 10; //The max number of entities we can have, mostly dictated by the size of the component pools for now
-	std::map<int, std::set<int>> m_sceneGraph;
+	size_t m_maxEntities = 100; //The max number of entities we can have, mostly dictated by the size of the component pools for now
+	std::unordered_map<int, std::set<int>> m_sceneGraph;
+	std::unordered_map<int, std::set<int>> m_entityOwnerships;
 	std::set<int> m_rootNodes;
-	std::map<int, int> m_gameEntityMap; //Map of entity UIDs to the entity placement in the entity vector
+	std::unordered_map<int, int> m_gameEntityMap; //Map of entity UIDs to the entity placement in the entity vector
 	std::unordered_map<int, int> m_componentTypeToPoolMap; //Map of component types to the pool placement in the pool vector
+	std::unordered_map<int, bool> m_entityActivityMap; // Map of entity UIDs to their active status
 	std::vector<GameEntity> m_gameEntities; //Worth noting: entity destructors get called a lot because we store them directly in the vector here.
 	std::vector<std::unique_ptr<ComponentPool>> m_componentPools;
 	int m_availableEntityUID = 0;
