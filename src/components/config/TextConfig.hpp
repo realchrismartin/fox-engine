@@ -10,6 +10,7 @@ struct TextConfig
 	unsigned int fontSize = 5;
 	size_t charactersPerLine = 20;
 	bool centered = false;
+	bool animated = false;
 };
 
 #endif

@@ -80,12 +80,20 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 		m_frameIndices.clear();
 	}
 
+	//We will create a number of frames equal to the number of characters
+	size_t numFrames = textConfig.textToDisplay.size();
+	m_frameIndices.reserve(numFrames);
+	m_frameVertices.reserve(numFrames);
+
+	for (size_t frameIndex = 0; frameIndex < numFrames; frameIndex++)
+	{
+		m_frameVertices.push_back({});
+		m_frameIndices.push_back({});
+	}
+
 	m_activeMeshIndex = 0; //Reset!
 
 	m_usesOrthographicProjection = true;
-
-	m_frameVertices.push_back({});
-	m_frameIndices.push_back({});
 
 	glm::vec2 textureSize = TextureMapper::getTextureDimensionsInPixels(textConfig.texture);
 
@@ -151,20 +159,25 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 		topLeft.s = characterTextureOffsetFactors[characterIndex].x;
 		topLeft.t = characterTextureOffsetFactors[characterIndex].y + characterSizes[characterIndex].y;
 
-		m_frameVertices[0].push_back(topRight);
-		m_frameVertices[0].push_back(bottomRight);
-		m_frameVertices[0].push_back(bottomLeft);
-		m_frameVertices[0].push_back(topLeft);
+		//Add the character vertices to every frame prior to and including the character index
+		for (size_t frameIndex = characterIndex; frameIndex < numFrames; frameIndex++)
+		{
+			size_t baseIndex = m_frameVertices[frameIndex].size();
 
-		size_t baseIndex = 4 * characterIndex;
+			m_frameVertices[frameIndex].push_back(topRight);
+			m_frameVertices[frameIndex].push_back(bottomRight);
+			m_frameVertices[frameIndex].push_back(bottomLeft);
+			m_frameVertices[frameIndex].push_back(topLeft);
 
-		m_frameIndices[0].push_back(baseIndex); 
-		m_frameIndices[0].push_back(baseIndex + 1); 
-		m_frameIndices[0].push_back(baseIndex + 3); 
-		m_frameIndices[0].push_back(baseIndex + 1); 
-		m_frameIndices[0].push_back(baseIndex + 2); 
-		m_frameIndices[0].push_back(baseIndex+ 3); 
+			m_frameIndices[frameIndex].push_back(baseIndex); 
+			m_frameIndices[frameIndex].push_back(baseIndex + 1); 
+			m_frameIndices[frameIndex].push_back(baseIndex + 3); 
+			m_frameIndices[frameIndex].push_back(baseIndex + 1); 
+			m_frameIndices[frameIndex].push_back(baseIndex + 2); 
+			m_frameIndices[frameIndex].push_back(baseIndex + 3); 
+		}
 
+		//Deal with breaking to a new line if needed
 		if (characterCounter >= textConfig.charactersPerLine && textConfig.textToDisplay[characterIndex] == ' ')
 		{
 			//Skip the next char since it's a space, convert it to a linebreak per se
@@ -198,8 +211,7 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 	rightmostBound = std::max(rightmostBound, currentLineWidth);
 	bottommostBound = std::min(bottommostBound, bottomCharacterBound);
 
-
-	//Add one long rectangle underneath everything to make it look nice.
+	//Create one long rectangle underneath everything to make it look nice.
 	Vertex topRight;
 	topRight.x = rightmostBound;
 	topRight.y = tallestCharacterHeight;
@@ -220,28 +232,35 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 	topLeft.y = tallestCharacterHeight;
 	topLeft.z = 0.f;
 
-	m_frameVertices[0].push_back(topRight);
-	m_frameVertices[0].push_back(bottomRight);
-	m_frameVertices[0].push_back(bottomLeft);
-	m_frameVertices[0].push_back(topLeft);
+	//Add the rectangle to every frame
+	for (size_t frameIndex = 0;frameIndex < m_frameVertices.size(); frameIndex++)
+	{
+		m_frameVertices[frameIndex].push_back(topRight);
+		m_frameVertices[frameIndex].push_back(bottomRight);
+		m_frameVertices[frameIndex].push_back(bottomLeft);
+		m_frameVertices[frameIndex].push_back(topLeft);
 
-	size_t baseIndex = 4 * textConfig.textToDisplay.size();
+		size_t baseIndex = 4 * m_frameIndices[frameIndex].size();
 
-	m_frameIndices[0].push_back(baseIndex); //0
-	m_frameIndices[0].push_back(baseIndex + 1); //0
-	m_frameIndices[0].push_back(baseIndex + 3); //0
-	m_frameIndices[0].push_back(baseIndex + 1); //0
-	m_frameIndices[0].push_back(baseIndex + 2); //0
-	m_frameIndices[0].push_back(baseIndex+ 3); //0
+		m_frameIndices[frameIndex].push_back(baseIndex); 
+		m_frameIndices[frameIndex].push_back(baseIndex + 1); 
+		m_frameIndices[frameIndex].push_back(baseIndex + 3); 
+		m_frameIndices[frameIndex].push_back(baseIndex + 1); 
+		m_frameIndices[frameIndex].push_back(baseIndex + 2); 
+		m_frameIndices[frameIndex].push_back(baseIndex+ 3); 
+	}
 
 	//If the text is supposed to be centered, adjust all of the x bounds by the longest line width * .5f
 	if (textConfig.centered)
 	{
 		float halfLongestLineWidth = maxLineWidth * .5f;
 
-		for (auto& vertex : m_frameVertices[0])
+		for (auto& frame : m_frameVertices)
 		{
-			vertex.x -= halfLongestLineWidth;
+			for (auto& vertex : frame)
+			{
+				vertex.x -= halfLongestLineWidth;
+			}
 		}
 	}
 }

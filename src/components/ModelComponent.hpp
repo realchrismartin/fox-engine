@@ -61,6 +61,7 @@ public:
 	void setTransformPoolIndex(size_t transformPoolIndex);
 
 	bool usesOrthographicProjection() const;
+
 private:
 	//Load a keyframe, generating vertices and indices for the keyframe and tween frames.
 	void loadKeyframe(size_t currentKeyframe, size_t framesPerMesh, const std::string& keyframePath, std::vector<std::vector<glm::vec3>>& keyframeVertices, std::vector<std::vector<glm::vec3>>& keyframeVertexNormals, std::vector<std::vector<glm::vec2>>& keyframeTexCoords, const glm::vec2& textureCoordinateRatio, const glm::vec2& textureOffsetFactor);

@@ -151,6 +151,14 @@ private:
 		{
 			ModelComponent& model = scene.getComponent<ModelComponent>(entity);
 
+			/*
+			if (!model.isAnimated())
+			{
+				model.setActiveMesh(model.getNumMeshes() - 1);
+				return;
+			}
+			*/
+
 			size_t numMeshes = model.getNumMeshes();
 
 			if (numMeshes <= 1)
@@ -168,6 +176,7 @@ private:
 			{
 				model.setActiveMesh(0);
 			}
+
 		}
 	}
 

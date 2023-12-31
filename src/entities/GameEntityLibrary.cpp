@@ -18,6 +18,7 @@ namespace GameEntities
 		{
 			TextConfig config;
 			config.textToDisplay = "fox n fowl";
+			config.charactersPerLine = 10;
 			config.centered = true;
 			scene.loadText(config, entity.getUID());
 		});
@@ -28,9 +29,9 @@ namespace GameEntities
 			TextConfig config;
 			config.textToDisplay = "press one to begin";
 			config.centered = true;
+			config.animated = true;
 			scene.loadText(config, entity.getUID());
 		});
-
 
 	static const GameEntityConfig PLAYER = GameEntityConfig()
 		.whenInit([](auto& entity, auto& scene)
