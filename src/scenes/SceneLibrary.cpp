@@ -101,6 +101,7 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 		auto floor = config.addEntity(GameEntityEnum::FLOOR);
 		floor.addInitFn([](const auto& entity, auto& scene)
 		{
+			scene.getComponent<TransformComponent>(entity.getUID()).setScale({ 1000.f,1000.f,1.f });
 			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 0.f,-2.f,-2.f });
 			scene.getComponent<TransformComponent>(entity.getUID()).setRotation({ 45.f,0.f,0.f });
 		});

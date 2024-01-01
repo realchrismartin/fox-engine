@@ -83,12 +83,21 @@ private:
 		const std::vector<glm::vec2>& textureCoordinates,
 		const std::vector<glm::vec3>& vertexNormals);
 
+	/// @brief Given prefabricated vertices for a rectangle, populate the m_frameVertices and indices for the specified frame
+	void storeRectangleVertices(
+		size_t frameIndex,
+		const Vertex& topRight,
+		const Vertex& bottomRight,
+		const Vertex& bottomLeft,
+		const Vertex& topLeft
+	);
 
 	size_t m_activeMeshIndex = 0;
 
 	std::vector<std::vector<GLuint>> m_frameIndices;
 	std::vector<std::vector<Vertex>> m_frameVertices;
 	bool m_usesOrthographicProjection = false;
+	bool m_animated = false;
 };
 
 #endif

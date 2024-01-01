@@ -80,8 +80,13 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 		m_frameIndices.clear();
 	}
 
-	//We will create a number of frames equal to the number of characters
-	size_t numFrames = textConfig.textToDisplay.size();
+	m_activeMeshIndex = 0; //Reset!
+	m_animated = textConfig.animated;
+	m_usesOrthographicProjection = true;
+
+
+	//We will create a number of frames equal to the number of characters if animated
+	size_t numFrames = m_animated ? textConfig.textToDisplay.size() : 1;
 	m_frameIndices.reserve(numFrames);
 	m_frameVertices.reserve(numFrames);
 
@@ -90,10 +95,6 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 		m_frameVertices.push_back({});
 		m_frameIndices.push_back({});
 	}
-
-	m_activeMeshIndex = 0; //Reset!
-
-	m_usesOrthographicProjection = true;
 
 	glm::vec2 textureSize = TextureMapper::getTextureDimensionsInPixels(textConfig.texture);
 
@@ -108,8 +109,8 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 
 	float tallestCharacterHeight = 0.f;
 
-	std::unordered_map<int, glm::vec2> characterSizes;
-	std::unordered_map<int, glm::vec2> characterTextureOffsetFactors;
+	std::unordered_map<size_t, glm::vec2> characterSizes;
+	std::unordered_map<size_t, glm::vec2> characterTextureOffsetFactors;
 
 	//Derive and save character sizes and texture offset factors.
 	//While doing so, calculate the tallest character of 'em all. It will be used to right-size the box around all the text.
@@ -160,21 +161,16 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 		topLeft.t = characterTextureOffsetFactors[characterIndex].y + characterSizes[characterIndex].y;
 
 		//Add the character vertices to every frame prior to and including the character index
-		for (size_t frameIndex = characterIndex; frameIndex < numFrames; frameIndex++)
+		if (m_animated)
 		{
-			size_t baseIndex = m_frameVertices[frameIndex].size();
-
-			m_frameVertices[frameIndex].push_back(topRight);
-			m_frameVertices[frameIndex].push_back(bottomRight);
-			m_frameVertices[frameIndex].push_back(bottomLeft);
-			m_frameVertices[frameIndex].push_back(topLeft);
-
-			m_frameIndices[frameIndex].push_back(baseIndex); 
-			m_frameIndices[frameIndex].push_back(baseIndex + 1); 
-			m_frameIndices[frameIndex].push_back(baseIndex + 3); 
-			m_frameIndices[frameIndex].push_back(baseIndex + 1); 
-			m_frameIndices[frameIndex].push_back(baseIndex + 2); 
-			m_frameIndices[frameIndex].push_back(baseIndex + 3); 
+			for (size_t frameIndex = characterIndex; frameIndex < numFrames; frameIndex++)
+			{
+				storeRectangleVertices(frameIndex, topRight, bottomRight, bottomLeft, topLeft);
+			}
+		}
+		else 
+		{
+			storeRectangleVertices(0, topRight, bottomRight, bottomLeft, topLeft);
 		}
 
 		//Deal with breaking to a new line if needed
@@ -233,21 +229,17 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 	topLeft.z = 0.f;
 
 	//Add the rectangle to every frame
-	for (size_t frameIndex = 0;frameIndex < m_frameVertices.size(); frameIndex++)
+
+	if (m_animated)
 	{
-		m_frameVertices[frameIndex].push_back(topRight);
-		m_frameVertices[frameIndex].push_back(bottomRight);
-		m_frameVertices[frameIndex].push_back(bottomLeft);
-		m_frameVertices[frameIndex].push_back(topLeft);
-
-		size_t baseIndex = 4 * m_frameIndices[frameIndex].size();
-
-		m_frameIndices[frameIndex].push_back(baseIndex); 
-		m_frameIndices[frameIndex].push_back(baseIndex + 1); 
-		m_frameIndices[frameIndex].push_back(baseIndex + 3); 
-		m_frameIndices[frameIndex].push_back(baseIndex + 1); 
-		m_frameIndices[frameIndex].push_back(baseIndex + 2); 
-		m_frameIndices[frameIndex].push_back(baseIndex+ 3); 
+		for (size_t frameIndex = 0;frameIndex < m_frameVertices.size(); frameIndex++)
+		{
+			storeRectangleVertices(frameIndex, topRight, bottomRight, bottomLeft, topLeft);
+		}
+	}
+	else
+	{
+		storeRectangleVertices(0, topRight, bottomRight, bottomLeft, topLeft);
 	}
 
 	//If the text is supposed to be centered, adjust all of the x bounds by the longest line width * .5f
@@ -603,4 +595,21 @@ void ModelComponent::storeFaceElements(
 			m_frameIndices[frameIndex].push_back(index);
 		}
 	}
+}
+
+void ModelComponent::storeRectangleVertices(size_t frameIndex, const Vertex& topRight, const Vertex& bottomRight, const Vertex& bottomLeft, const Vertex& topLeft)
+{
+	size_t baseIndex = m_frameVertices[frameIndex].size();
+
+	m_frameVertices[frameIndex].push_back(topRight);
+	m_frameVertices[frameIndex].push_back(bottomRight);
+	m_frameVertices[frameIndex].push_back(bottomLeft);
+	m_frameVertices[frameIndex].push_back(topLeft);
+
+	m_frameIndices[frameIndex].push_back(baseIndex); 
+	m_frameIndices[frameIndex].push_back(baseIndex + 1); 
+	m_frameIndices[frameIndex].push_back(baseIndex + 3); 
+	m_frameIndices[frameIndex].push_back(baseIndex + 1); 
+	m_frameIndices[frameIndex].push_back(baseIndex + 2); 
+	m_frameIndices[frameIndex].push_back(baseIndex+ 3); 
 }
