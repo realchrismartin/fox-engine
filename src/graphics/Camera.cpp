@@ -29,6 +29,21 @@ const glm::mat4& Camera::getProjectionMatrix() const
 	return m_projectionMatrix;
 }
 
+const glm::mat4& Camera::getOrthographicProjectionMatrix()
+{
+	if (m_orthographicProjectionMatrixDirty)
+	{
+		//TODO
+		constexpr float aspectRatio = 1024.f / 768.f;
+		m_orthographicProjectionMatrix = glm::ortho(-aspectRatio,aspectRatio,-1.f,1.f,1.f,-1.f); //TODO siz
+
+		m_orthographicProjectionMatrixDirty = false;
+	}
+
+	return m_orthographicProjectionMatrix;
+
+}
+
 const glm::mat4& Camera::getViewMatrix() const
 {
 	return m_viewMatrix;
