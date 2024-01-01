@@ -97,16 +97,6 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 	}
 
 	glm::vec2 textureSize = TextureMapper::getTextureDimensionsInPixels(textConfig.texture);
-
-	float bottommostBound = 0.f;
-	float rightmostBound = 0.f;
-
-	float leftCharacterBound = 0.f;
-	float bottomCharacterBound = 0.f;
-
-	size_t line = 0;
-	size_t characterCounter = 0;
-
 	float tallestCharacterHeight = 0.f;
 
 	std::unordered_map<size_t, glm::vec2> characterSizes;
@@ -127,6 +117,20 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 
 	float currentLineWidth = 0.f;
 	float maxLineWidth = 0.f;
+
+	float defaultBottomCharacterBound =	textConfig.margin.y;
+
+	float bottommostBound = defaultBottomCharacterBound;
+	float rightmostBound = 0.f;
+
+	float defaultLeftCharacterBound = textConfig.margin.x;
+
+	float leftCharacterBound = defaultLeftCharacterBound;
+	float bottomCharacterBound = defaultBottomCharacterBound;
+
+	size_t line = 0;
+	size_t characterCounter = 0;
+
 
 	for (size_t characterIndex = 0; characterIndex < textConfig.textToDisplay.size(); characterIndex++)
 	{
@@ -185,7 +189,7 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 			//Update the rightmost bound
 			rightmostBound = std::max(rightmostBound, leftCharacterBound + (characterSizes[characterIndex].x * textConfig.fontSize));
 
-			leftCharacterBound = 0.f; //Reset the left bound
+			leftCharacterBound = defaultLeftCharacterBound; //Reset the left bound
 			characterCounter = 0; //Reset the counter
 			bottomCharacterBound -= tallestCharacterHeight;
 
@@ -209,23 +213,23 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 
 	//Create one long rectangle underneath everything to make it look nice.
 	Vertex topRight;
-	topRight.x = rightmostBound;
-	topRight.y = tallestCharacterHeight;
+	topRight.x = rightmostBound + textConfig.margin.x * 2.f;
+	topRight.y = tallestCharacterHeight + textConfig.margin.y * 2.f;
 	topRight.z = 0.f;
 
 	Vertex bottomRight;
-	bottomRight.x = rightmostBound;
-	bottomRight.y = bottommostBound;
+	bottomRight.x = rightmostBound + textConfig.margin.x * 2.f;
+	bottomRight.y = bottommostBound - textConfig.margin.y;
 	bottomRight.z = 0.f;
 
 	Vertex bottomLeft;
 	bottomLeft.x = 0.f; //always leftmost
-	bottomLeft.y = bottommostBound;
+	bottomLeft.y = bottommostBound - textConfig.margin.y;
 	bottomLeft.z = 0.f;
 
 	Vertex topLeft;
 	topLeft.x = 0.f; //always leftmost
-	topLeft.y = tallestCharacterHeight;
+	topLeft.y = tallestCharacterHeight + textConfig.margin.y * 2.f;
 	topLeft.z = 0.f;
 
 	//Add the rectangle to every frame
@@ -245,7 +249,7 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 	//If the text is supposed to be centered, adjust all of the x bounds by the longest line width * .5f
 	if (textConfig.centered)
 	{
-		float halfLongestLineWidth = maxLineWidth * .5f;
+		float halfLongestLineWidth = (maxLineWidth * .5f) + (textConfig.margin.x);
 
 		for (auto& frame : m_frameVertices)
 		{

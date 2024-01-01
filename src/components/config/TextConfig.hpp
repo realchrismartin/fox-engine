@@ -11,6 +11,7 @@ struct TextConfig
 	size_t charactersPerLine = 20;
 	bool centered = false;
 	bool animated = false;
+	glm::vec2 margin = glm::vec2(0.f, 0.f);
 };
 
 #endif

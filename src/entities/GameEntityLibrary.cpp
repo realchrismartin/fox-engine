@@ -20,6 +20,8 @@ namespace GameEntities
 			config.textToDisplay = "fox n fowl";
 			config.charactersPerLine = 10;
 			config.centered = true;
+			config.margin = { .15f,.15f };
+			config.fontSize = 15;
 			scene.loadText(config, entity.getUID());
 		});
 
@@ -30,6 +32,8 @@ namespace GameEntities
 			config.textToDisplay = "press one to begin";
 			config.centered = true;
 			config.animated = true;
+			config.margin = { .05f,.05f };
+			config.fontSize = 5;
 			scene.loadText(config, entity.getUID());
 		});
 
