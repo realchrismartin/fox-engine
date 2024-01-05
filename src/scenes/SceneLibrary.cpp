@@ -130,6 +130,7 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 		floor.addInitFn([](int entityUID, auto& scene)
 		{
 <<<<<<< HEAD
+<<<<<<< HEAD
 			scene.getComponent<TransformComponent>(entity.getUID()).setScale({ 1000.f,1000.f,1.f });
 			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 0.f,-2.f,-2.f });
 			scene.getComponent<TransformComponent>(entity.getUID()).setRotation({ 45.f,0.f,0.f });
@@ -141,6 +142,11 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,-2.f,-2.f });
 			scene.getComponent<TransformComponent>(entityUID).setRotation({ 45.f,0.f,0.f });
 >>>>>>> 3607be4 (shipit)
+=======
+			scene.getComponent<TransformComponent>(entityUID).setScale({ 1000.f,1000.f,1.f });
+			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,-2.f,-2.f });
+			scene.getComponent<TransformComponent>(entityUID).setRotation({ 45.f,0.f,0.f });
+>>>>>>> 593a9c6 (fix)
 		});
 
 		break;

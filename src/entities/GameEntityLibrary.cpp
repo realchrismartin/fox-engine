@@ -24,6 +24,7 @@ namespace GameEntities
 <<<<<<< HEAD
 			config.margin = { .15f,.15f };
 			config.fontSize = 15;
+<<<<<<< HEAD
 			scene.loadText(config, entity.getUID());
 =======
 			ModelConfig model;
@@ -35,6 +36,9 @@ namespace GameEntities
 =======
 			scene.loadText(config, entityUID);
 >>>>>>> 3607be4 (shipit)
+=======
+			scene.loadText(config, entityUID);
+>>>>>>> 593a9c6 (fix)
 		});
 
 	static const GameEntityConfig START_BUTTON = GameEntityConfig()
@@ -48,6 +52,7 @@ namespace GameEntities
 			config.animated = true;
 			config.margin = { .05f,.05f };
 			config.fontSize = 5;
+<<<<<<< HEAD
 			scene.loadText(config, entity.getUID());
 =======
 			ModelConfig model;
@@ -59,6 +64,9 @@ namespace GameEntities
 =======
 			scene.loadText(config, entityUID);
 >>>>>>> 3607be4 (shipit)
+=======
+			scene.loadText(config, entityUID);
+>>>>>>> 593a9c6 (fix)
 		});
 
 	static const GameEntityConfig PLAYER = GameEntityConfig()
