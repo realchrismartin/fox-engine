@@ -85,7 +85,7 @@ private:
 
 	/// @brief Given prefabricated vertices for a rectangle, populate the m_frameVertices and indices for the specified frame
 	void storeRectangleVertices(
-		size_t frameIndex,
+		size_t animationIndex,
 		const Vertex& topRight,
 		const Vertex& bottomRight,
 		const Vertex& bottomLeft,

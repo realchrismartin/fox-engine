@@ -601,19 +601,19 @@ void ModelComponent::storeFaceElements(
 	}
 }
 
-void ModelComponent::storeRectangleVertices(size_t frameIndex, const Vertex& topRight, const Vertex& bottomRight, const Vertex& bottomLeft, const Vertex& topLeft)
+void ModelComponent::storeRectangleVertices(size_t animationIndex, const Vertex& topRight, const Vertex& bottomRight, const Vertex& bottomLeft, const Vertex& topLeft)
 {
-	size_t baseIndex = m_frameVertices[frameIndex].size();
+	GLuint baseIndex = (GLuint)m_frameVertices[animationIndex].size();
 
-	m_frameVertices[frameIndex].push_back(topRight);
-	m_frameVertices[frameIndex].push_back(bottomRight);
-	m_frameVertices[frameIndex].push_back(bottomLeft);
-	m_frameVertices[frameIndex].push_back(topLeft);
+	m_frameVertices[animationIndex].push_back(topRight);
+	m_frameVertices[animationIndex].push_back(bottomRight);
+	m_frameVertices[animationIndex].push_back(bottomLeft);
+	m_frameVertices[animationIndex].push_back(topLeft);
 
-	m_frameIndices[frameIndex].push_back(baseIndex); 
-	m_frameIndices[frameIndex].push_back(baseIndex + 1); 
-	m_frameIndices[frameIndex].push_back(baseIndex + 3); 
-	m_frameIndices[frameIndex].push_back(baseIndex + 1); 
-	m_frameIndices[frameIndex].push_back(baseIndex + 2); 
-	m_frameIndices[frameIndex].push_back(baseIndex+ 3); 
+	m_frameIndices[animationIndex].push_back(baseIndex); 
+	m_frameIndices[animationIndex].push_back(baseIndex + 1); 
+	m_frameIndices[animationIndex].push_back(baseIndex + 3); 
+	m_frameIndices[animationIndex].push_back(baseIndex + 1); 
+	m_frameIndices[animationIndex].push_back(baseIndex + 2); 
+	m_frameIndices[animationIndex].push_back(baseIndex+ 3); 
 }
