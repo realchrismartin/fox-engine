@@ -76,11 +76,13 @@ private:
 	//Run all of the game systems that pertain to updating
 	static const void update(Window& window, Scene& scene, Camera& camera, float elapsedTime)
 	{
+		pollEventSystem(window, scene, camera);
+		updateCameraProjectionSystem(window, camera);
 		changeSceneSystem(scene);
-		pollEventSystem(window, scene);
 		runInputProcessingSystem(scene, elapsedTime);
 		runAnimationSystem(scene, elapsedTime);
 		runSceneGraphUpdateSystem(scene, camera);
+		cleanDirtyFlagsSystem(window, scene, camera);
 	};
 
 	//Run all of the game systems that pertain to rendering
@@ -96,6 +98,18 @@ private:
 	};
 
 
+	static const void updateCameraProjectionSystem(const Window& window, Camera& camera)
+	{
+		if (!window.isWindowSizeDirty())
+		{
+			return;
+		}
+
+		glm::i64vec2 windowSize = window.getWindowSize();
+		camera.updateOrthographicProjectionMatrix(windowSize);
+		camera.updatePerspectiveProjectionMatrix(windowSize);
+	}
+
 	static const void changeSceneSystem(Scene& scene)
 	{
 		if (scene.getNextSceneRequested() != SceneEnum::NONE)
@@ -105,16 +119,24 @@ private:
 		}
 	}
 
-	static const void pollEventSystem(Window& window, Scene& scene)
+	static const void pollEventSystem(Window& window, Scene& scene, Camera& camera)
 	{
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
 			//Inform the window of window events
+			//TODO: inform the camera if the window size changes
 			if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED || event.type == SDL_EVENT_QUIT)
 			{
 				window.close();
 				break;
+			}
+
+			//If the window is resized by a user, ensure that the camera will update its projection matrices, which depend on the size of the window
+			//TODO: this is not tested
+			if (event.type == SDL_EVENT_WINDOW_RESIZED)
+			{
+				window.markWindowSizeDirty();
 			}
 
 			//Inform the input components of input events
@@ -168,17 +190,13 @@ private:
 			{
 				model.setActiveMesh(0);
 			}
-
 		}
 	}
 
 	static const void runSceneGraphUpdateSystem(Scene& scene, Camera& camera)
 	{
 		//Update each component's local and world matrices if needed. If they change during this update, the world matrix will be marked dirty.
-		//We also track if any node is dirty at all, since we need to reset the graph's dirty flags afterward if this is the case.
-		bool anyNodeWorldDirty = false;
-
-		std::function<void(Scene&, std::optional<int>,int)> functor = [&anyNodeWorldDirty,&camera](Scene& scene, std::optional<int> parentEntityUID, int entityUID)
+		std::function<void(Scene&, std::optional<int>,int)> functor = [&camera](Scene& scene, std::optional<int> parentEntityUID, int entityUID)
 		{
 			if (!scene.hasComponent<TransformComponent>(entityUID))
 			{
@@ -212,20 +230,16 @@ private:
 				//Update the transform and the world transform using the parent transform
 				transform.updateLocalAndWorldMatrix(parentTransform);
 			}
-			
-			//track whether any node's world matrix is dirty overall so we can reset the graph's dirty flags after updating.
-			anyNodeWorldDirty = anyNodeWorldDirty || transform.isWorldMatrixDirty();
 		};
 
 		//Update the whole scene graph - any entity that has transforms will have those transforms updated.
 		scene.applyToSceneGraph(functor);
 
-		//Now that we've updated world matrices and marked them dirty, update the camera matrices.
-		//Update the camera matrices if needed. If they change during this update, they will be marked dirty.
-		camera.updateProjectionMatrix();
+		//Now that we've updated world matrices and marked them dirty, the camera may want to update its view, since the scene may have specified a camera perspective.
+		//Update the camera view matrix accordingly if needed
 		camera.updateViewMatrix(scene);
 
-		//Now that we've updated both the world matrices and v/p matrices, update the MVP matrices
+		//Now that we've updated both the world matrices and view matrices, update the MVP matrices
 		//Unfortunately we can't do this at the same time as the scene graph traversal b/c the camera view can depend on the world matrices of the targets,
 		//so we waste some efficiency by doing another iteration and component lookup...
 		for (auto const& entity : EntityFilter<ModelComponent,TransformComponent, MVPTransformComponent>(scene))
@@ -234,37 +248,28 @@ private:
 			TransformComponent& transform = scene.getComponent<TransformComponent>(entity);
 			MVPTransformComponent& mvpTransform = scene.getComponent<MVPTransformComponent>(entity);
 
-			bool modelDirty = transform.isWorldMatrixDirty();
-			bool viewDirty = camera.isViewMatrixDirty();
-			bool projectionDirty = camera.isProjectionMatrixDirty();
-
 			//If any of the three matrices is dirty, update the combined MVP matrix.
-			if (modelDirty || viewDirty || projectionDirty)
+			if (model.usesOrthographicProjection() && (transform.isWorldMatrixDirty() || camera.isViewMatrixDirty() || camera.isOrthographicProjectionMatrixDirty()))
 			{
-
-				if (model.usesOrthographicProjection())
-				{
-					mvpTransform.setMVPMatrix(transform.getWorldMatrix(), glm::mat4(1.0), camera.getOrthographicProjectionMatrix());
-				}
-				else
-				{
-					mvpTransform.setMVPMatrix(transform.getWorldMatrix(), camera.getViewMatrix(), camera.getProjectionMatrix());
-				}
+				mvpTransform.setMVPMatrix(transform.getWorldMatrix(), glm::mat4(1.0), camera.getOrthographicProjectionMatrix());
+			}
+			else if (!model.usesOrthographicProjection() && (transform.isWorldMatrixDirty() || camera.isViewMatrixDirty() || camera.isPerspectiveProjectionMatrixDirty()))
+			{
+				mvpTransform.setMVPMatrix(transform.getWorldMatrix(), camera.getViewMatrix(), camera.getPerspectiveProjectionMatrix());
 			}
 		}
+	}
 
-		//Mark the camera transform dirty flags clean
+	static const void cleanDirtyFlagsSystem(Window& window, Scene& scene, Camera& camera)
+	{
+		//Mark the window size clean
+		window.markWindowSizeClean();
+
+		//Mark the camera transform dirty flag clean
 		camera.markViewMatrixClean();
-		camera.markProjectionMatrixClean();
 
-		//If the graph didn't update at all, stop here
-		if (!anyNodeWorldDirty)
-		{
-			return;
-		}
-
-		//If the graph updated, we can clear the world dirty flags now that all parent-child relationships have updated.
-		std::function<void(Scene&, std::optional<int>,int)> cleanFunctor = [&anyNodeWorldDirty](Scene& scene, std::optional<int> parentEntityUID, int entityUID)
+		//We can clear the world dirty flags now that all parent-child relationships have updated.
+		std::function<void(Scene&, std::optional<int>,int)> cleanFunctor = [](Scene& scene, std::optional<int> parentEntityUID, int entityUID)
 		{
 			//Since this functor runs on all nodes, ignore the parent and mark the current node clean.
 			if (!scene.hasComponent<TransformComponent>(entityUID))

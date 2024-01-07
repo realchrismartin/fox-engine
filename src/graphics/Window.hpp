@@ -31,6 +31,20 @@ public:
 	/// @return 
 	bool isOpen() const;
 
+	/// @brief Get the current window size in pixels
+	/// @return 
+	const glm::i64vec2& getWindowSize() const;
+
+	/// @brief Called when the SDL window events indicate the user resized the window
+	void markWindowSizeDirty();
+
+	/// @brief Indicates whether the window was resized since the last update
+	/// @return 
+	bool isWindowSizeDirty() const;
+
+	/// @brief Mark the window size clean
+	void markWindowSizeClean();
+
 private:
 	void setupOpenGL();
 
@@ -49,6 +63,10 @@ private:
 	size_t m_maxSSBOMatricesPerRender = 0;
 
 	bool m_open = true;
+
+	glm::i64vec2 m_windowSize = glm::i64vec2(1024, 768);
+
+	bool m_windowSizeDirty = true;
 };
 #endif
 

@@ -9,59 +9,48 @@ bool Camera::isViewMatrixDirty() const
 	return m_viewMatrixDirty;
 }
 
-bool Camera::isProjectionMatrixDirty() const
-{
-	return m_projectionMatrixDirty;
-}
-
 void Camera::markViewMatrixClean()
 {
 	m_viewMatrixDirty = false;
 }
 
-void Camera::markProjectionMatrixClean()
+bool Camera::isPerspectiveProjectionMatrixDirty() const
 {
-	m_projectionMatrixDirty = false;
+	return true; //TODO
 }
 
-const glm::mat4& Camera::getProjectionMatrix() const
+bool Camera::isOrthographicProjectionMatrixDirty() const
 {
-	return m_projectionMatrix;
+	return true; //TODO
 }
 
-const glm::mat4& Camera::getOrthographicProjectionMatrix()
+const glm::mat4& Camera::getPerspectiveProjectionMatrix() const
 {
-	if (m_orthographicProjectionMatrixDirty)
-	{
-		//TODO
-		constexpr float aspectRatio = 1024.f / 768.f;
-		m_orthographicProjectionMatrix = glm::ortho(-aspectRatio,aspectRatio,-1.f,1.f,1.f,-1.f); //TODO siz
+	return m_perspectiveProjectionMatrix;
+}
 
-		m_orthographicProjectionMatrixDirty = false;
-	}
-
+const glm::mat4& Camera::getOrthographicProjectionMatrix() const
+{
 	return m_orthographicProjectionMatrix;
+}
 
+void Camera::updatePerspectiveProjectionMatrix(const glm::i64vec2& windowSize)
+{
+	// Projection matrix : 45 degree Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+
+	float ratio = (float)windowSize.x / (float)windowSize.y;
+	m_perspectiveProjectionMatrix = glm::perspective(glm::radians(90.0f), ratio, 1.f, 100.f);
+}
+
+void Camera::updateOrthographicProjectionMatrix(const glm::i64vec2& windowSize)
+{
+	float ratio = (float)windowSize.x / (float)windowSize.y;
+	m_orthographicProjectionMatrix = glm::ortho(-ratio,ratio,-1.f,1.f,1.f,-1.f);
 }
 
 const glm::mat4& Camera::getViewMatrix() const
 {
 	return m_viewMatrix;
-}
-
-void Camera::updateProjectionMatrix()
-{
-	if (m_projectionMatrixEverSet)
-	{
-		return;
-	}
-
-	m_projectionMatrixEverSet = true;
-
-	// Projection matrix : 45 degree Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-	m_projectionMatrix = glm::perspective(glm::radians(90.0f), 1024.f / 768.f, 1.f, 100.f);
-
-	m_projectionMatrixDirty = true;
 }
 
 void Camera::updateViewMatrix(Scene& scene)
@@ -124,7 +113,8 @@ void Camera::informOfSceneChange()
 {
 	//Do things needed to change the scene. We assume the next time systems run, the camera will be updated again.
 	m_viewMatrixDirty = true;
-	m_projectionMatrixDirty = true; //TODO: maybe not necessary.
 	m_cameraEntityLastTick = std::nullopt;
 	m_cameraTargetLastTick = std::nullopt;
+
+	//TODO: dirtify the projection matrices?
 }

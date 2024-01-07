@@ -11,27 +11,29 @@ class Camera
 {
 public:
 	bool isViewMatrixDirty() const;
-	bool isProjectionMatrixDirty() const;
 	void markViewMatrixClean();
-	void markProjectionMatrixClean();
-	const glm::mat4& getProjectionMatrix() const;
-	const glm::mat4& getOrthographicProjectionMatrix();
+
+	bool isPerspectiveProjectionMatrixDirty() const;
+	bool isOrthographicProjectionMatrixDirty() const;
+
+	const glm::mat4& getPerspectiveProjectionMatrix() const;
+	const glm::mat4& getOrthographicProjectionMatrix() const;
 	const glm::mat4& getViewMatrix() const;
-	void updateProjectionMatrix();
+
+	void updatePerspectiveProjectionMatrix(const glm::i64vec2& windowSize);
+	void updateOrthographicProjectionMatrix(const glm::i64vec2& windowSize);
 	void updateViewMatrix(Scene& scene);
+
 	void informOfSceneChange();
 private:
 
-
 	glm::mat4 m_viewMatrix = glm::mat4(1.f);
-	glm::mat4 m_projectionMatrix = glm::mat4(1.f);
+	glm::mat4 m_perspectiveProjectionMatrix = glm::mat4(1.f); //The matrix used for all things in the world that render using perspective
+	glm::mat4 m_orthographicProjectionMatrix = glm::mat4(1.f); //The matrix used for all UI elements that render orthographically
+
  
 	bool m_viewMatrixEverSet = false;
-	bool m_projectionMatrixEverSet = false;
-
 	bool m_viewMatrixDirty = true;
-	bool m_projectionMatrixDirty = true;
-	bool m_orthographicProjectionMatrixDirty = true;
 
 	std::optional<int> m_cameraEntityLastTick = std::nullopt;
 	std::optional<int> m_cameraTargetLastTick = std::nullopt;
