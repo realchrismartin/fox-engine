@@ -6,7 +6,7 @@
 
 #include "src/entities/GameEntityEnum.hpp"
 #include "src/entities/GameEntityLibrary.hpp"
-#include "src/entities/ConfiguredEntity.hpp"
+#include "src/entities/EntityInstanceConfig.hpp"
 
 #include "src/components/TransformComponent.hpp"
 
@@ -52,31 +52,38 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 
 		//Floor
 		auto floor = config.addEntity(GameEntityEnum::FLOOR);
-		floor.addInitFn([](const auto& entity, auto& scene)
+		floor.addInitFn([](int entityUID, auto& scene)
 		{
-			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 0.f,-2.f,0.f });
+			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,-2.f,0.f });
 		});
 
 		//Bush
 		auto bush = config.addEntity(GameEntityEnum::BUSH);
-		bush.addInitFn([](const auto& entity, auto& scene)
+		bush.addInitFn([](int entityUID, auto& scene)
 		{
-			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 10.f,0.f,5.f });
+			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 10.f,0.f,5.f });
 		});
 
+<<<<<<< HEAD
+=======
+		//Add the bush as a child of the player
+		player.addChild(bush);
+
+>>>>>>> 014ca54 (j's pr review)
 		//Mushroom
 		auto mushroom1 = config.addEntity(GameEntityEnum::MUSHROOM);
-		mushroom1.addInitFn([](const auto& entity, auto& scene)
+		mushroom1.addInitFn([](int entityUID, auto& scene)
 		{
-			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 10.f,0.f,5.f });
+			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 10.f,0.f,5.f });
 		});
 
 		//Another mushroom
 		auto mushroom2 = config.addEntity(GameEntityEnum::MUSHROOM);
-		mushroom2.addInitFn([](const auto& entity, auto& scene)
+		mushroom2.addInitFn([](int entityUID, auto& scene)
 		{
-			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 0.f,0.f,10.f });
+			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,0.f,10.f });
 		});
+
 
 		break;
 	}
@@ -85,15 +92,20 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 	{
 		//Title
 		auto title = config.addEntity(GameEntityEnum::TITLE_TEXT);
-		title.addInitFn([](const auto& entity, auto& scene)
+		title.addInitFn([](int entityUID, auto& scene)
 		{
+<<<<<<< HEAD
 			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({0.f,.5f,0.f });
+=======
+			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,20.f,15.f });
+>>>>>>> 014ca54 (j's pr review)
 		});
 
 		//Start button
 		auto startButton = config.addEntity(GameEntityEnum::START_BUTTON);
-		startButton.addInitFn([](const auto& entity, auto& scene)
+		startButton.addInitFn([](int entityUID, auto& scene)
 		{
+<<<<<<< HEAD
 			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({0.f,-.3f,0.f });
 		});
 
@@ -104,6 +116,10 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 			scene.getComponent<TransformComponent>(entity.getUID()).setScale({ 1000.f,1000.f,1.f });
 			scene.getComponent<TransformComponent>(entity.getUID()).setTranslation({ 0.f,-2.f,-2.f });
 			scene.getComponent<TransformComponent>(entity.getUID()).setRotation({ 45.f,0.f,0.f });
+=======
+			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,5.f,15.f });
+			scene.setCameraTargetEntity(entityUID);
+>>>>>>> 014ca54 (j's pr review)
 		});
 
 		break;

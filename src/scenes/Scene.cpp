@@ -36,11 +36,11 @@ void Scene::init(const SceneConfig& sceneConfig)
 	std::vector<int> entityIds;
 
 	//Get a ref to the init fn map
-	const std::unordered_map<int, std::function<void(const GameEntity&, Scene&)>>& initFnMap = sceneConfig.getSceneSpecificInitFnMap();
+	const std::unordered_map<size_t, std::function<void(int, Scene&)>>& initFnMap = sceneConfig.getSceneSpecificInitFnMap();
 
 	for (auto const& entity : sceneConfig.getGameEntities())
 	{
-		//For each entity to be added, add it, then use the ID we got to init it inline 
+		//Create the entity
 		std::optional<int> entityId = createEntity();
 
 		if (!entityId.has_value())
@@ -52,16 +52,13 @@ void Scene::init(const SceneConfig& sceneConfig)
 		//Get the entity config from the entity library
 		const GameEntityConfig& config = GameEntityLibrary::getGameEntityConfig(entity);
 
-		//Get the entity to set up
-		GameEntity& gameEntity = getEntity(entityId.value());
-
-		//Run the entity init
-		config.init(gameEntity, *this);
+		//Use the config to initialize the entity
+		config.init(entityId.value(), *this);
 
 		//Now that the entity is initialized, if there's a scene-specific init for this entity too, run that now.
-		if (initFnMap.count((int)entityIds.size()))
+		if (initFnMap.count(entityIds.size()))
 		{
-			initFnMap.at((int)entityIds.size())(gameEntity, *this);
+			initFnMap.at(entityIds.size())(entityId.value(), *this);
 		}
 
 		//Store the IDs for scene graph association purposes

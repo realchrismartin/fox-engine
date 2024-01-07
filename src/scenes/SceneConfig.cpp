@@ -1,22 +1,22 @@
 #include "src/scenes/SceneConfig.hpp"
 
-#include "src/entities/ConfiguredEntity.hpp"
+#include "src/entities/EntityInstanceConfig.hpp"
 
-ConfiguredEntity SceneConfig::addEntity(GameEntityEnum entity)
+EntityInstanceConfig SceneConfig::addEntity(GameEntityEnum entity)
 {
 	m_entities.push_back(entity);
-	ConfiguredEntity configEntity;
+	EntityInstanceConfig configEntity;
 	configEntity.entityIndex = m_entities.size() - 1;
 	configEntity.config = this;
 	return configEntity;
 }
 
-void SceneConfig::addInitFnForEntity(size_t index, std::function<void(const GameEntity&,Scene&)> initFn)
+void SceneConfig::addInitFnForEntity(const EntityInstanceConfig& entity, const std::function<void(int,Scene&)>& initFn)
 {
-	m_sceneSpecificInitFnMap[index] = initFn;
+	m_sceneSpecificInitFnMap[entity.entityIndex] = initFn;
 }
 
-void SceneConfig::addChild(const ConfiguredEntity& parent, const ConfiguredEntity& child) 
+void SceneConfig::addChild(const EntityInstanceConfig& parent, const EntityInstanceConfig& child) 
 {
 	size_t parentIndex = parent.entityIndex;
 	size_t childIndex = child.entityIndex;
@@ -42,7 +42,7 @@ void SceneConfig::addChild(const ConfiguredEntity& parent, const ConfiguredEntit
 	}
 	else 
 	{
-		m_sceneGraphConfig[parentIndex] = { (int)childIndex };
+		m_sceneGraphConfig[parentIndex] = { childIndex };
 	}
 }
 
@@ -51,12 +51,12 @@ const std::vector<GameEntityEnum>& SceneConfig::getGameEntities() const
 	return m_entities;
 }
 
-const std::unordered_map<int, std::set<int>>& SceneConfig::getSceneGraphMap() const
+const std::unordered_map<size_t, std::set<size_t>>& SceneConfig::getSceneGraphMap() const
 {
 	return m_sceneGraphConfig;
 }
 
-const std::unordered_map<int, std::function<void(const GameEntity&, Scene&)>>& SceneConfig::getSceneSpecificInitFnMap() const
+const std::unordered_map<size_t, std::function<void(int, Scene&)>>& SceneConfig::getSceneSpecificInitFnMap() const
 {
 	return m_sceneSpecificInitFnMap;
 }

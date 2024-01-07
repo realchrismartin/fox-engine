@@ -10,7 +10,7 @@ struct GameEntityConfig
 	/// @brief Specify a setup function that will run on the scene when this entity is built.
 	/// @param fn 
 	/// @return 
-	GameEntityConfig whenInit(std::function<void(const GameEntity&, Scene&)> fn)
+	GameEntityConfig whenInit(const std::function<void(const GameEntity&, Scene&)>& fn)
 	{
 		m_initFn = fn;
 		return *this;
