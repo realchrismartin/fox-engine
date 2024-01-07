@@ -14,8 +14,9 @@
 namespace GameEntities 
 {
 	static const GameEntityConfig TITLE_TEXT = GameEntityConfig()
-		.whenInit([](auto& entity, auto& scene)
+		.whenInit([](int entityUID, auto& scene)
 		{
+<<<<<<< HEAD
 			TextConfig config;
 			config.textToDisplay = "fox n fowl";
 			config.charactersPerLine = 10;
@@ -23,11 +24,19 @@ namespace GameEntities
 			config.margin = { .15f,.15f };
 			config.fontSize = 15;
 			scene.loadText(config, entity.getUID());
+=======
+			ModelConfig model;
+			model.keyframeFilePaths = { "../../img/cube.obj" };
+			scene.loadModel(model, entityUID);
+
+			scene.getComponent<TransformComponent>(entityUID).setScale({ 5.f,5.f,1.f });
+>>>>>>> d220627 (oops)
 		});
 
 	static const GameEntityConfig START_BUTTON = GameEntityConfig()
-		.whenInit([](auto& entity, auto& scene)
+		.whenInit([](int entityUID, auto& scene)
 		{
+<<<<<<< HEAD
 			TextConfig config;
 			config.textToDisplay = "press one to begin";
 			config.centered = true;
@@ -35,43 +44,54 @@ namespace GameEntities
 			config.margin = { .05f,.05f };
 			config.fontSize = 5;
 			scene.loadText(config, entity.getUID());
+=======
+			ModelConfig model;
+			model.keyframeFilePaths = { "../../img/cube.obj" };
+			scene.loadModel(model, entityUID);
+
+			scene.getComponent<TransformComponent>(entityUID).setScale({ 5.f,5.f,1.f });
+>>>>>>> d220627 (oops)
 		});
 
 	static const GameEntityConfig PLAYER = GameEntityConfig()
-		.whenInit([](auto& entity, auto& scene)
+		.whenInit([](int entityUID, auto& scene)
 		{
-			scene.addComponent<InputComponent>(entity.getUID());
+			scene.addComponent<InputComponent>(entityUID);
 
 			ModelConfig model;
-			scene.loadModel(model, entity.getUID());
+			scene.loadModel(model, entityUID);
 		});
 
 	static const GameEntityConfig FLOOR = GameEntityConfig()
-		.whenInit([](auto& entity, auto& scene)
+		.whenInit([](int entityUID, auto& scene)
 		{
 			ModelConfig model;
 			model.spriteSize = { 512,512 };
 			model.spriteOffsetOnTexture = { 511,1988 };
 			model.keyframeFilePaths = { "../../img/cube.obj" };
 
-			scene.loadModel(model, entity.getUID());
-			scene.getComponent<TransformComponent>(entity.getUID()).setScale({ 100.f,1.f,100.f });
+			scene.loadModel(model, entityUID);
+			scene.getComponent<TransformComponent>(entityUID).setScale({ 100.f,1.f,100.f });
 		});
 
 	static const GameEntityConfig BUSH = GameEntityConfig()
-		.whenInit([](auto& entity, auto& scene)
+		.whenInit([](int entityUID, auto& scene)
 		{
 			ModelConfig model;
 			model.spriteSize = { 228,228 };
 			model.spriteOffsetOnTexture = { 0,1759 };
 			model.keyframeFilePaths = { "../../img/quoteunquote-bush.obj" };
 
+<<<<<<< HEAD
 			scene.loadModel(model, entity.getUID());
 			scene.getComponent<TransformComponent>(entity.getUID()).setScale({ 2.f,2.f,2.f});
+=======
+			scene.loadModel(model, entityUID);
+>>>>>>> d220627 (oops)
 		});
 
 	static const GameEntityConfig MUSHROOM = GameEntityConfig()
-		.whenInit([](auto& entity, auto& scene)
+		.whenInit([](int entityUID, auto& scene)
 		{
 			ModelConfig model;
 			model.spriteSize = { 1024.f,1024.f };
@@ -85,8 +105,8 @@ namespace GameEntities
 				"../../img/mushroom/mushroom20.obj"
 			};
 
-			scene.loadModel(model, entity.getUID());
-			scene.getComponent<TransformComponent>(entity.getUID()).setScale({ 2.f,2.f,2.f});
+			scene.loadModel(model, entityUID);
+			scene.getComponent<TransformComponent>(entityUID).setScale({ 2.f,2.f,2.f});
 		});
 }
 
