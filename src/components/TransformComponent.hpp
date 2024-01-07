@@ -49,7 +49,5 @@ private:
 
 	bool m_localDirty = true;
 	bool m_worldDirty = true;
-
-	bool m_ignoreRotation = false;
 };
 #endif

@@ -68,7 +68,7 @@ bool ModelComponent::usesOrthographicProjection() const
 
 void ModelComponent::loadText(const TextConfig& textConfig)
 {
-	if (textConfig.textToDisplay.size() <= 0)
+	if (textConfig.textToDisplay.empty())
 	{
 		Logger::log("There is no text to display! Cannot load text.");
 		return;
