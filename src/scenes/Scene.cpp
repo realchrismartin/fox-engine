@@ -47,7 +47,11 @@ void Scene::init(const SceneConfig& sceneConfig)
 	std::vector<int> entityIds;
 
 	//Get a ref to the init fn map
+<<<<<<< HEAD
 	const std::unordered_map<int, std::function<void(int, Scene&)>>& initFnMap = sceneConfig.getSceneSpecificInitFnMap();
+=======
+	const std::unordered_map<size_t, std::function<void(int, Scene&)>>& initFnMap = sceneConfig.getSceneSpecificInitFnMap();
+>>>>>>> 2744161 (acc)
 
 	for (auto const& entity : sceneConfig.getGameEntities())
 	{
@@ -69,7 +73,7 @@ void Scene::init(const SceneConfig& sceneConfig)
 		//Update the activity status of the entity to whatever the config says
 		m_entityActivityMap[entityId.value()] = config.getDefaultActiveState();
 
-		int entityIndex = (int)entityIds.size() - 1;
+		size_t entityIndex = entityIds.size() - 1;
 
 		//Run the entity init
 		config.init(entityId.value(), *this);
