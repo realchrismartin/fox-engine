@@ -17,6 +17,7 @@
 #include "src/components/TransformComponent.hpp"
 #include "src/components/ModelComponent.hpp"
 #include "src/components/MVPTransformComponent.hpp"
+#include "src/components/TriggerComponent.hpp"
 
 #include "src/systems/MessageRelay.hpp"
 #include "src/systems/MessageTypes.hpp"
@@ -82,6 +83,7 @@ private:
 		pollEventSystem(window, scene, camera);
 		updateCameraProjectionSystem(window, camera);
 		runInputProcessingSystem(scene, elapsedTime);
+		updateTriggerSystem(scene, elapsedTime);
 		runAnimationSystem(scene, elapsedTime);
 		runSceneGraphUpdateSystem(scene, camera);
 		cleanDirtyFlagsSystem(window, scene, camera);
@@ -99,6 +101,15 @@ private:
 		window.display();
 	};
 
+	static const void updateTriggerSystem(Scene& scene, float elapsedTime)
+	{
+		for (auto const& entity : EntityFilter<TriggerComponent>(scene))
+		{
+			TriggerComponent& trigger = scene.getComponent<TriggerComponent>(entity);
+
+			trigger.update(elapsedTime);
+		}
+	}
 
 	static const void updateCameraProjectionSystem(const Window& window, Camera& camera)
 	{
