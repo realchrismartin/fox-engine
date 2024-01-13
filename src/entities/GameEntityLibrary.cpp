@@ -7,6 +7,7 @@
 #include "src/scenes/Scene.hpp"
 #include "src/components/InputComponent.hpp"
 #include "src/components/TransformComponent.hpp"
+#include "src/components/TriggerComponent.hpp"
 #include "src/components/config/ModelConfig.hpp"
 #include "src/components/config/TextConfig.hpp"
 
@@ -133,6 +134,7 @@ namespace GameEntities
 	static const GameEntityConfig BLOCK_EMITTER = GameEntityConfig()
 		.whenInit([](int entityUID, auto& scene)
 		{
+
 			//The emitter itself
 			ModelConfig model;
 			model.keyframeFilePaths = { "../../img/cube.obj" };
@@ -163,10 +165,38 @@ namespace GameEntities
 				//Set this entity as inactive
 				scene.setEntityActiveStatus(id.value(), false);
 
+				scene.addComponent<TriggerComponent>(id.value());
+
+				TriggerComponent& triggerComponent = scene.getComponent<TriggerComponent>(id.value());
+
+				Trigger trigger;
+				trigger.setCondition([](Scene& scene, int entityUID, float lifetime, float elapsedTime)
+				{
+					return lifetime > 2.f;
+				});
+				trigger.setAction([](Scene& scene, int entityUID)
+				{
+					scene.setEntityActiveStatus(entityUID,true);
+
+					TransformComponent& transform = scene.getComponent<TransformComponent>(entityUID);
+
+					const glm::vec3& currentScale = transform.getScale();
+					const glm::vec3 newScale = glm::vec3(currentScale.x * 1.1f, currentScale.y * 1.1f, currentScale.z * 1.1f);
+					transform.setScale(newScale);
+				});
+
+				triggerComponent.addTrigger(trigger);
+
 				//TODO: add the trigger components fns here. 
 				//The functions should:
+
+				//When? If the timer is reset
 				// a) set the model active at the beginning of the timer
+
+				//When? If the timer is running but not complete
 				// b) apply translation to the model each tick to simulate movement
+
+				//When? If the timer is complete
 				// c) .reset() the TransformComponent and set active=false when the timer expires. moving the cube back to the emitter source
 			}
 		});

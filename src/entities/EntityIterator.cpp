@@ -34,9 +34,9 @@ EntityIterator& EntityIterator::operator++()
 
 	m_entityIndex++;
 
-	//Skip all inactive entities and entities that don't have the specified components
+	//Skip entities that don't have the specified components
 	//NB: entityExists is used so that we can operator* without checking the value exists
-	while (m_entityIndex < size && (!m_scene.entityExists(m_entityIndex) || !m_scene.isEntityAtIndexActive(m_entityIndex) || !m_scene.entityHasComponents(m_entityIndex,m_componentIds)))
+	while (m_entityIndex < size && (!m_scene.entityExists(m_entityIndex) || !m_scene.entityHasComponents(m_entityIndex,m_componentIds)))
 	{
 		m_entityIndex++;
 	}
@@ -50,9 +50,9 @@ const EntityIterator EntityIterator::begin() const
 
 	size_t size = m_scene.getEntityCount();
 
-	//Skip all inactive entities and entities that don't have the specified components
+	//Skip entities that don't have the specified components
 	//NB: entityExists is used so that we can operator* without checking the value exists
-	while (index < (int)size && (!m_scene.entityExists(index) || !m_scene.isEntityAtIndexActive(index) || !m_scene.entityHasComponents(index, m_componentIds)))
+	while (index < (int)size && (!m_scene.entityExists(index) || !m_scene.entityHasComponents(index, m_componentIds)))
 	{
 		index++;
 	}

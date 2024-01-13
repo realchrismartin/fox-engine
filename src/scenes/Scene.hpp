@@ -136,7 +136,6 @@ public:
 
 	void removeEntity(int uid);
 
-	bool isEntityAtIndexActive(size_t entityIndex) const;
 	bool isEntityActive(int entityUID) const;
 	bool entityExists(size_t entityIndex) const;
 	std::optional<int> getEntityUIDForIndex(size_t entityIndex);

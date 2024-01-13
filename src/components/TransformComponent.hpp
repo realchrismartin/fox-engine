@@ -32,6 +32,8 @@ public:
 	/// @param scale 
 	void setScale(glm::vec3 scale);
 
+	const glm::vec3& getScale() const;
+
 	/// @brief Set the local translation for this transform
 	/// @param translation 
 	void setTranslation(glm::vec3 translation);

@@ -83,6 +83,11 @@ void TransformComponent::setScale(glm::vec3 scale)
 	m_localDirty = true;
 }
 
+const glm::vec3& TransformComponent::getScale() const
+{
+	return m_scale;
+}
+
 void TransformComponent::setTranslation(glm::vec3 translation)
 {
 	m_translation = translation;

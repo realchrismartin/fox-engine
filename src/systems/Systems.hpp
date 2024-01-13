@@ -107,7 +107,7 @@ private:
 		{
 			TriggerComponent& trigger = scene.getComponent<TriggerComponent>(entity);
 
-			trigger.update(elapsedTime);
+			trigger.update(scene, entity, elapsedTime);
 		}
 	}
 

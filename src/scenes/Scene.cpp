@@ -137,16 +137,6 @@ void Scene::loadText(const TextConfig& textConfig, int entityUID)
 	updateAllModelComponentAssociations();
 }
 
-bool Scene::isEntityAtIndexActive(size_t entityIndex) const
-{
-	if (!entityExists(entityIndex))
-	{
-		return false;
-	}
-
-	return m_entityActivityMap.at(m_gameEntities[entityIndex].getUID());
-}
-
 bool Scene::isEntityActive(int entityUID) const
 {
 	if (!m_entityActivityMap.contains(entityUID))
