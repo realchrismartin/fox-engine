@@ -15,15 +15,18 @@ struct ModelConfig;
 struct TextConfig;
 struct SceneConfig;
 
+#include "src/systems/MessageTypes.hpp"
+#include "src/systems/Recipient.hpp"
+
 /// @brief An association of Entities with their Components.
 /// @brief Represents the game world and holds all entities and their components that are in the world.
-class Scene
+class Scene : public Recipient<SceneChangeMessage>
 {
 public:
 
-	/// @brief Reset and initialize the scene with this config
-	/// @param sceneConfig 
-	void init(const SceneConfig& sceneConfig);
+	Scene(const SceneConfig& sceneConfig);
+
+	virtual void onMessageReceived(const SceneChangeMessage& message) override;
 
 	/// @brief Get the component of the specified type T that is associated with the entity with the UID entityUID
 	/// @tparam T The type of component we are asking for
@@ -154,22 +157,11 @@ public:
 		addComponentPrivate<T>(entityUID);
 	}
 
-	SceneEnum getNextSceneRequested() const
-	{
-		return m_nextSceneRequested;
-	}
-
-	void requestSceneChange(SceneEnum scene)
-	{
-		if (scene == m_sceneID)
-		{
-			return;
-		}
-
-		m_nextSceneRequested = scene;
-	}
-
 protected:
+	/// @brief Reset and initialize the scene with this config
+	/// @param sceneConfig 
+	void init(const SceneConfig& sceneConfig);
+
 	void addChild(int parentEntityUID, int childEntityUID);
 	std::optional<int> createEntity();
 	void removeEntity(int uid);
@@ -219,9 +211,6 @@ private:
 
 	std::optional<int> m_cameraEntityId;
 	std::optional<int> m_cameraTargetEntityId;
-
-	SceneEnum m_sceneID = SceneEnum::NONE;
-	SceneEnum m_nextSceneRequested = SceneEnum::NONE;
 };
 
 #endif

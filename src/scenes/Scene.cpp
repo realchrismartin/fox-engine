@@ -6,10 +6,22 @@
 #include "src/entities/GameEntityConfig.hpp"
 #include "src/entities/GameEntityLibrary.hpp"
 #include "src/graphics/ModelConfig.hpp"
+#include "src/scenes/SceneLibrary.hpp"
+
 
 #include "src/components/ModelComponent.hpp"
 #include "src/components/TransformComponent.hpp"
 #include "src/components/MVPTransformComponent.hpp"
+
+Scene::Scene(const SceneConfig& sceneConfig)
+{
+	init(sceneConfig);
+}
+
+void Scene::onMessageReceived(const SceneChangeMessage& message)
+{
+	init(SceneLibrary::getSceneConfig(message.requestedScene));
+}
 
 void Scene::init(const SceneConfig& sceneConfig)
 {
@@ -27,11 +39,8 @@ void Scene::init(const SceneConfig& sceneConfig)
 	m_availableEntityUID = 0;
 	m_cameraEntityId = std::nullopt;
 	m_cameraTargetEntityId = std::nullopt;
-	m_nextSceneRequested = SceneEnum::NONE;
 
 	//Now, we make the scene.
-	m_sceneID = sceneConfig.id;
-
 	//Store IDs as we make them in the prescribed order so that we can associate them in the scene graph.
 	std::vector<int> entityIds;
 

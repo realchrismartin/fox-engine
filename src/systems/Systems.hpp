@@ -18,6 +18,9 @@
 #include "src/components/ModelComponent.hpp"
 #include "src/components/MVPTransformComponent.hpp"
 
+#include "src/systems/MessageRelay.hpp"
+#include "src/systems/MessageTypes.hpp"
+
 static const float TIMESTEP = .0167f;
 
 /// @brief A collection of static functions that are "systems", functions that operate on specific associations of components in a scene to update them.
@@ -40,13 +43,13 @@ public:
 		//Initialize the game elements on the stack now. 
 		Clock clock;
 		Window window;
-		Scene scene;
 		Camera camera;
+
+		//Initialize the scene as the main menu.
+		Scene scene(SceneLibrary::getSceneConfig(SceneEnum::MAIN_MENU));
 
 		float currentTime = clock.getElapsedTimeInSeconds();
 		float accumulator = TIMESTEP;
-
-		scene.init(SceneLibrary::getSceneConfig(SceneEnum::MAIN_MENU));
 
 		//This is the main game loop.
 		while (window.isOpen())
@@ -78,7 +81,6 @@ private:
 	{
 		pollEventSystem(window, scene, camera);
 		updateCameraProjectionSystem(window, camera);
-		changeSceneSystem(scene);
 		runInputProcessingSystem(scene, elapsedTime);
 		runAnimationSystem(scene, elapsedTime);
 		runSceneGraphUpdateSystem(scene, camera);
@@ -108,15 +110,6 @@ private:
 		glm::i64vec2 windowSize = window.getWindowSize();
 		camera.updateOrthographicProjectionMatrix(windowSize);
 		camera.updatePerspectiveProjectionMatrix(windowSize);
-	}
-
-	static const void changeSceneSystem(Scene& scene)
-	{
-		if (scene.getNextSceneRequested() != SceneEnum::NONE)
-		{
-			//Time to load the next scene!
-			scene.init(SceneLibrary::getSceneConfig(scene.getNextSceneRequested()));
-		}
 	}
 
 	static const void pollEventSystem(Window& window, Scene& scene, Camera& camera)
@@ -154,13 +147,17 @@ private:
 				//For now, 0 will load the menu
 				if (event.key.keysym.scancode == SDL_SCANCODE_0)
 				{
-					scene.requestSceneChange(SceneEnum::MAIN_MENU);
+					SceneChangeMessage message;
+					message.requestedScene = SceneEnum::MAIN_MENU;
+					MessageRelay::getInstance()->sendMessage(message);
 				}
 
 				//1 will load the level 1
 				if (event.key.keysym.scancode == SDL_SCANCODE_1)
 				{
-					scene.requestSceneChange(SceneEnum::LEVEL_1);
+					SceneChangeMessage message;
+					message.requestedScene = SceneEnum::LEVEL_1;
+					MessageRelay::getInstance()->sendMessage(message);
 				}
 			}
 		}

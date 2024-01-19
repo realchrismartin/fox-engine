@@ -4,22 +4,12 @@
 
 //Add new constructors here as you add message types!
 
-Recipient<WindowMessage>::Recipient()
+Recipient<SceneChangeMessage>::Recipient()
 {
-	MessageRelay::getInstance()->subscribe<WindowMessage>(this);
+	MessageRelay::getInstance()->subscribe<SceneChangeMessage>(this);
 }
 
-Recipient<WindowMessage>::~Recipient()
+Recipient<SceneChangeMessage>::~Recipient()
 {
-	MessageRelay::getInstance()->unsubscribe<WindowMessage>(this);
-}
-
-Recipient<DefaultMessage>::Recipient()
-{
-	MessageRelay::getInstance()->subscribe<DefaultMessage>(this);
-}
-
-Recipient<DefaultMessage>::~Recipient()
-{
-	MessageRelay::getInstance()->unsubscribe<DefaultMessage>(this);
+	MessageRelay::getInstance()->unsubscribe<SceneChangeMessage>(this);
 }

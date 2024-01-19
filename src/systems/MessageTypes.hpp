@@ -1,14 +1,12 @@
 #ifndef MESSAGETYPES_HPP
 #define MESSAGETYPES_HPP
 
-struct WindowMessage
-{
-	int i = 0;
-};
+#include "src/scenes/SceneEnum.hpp"
 
-struct DefaultMessage
+/// @brief Scenes listen for this message type to see if the scene should be changed.
+struct SceneChangeMessage
 {
-	int p = 0;
+	SceneEnum requestedScene = SceneEnum::MAIN_MENU;
 };
 
 #endif
