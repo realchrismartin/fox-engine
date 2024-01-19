@@ -16,8 +16,6 @@ struct FaceElement
 	unsigned int vertexNormalIndex = 0;
 };
 
-#include "src/systems/Recipient.hpp"
-
 /// @brief A component that contains data required to represent and render a 3D model in the scene.
 /// @brief A model consists of 0 ... n Meshes which are made of vertices and indices. One mesh is drawn at a time to represent an "animation". The Scene controls which mesh is drawn by setting the active mesh index.
 class ModelComponent
