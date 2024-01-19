@@ -8,23 +8,6 @@
 #include <fstream>
 #include <sstream>
 
-#include "src/systems/MessageRelay.hpp"
-
-ModelComponent::ModelComponent()
-{
-	MessageRelay::getInstance()->subscribe<WindowMessage>(this);
-}
-
-ModelComponent::~ModelComponent()
-{
-	MessageRelay::getInstance()->unsubscribe<WindowMessage>(this);
-}
-
-void ModelComponent::onMessageReceived(const WindowMessage& message)
-{
-	std::cout << message.i << std::endl;
-}
-
 size_t ModelComponent::getNumMeshes() const
 {
 	//NB: assumes the number of meshes is constant across vertices,indices lists

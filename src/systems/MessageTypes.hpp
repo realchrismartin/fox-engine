@@ -6,4 +6,9 @@ struct WindowMessage
 	int i = 0;
 };
 
+struct DefaultMessage
+{
+	int p = 0;
+};
+
 #endif
