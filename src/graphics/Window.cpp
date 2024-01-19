@@ -1,6 +1,9 @@
 #include "src/graphics/Window.hpp"
 #include "src/graphics/Vertex.hpp"
 
+#include "src/systems/MessageRelay.hpp"
+#include "src/systems/MessageTypes.hpp"
+
 Window::Window()
 {
 	m_window = SDL_CreateWindow("FnF", m_windowSize.x, m_windowSize.y, SDL_WINDOW_OPENGL);
@@ -111,6 +114,12 @@ void Window::setupOpenGL()
 
 void Window::draw(size_t vertexCount, size_t indexCount, size_t matrixCount, GLvoid* vertices, GLvoid* indices, GLvoid* mvpMatrices)
 {
+
+	WindowMessage theMessage;
+	theMessage.i = 1;
+	MessageRelay::getInstance()->sendMessage(theMessage);
+
+
 	if (!m_open)
 	{
 		//Window is closing or closed.
