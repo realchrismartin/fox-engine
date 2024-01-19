@@ -9,7 +9,6 @@
 #include <sstream>
 
 #include "src/systems/MessageRelay.hpp"
-#include "src/systems/MessageTypes.hpp"
 
 ModelComponent::ModelComponent()
 {

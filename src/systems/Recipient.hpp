@@ -1,7 +1,6 @@
 #ifndef RECIPIENT_HPP
 #define RECIPIENT_HPP
 
-
 template <typename T>
 class Recipient
 {
@@ -10,8 +9,6 @@ public:
 	{
 		//Does nothing by default.
 	}
-
-
 };
 
 #endif

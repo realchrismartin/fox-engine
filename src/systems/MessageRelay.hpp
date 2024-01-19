@@ -18,8 +18,8 @@ public:
 
 		if (!m_channels.count(type))
 		{
-			std::vector<std::any> anySet;
-			m_channels.emplace(type, anySet);
+			std::vector<std::any> anyVec;
+			m_channels.emplace(type, anyVec);
 		}
 
 		m_channels.at(type).push_back(sub);
@@ -35,11 +35,9 @@ public:
 			return;
 		}
 
-		//Inefficient!
-		//TODO: also might not work
-		std::erase_if(m_channels.at(type), [](auto it, auto item)
+		std::erase_if(m_channels.at(type), [sub](auto item)
 		{
-			return it == item;
+			return std::any_cast<Recipient<T>*>(item) == sub;
 		});
 	}
 
