@@ -9,6 +9,6 @@ std::shared_ptr<MessageRelay> MessageRelay::getInstance()
 
 MessageRelay::MessageRelay()
 {
-    //TODO
+    //Private, because this is a singleton!
 }
 
