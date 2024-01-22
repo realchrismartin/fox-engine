@@ -93,6 +93,7 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 			scene.addComponent<TriggerComponent>(entityUID);
 			TriggerComponent& tc = scene.getComponent<TriggerComponent>(entityUID);
 
+			//Example direct trigger sink
 			Trigger directTrigger;
 			directTrigger.setDirectTriggerCondition(true);
 			directTrigger.setAction([](Scene& scene, int entityUID)
@@ -102,10 +103,26 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 					return;
 				}
 				
-				scene.getComponent<TransformComponent>(entityUID).setScale({ 5.f,2.f,2.f });
+				//TODO: not working
+				scene.getComponent<TransformComponent>(entityUID).setRotation({ 5.f,2.f,2.f });
+			});
+
+			//Example message trigger sink
+			Trigger messageTrigger;
+			messageTrigger.setMessageCondition(true);
+			messageTrigger.setAction([](Scene& scene, int entityUID)
+			{
+				if (!scene.hasComponent<TransformComponent>(entityUID))
+				{
+					return;
+				}
+				
+				//TODO: not working
+				scene.getComponent<TransformComponent>(entityUID).setScale({ 5.f,6.f,2.f });
 			});
 
 			tc.addTrigger(directTrigger);
+			tc.addTrigger(messageTrigger);
 		});
 
 		//Mushroom
@@ -118,16 +135,32 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 			scene.addComponent<TriggerComponent>(entityUID);
 			TriggerComponent& tc = scene.getComponent<TriggerComponent>(entityUID);
 
+			//Example direct trigger source
 			Trigger directTrigger;
 			directTrigger.setUpdateCondition([](Scene& scene, int entityUID, float lifetime, float elapsedTime)
 			{
-					return lifetime > 5.f;
+				return lifetime > 6.f;
 			});
 
 			directTrigger.setAction([mushroom2](Scene& scene, int entityUID)
 			{
 				scene.trigger(mushroom2.entityUID);
 			});
+
+			//Example message trigger source
+			Trigger messageTrigger;
+			messageTrigger.setUpdateCondition([](Scene& scene, int entityUID, float lifetime, float elapsedTime)
+			{
+				return lifetime > 3.f;
+			});
+
+			messageTrigger.setAction([mushroom2](Scene& scene, int entityUID)
+			{
+				TriggerExecutionMessage message;
+				message.entityUID = mushroom2.entityUID;
+				MessageRelay::getInstance()->sendMessage(message);
+			});
+
 
 			tc.addTrigger(directTrigger);
 >>>>>>> 586c5df (variouse)
