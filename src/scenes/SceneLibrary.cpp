@@ -82,11 +82,13 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 		});
 
 		//Another mushroom
+		/*
 		auto mushroom2 = config.addEntity(GameEntityEnum::MUSHROOM);
 		mushroom2.addInitFn([](int entityUID, auto& scene)
 		{
 			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,0.f,10.f });
 		});
+		*/
 
 <<<<<<< HEAD
 =======

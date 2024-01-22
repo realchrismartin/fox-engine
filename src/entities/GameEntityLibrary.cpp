@@ -50,6 +50,9 @@ namespace GameEntities
 			config.textToDisplay = "press one to begin";
 			config.centered = true;
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 9d1d7dd (en titty)
 			config.animated = true;
 			config.margin = { .05f,.05f };
 			config.fontSize = 5;

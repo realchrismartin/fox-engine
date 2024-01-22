@@ -6,9 +6,18 @@ EntityInstanceConfig SceneConfig::addEntity(GameEntityEnum entity)
 {
 	m_entities.push_back(entity);
 	EntityInstanceConfig configEntity;
+<<<<<<< HEAD
 	configEntity.entityIndex = m_entities.size() - 1;
 	configEntity.config = this;
 	return configEntity;
+=======
+	configEntity.entityEnum = entity;
+	configEntity.entityUID = m_entities.size();
+	m_entities.push_back(configEntity); //Keep a copy for ourselves.
+
+	configEntity.config = this;
+	return configEntity; //Return a copy so we don't screw ourselves due to vector realloc
+>>>>>>> 9d1d7dd (en titty)
 }
 
 <<<<<<< HEAD
