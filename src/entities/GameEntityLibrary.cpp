@@ -140,9 +140,15 @@ namespace GameEntities
 			model.keyframeFilePaths = { "../../img/cube.obj" };
 			scene.loadModel(model, entityUID);
 
+			float startDelay = 0.f;
+
 			//The cubes that get emitted
 			for (int i = 0; i < 10; i++)
 			{
+
+				startDelay += (float)i;
+				constexpr float visibleDuration = 4.f;
+
 				std::optional<int> id = scene.createEntity();
 
 				if (!id.has_value())
@@ -169,35 +175,75 @@ namespace GameEntities
 
 				TriggerComponent& triggerComponent = scene.getComponent<TriggerComponent>(id.value());
 
+				//Become visible trigger
 				Trigger trigger;
-				trigger.setCondition([](Scene& scene, int entityUID, float lifetime, float elapsedTime)
+				trigger.setCondition([startDelay](Scene& scene, int entityUID, float lifetime, float elapsedTime)
 				{
-					return lifetime > 2.f;
+					return lifetime > startDelay;
 				});
 				trigger.setAction([](Scene& scene, int entityUID)
 				{
 					scene.setEntityActiveStatus(entityUID,true);
-
-					TransformComponent& transform = scene.getComponent<TransformComponent>(entityUID);
-
-					const glm::vec3& currentScale = transform.getScale();
-					const glm::vec3 newScale = glm::vec3(currentScale.x * 1.1f, currentScale.y * 1.1f, currentScale.z * 1.1f);
-					transform.setScale(newScale);
 				});
 
 				triggerComponent.addTrigger(trigger);
 
-				//TODO: add the trigger components fns here. 
-				//The functions should:
+				//Movement trigger
+				Trigger moveTrigger;
+				moveTrigger.setCondition([startDelay,visibleDuration](Scene& scene, int entityUID, float lifetime, float elapsedTime)
+				{
+					return lifetime > startDelay && lifetime < visibleDuration;
+				});
+				moveTrigger.setAction([](Scene& scene, int entityUID)
+				{
+					if (!scene.hasComponent<TransformComponent>(entityUID))
+					{
+						return;
+					}
 
-				//When? If the timer is reset
-				// a) set the model active at the beginning of the timer
+					//Pick random directions upward
+					
+					float xDirection = (rand() % 2) > 0 ? 1.f : -1.f;
+					float zDirection = (rand() % 2) > 0 ? 1.f : -1.f;
 
-				//When? If the timer is running but not complete
-				// b) apply translation to the model each tick to simulate movement
+					constexpr float moveFactor = .01f;
 
-				//When? If the timer is complete
-				// c) .reset() the TransformComponent and set active=false when the timer expires. moving the cube back to the emitter source
+					float xTranslation = xDirection * (float)(rand() % 2) * moveFactor;
+					float yTranslation =  (float)(rand() % 2) * moveFactor;
+					float zTranslation = xDirection * (float)(rand() % 2) * moveFactor;
+
+					scene.getComponent<TransformComponent>(entityUID).setTranslation({ xTranslation,yTranslation,zTranslation });
+				});
+
+				triggerComponent.addTrigger(moveTrigger);
+
+				//Reset trigger
+				Trigger resetTrigger;
+				resetTrigger.setCondition([startDelay,visibleDuration](Scene& scene, int entityUID, float lifetime, float elapsedTime)
+				{
+					return lifetime > visibleDuration;
+				});
+				resetTrigger.setAction([](Scene& scene, int entityUID)
+				{
+					scene.setEntityActiveStatus(entityUID,false);
+
+					if (!scene.hasComponent<TransformComponent>(entityUID))
+					{
+						return;
+					}
+
+					scene.getComponent<TransformComponent>(entityUID).reset();
+
+					if (!scene.hasComponent<TriggerComponent>(entityUID))
+					{
+						//Weird...
+						return;
+					}
+
+					scene.getComponent<TriggerComponent>(entityUID).resetLifetime();
+				});
+
+				triggerComponent.addTrigger(resetTrigger);
 			}
 		});
 }

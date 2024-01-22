@@ -42,6 +42,7 @@ class TriggerComponent
 public:
 	void update(Scene& scene, int entityUID, float elapsedTime);
 	void addTrigger(const Trigger& trigger);
+	void resetLifetime();
 
 private:
 	float m_lifetime = 0.f;
