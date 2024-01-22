@@ -103,8 +103,7 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 					return;
 				}
 				
-				//TODO: not working
-				scene.getComponent<TransformComponent>(entityUID).setRotation({ 5.f,2.f,2.f });
+				scene.getComponent<TransformComponent>(entityUID).setRotation({ 90.f,0.f,2.f });
 			});
 
 			//Example message trigger sink
@@ -117,8 +116,7 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 					return;
 				}
 				
-				//TODO: not working
-				scene.getComponent<TransformComponent>(entityUID).setScale({ 5.f,6.f,2.f });
+				scene.getComponent<TransformComponent>(entityUID).setScale({ 5.f,3.f,2.f });
 			});
 
 			tc.addTrigger(directTrigger);
@@ -162,6 +160,7 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 			});
 
 
+			tc.addTrigger(messageTrigger);
 			tc.addTrigger(directTrigger);
 >>>>>>> 586c5df (variouse)
 		});
