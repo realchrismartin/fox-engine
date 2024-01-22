@@ -142,23 +142,18 @@ namespace GameEntities
 			scene.loadModel(model, entityUID);
 
 			//Reuse the model for da emitted stuff
-			model.spriteSize = { 1024.f,1024.f };
-			model.spriteOffsetOnTexture = { 1023.f,1476 };
-			model.frameCount = 60;
+			model.spriteSize = { 10.f,10.f };
+			model.spriteOffsetOnTexture = { 329.f,16.f };
 			model.keyframeFilePaths = {
-				"../../img/mushroom/mushroom0.obj",
-				"../../img/mushroom/mushroom5.obj",
-				"../../img/mushroom/mushroom10.obj",
-				"../../img/mushroom/mushroom15.obj",
-				"../../img/mushroom/mushroom20.obj"
+				"../../img/cube.obj",
 			};
 
-			float visibleDuration = 3.f;
+			float visibleDuration = 5.f;
 
 			//The stuff that get emitted
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < 20; i++)
 			{
-				float startDelay = i * .1f;
+				float startDelay = i * ((((rand() % 2) + 1) * .15f) + .15f);
 
 				std::optional<int> id = scene.createEntity();
 
@@ -211,7 +206,7 @@ namespace GameEntities
 					float xDirection = (rand() % 2) > 0 ? 1.f : -1.f;
 					float zDirection = (rand() % 2) > 0 ? 1.f : -1.f;
 
-					constexpr float moveFactor = .05f;
+					constexpr float moveFactor = .03f;
 
 					float xTranslation = xDirection * (float)(rand() % 2) * moveFactor;
 					float yTranslation =  (float)(rand() % 2) * moveFactor;
