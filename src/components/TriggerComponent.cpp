@@ -1,4 +1,5 @@
 #include "TriggerComponent.hpp"
+#include "TriggerComponent.hpp"
 
 void TriggerComponent::update(Scene& scene, int entityUID, float elapsedTime)
 {

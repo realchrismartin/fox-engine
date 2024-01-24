@@ -1,6 +1,14 @@
 #ifndef TRIGGERCOMPONENT_HPP
 #define TRIGGERCOMPONENT_HPP
 
+<<<<<<< HEAD
+=======
+#include <queue>;
+#include "src/systems/MessageTypes.hpp"
+#include "src/systems/Recipient.hpp"
+#include "src/components/InputComponent.hpp"
+
+>>>>>>> 3ef75ed (upgrade events and allow for window resizing)
 class Scene;
 
 

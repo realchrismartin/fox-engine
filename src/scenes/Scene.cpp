@@ -21,15 +21,10 @@
 
 Scene::Scene(const SceneConfig& sceneConfig)
 {
-	init(sceneConfig);
+	changeScene(sceneConfig);
 }
 
-void Scene::onMessageReceived(const SceneChangeMessage& message)
-{
-	init(SceneLibrary::getSceneConfig(message.requestedScene));
-}
-
-void Scene::init(const SceneConfig& sceneConfig)
+void Scene::changeScene(const SceneConfig& sceneConfig)
 {
 	//Dump whatever's in the existing pools, if there are any
 	for (auto& pool : m_componentPools)

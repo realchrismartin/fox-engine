@@ -1,15 +1,22 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 
+<<<<<<< HEAD
 
 #include "glm/glm/ext/matrix_transform.hpp"
 #include "glm/glm/ext/matrix_clip_space.hpp"
+=======
+#include "src/systems/Recipient.hpp"
+#include "src/systems/MessageTypes.hpp"
+>>>>>>> 3ef75ed (upgrade events and allow for window resizing)
 
 class Scene;
 
-class Camera
+class Camera : public Recipient<WindowMessage>
 {
 public:
+	Camera(const glm::i32vec2& defaultWindowSize);
+	void onMessageReceived(const WindowMessage& message) override;
 	bool isViewMatrixDirty() const;
 	void markViewMatrixClean();
 
@@ -20,8 +27,8 @@ public:
 	const glm::mat4& getOrthographicProjectionMatrix() const;
 	const glm::mat4& getViewMatrix() const;
 
-	void updatePerspectiveProjectionMatrix(const glm::i64vec2& windowSize);
-	void updateOrthographicProjectionMatrix(const glm::i64vec2& windowSize);
+	void updatePerspectiveProjectionMatrix(const glm::i32vec2& windowSize);
+	void updateOrthographicProjectionMatrix(const glm::i32vec2& windowSize);
 	void updateViewMatrix(Scene& scene);
 
 	void informOfSceneChange();

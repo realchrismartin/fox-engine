@@ -8,6 +8,7 @@
 #include "src/entities/GameEntityLibrary.hpp"
 #include "src/entities/EntityInstanceConfig.hpp"
 
+#include "src/components/config/TextConfig.hpp"
 #include "src/components/TransformComponent.hpp"
 
 #include "src/util/Logger.hpp"
@@ -176,9 +177,12 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,2.f,0.f });
 		});
 
+<<<<<<< HEAD
 		config.addChild(player, emitter);
 >>>>>>> 5a80cce (magnificent)
 
+=======
+>>>>>>> 3ef75ed (upgrade events and allow for window resizing)
 		break;
 	}
 
@@ -200,6 +204,7 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 		});
 
 		//Start button
+<<<<<<< HEAD
 		auto startButton = config.addEntity(GameEntityEnum::START_BUTTON);
 		startButton.addInitFn([](int entityUID, auto& scene)
 		{
@@ -209,6 +214,56 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 =======
 			scene.getComponent<TransformComponent>(entityUID).setTranslation({0.f,-.3f,0.f });
 >>>>>>> 3607be4 (shipit)
+=======
+		auto startButton = config.addEntity(GameEntityEnum::BUTTON);
+		startButton.addInitFn([](int entityUID, Scene& scene)
+		{
+				//NB: right now this button loads its text twice since default buttons start with text. Maybe we dont want that?
+			TextConfig config;
+			config.textToDisplay = "click to begin";
+			config.centered = true;
+			config.animated = true;
+			config.margin = { .05f,.05f };
+			config.fontSize = 5;
+			scene.loadText(config, entityUID);
+
+			scene.getComponent<TransformComponent>(entityUID).setTranslation({0.f,-.3f,0.f });
+
+			scene.addComponent<InputComponent>(entityUID);
+
+			scene.addComponent<TriggerComponent>(entityUID);
+			TriggerComponent& triggerComponent = scene.getComponent<TriggerComponent>(entityUID);
+
+			Trigger trigger;
+			trigger.setUpdateCondition([](Scene& scene, int entityUID, float lifetime, float elapsedTime)
+			{
+				if (!scene.hasComponent<InputComponent>(entityUID))
+				{
+					return false;
+				}
+
+				//TODO: later make sure this click is actually on the button, chief ;)
+				return scene.getComponent<InputComponent>(entityUID).getActiveInputs().contains(UserInputActionsEnum::LEFT_CLICKING);
+			});
+			trigger.setAction([](Scene& scene, int entityUID)
+			{
+				if (!scene.hasComponent<InputComponent>(entityUID))
+				{
+					return false;
+				}
+				
+				std::optional<glm::vec2> coords = scene.getComponent<InputComponent>(entityUID).getInputActionWindowCoordinates(UserInputActionsEnum::LEFT_CLICKING);
+
+				if (coords.has_value())
+				{
+					std::cout << "Clicked on the start button in a manner of speaking, coords were " << coords.value().x << " " << coords.value().y << std::endl;
+				}
+
+				scene.changeScene(SceneLibrary::getSceneConfig(SceneEnum::LEVEL_1));
+			});
+
+			triggerComponent.addTrigger(trigger);
+>>>>>>> 3ef75ed (upgrade events and allow for window resizing)
 		});
 
 		//Floor

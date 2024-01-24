@@ -1,9 +1,11 @@
 #include "src/graphics/Window.hpp"
 #include "src/graphics/Vertex.hpp"
 
+const glm::i32vec2 Window::DEFAULT_WINDOW_SIZE = { 1024,768 };
+
 Window::Window()
 {
-	m_window = SDL_CreateWindow("FnF", m_windowSize.x, m_windowSize.y, SDL_WINDOW_OPENGL);
+	m_window = SDL_CreateWindow("FnF", DEFAULT_WINDOW_SIZE.x, DEFAULT_WINDOW_SIZE.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
 	if (m_window == NULL)
 	{
@@ -24,6 +26,22 @@ Window::~Window()
 	if (m_window != nullptr)
 	{
 		SDL_DestroyWindow(m_window);
+	}
+}
+
+void Window::onMessageReceived(const WindowMessage & message)
+{
+	if (message.windowEvent.has_value())
+	{
+		if (message.windowEvent.value().type == SDL_EVENT_WINDOW_RESIZED)
+		{
+			glViewport(0, 0, message.windowEvent.value().window.data1, message.windowEvent.value().window.data2);
+		}
+
+		if (message.windowEvent.value().type == SDL_EVENT_WINDOW_CLOSE_REQUESTED || message.windowEvent.value().type == SDL_EVENT_QUIT)
+		{
+			close();
+		}
 	}
 }
 
@@ -171,26 +189,6 @@ void Window::close()
 bool Window::isOpen() const
 {
 	return m_open;
-}
-
-const glm::i64vec2& Window::getWindowSize() const
-{
-	return m_windowSize;
-}
-
-void Window::markWindowSizeDirty()
-{
-	m_windowSizeDirty = true;
-}
-
-void Window::markWindowSizeClean()
-{
-	m_windowSizeDirty = false;
-}
-
-bool Window::isWindowSizeDirty() const
-{
-	return m_windowSizeDirty;
 }
 
 void Window::clear()

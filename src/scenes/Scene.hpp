@@ -15,19 +15,24 @@ struct ModelConfig;
 struct TextConfig;
 struct SceneConfig;
 
-#include "src/systems/MessageTypes.hpp"
-#include "src/systems/Recipient.hpp"
-
 /// @brief An association of Entities with their Components.
 /// @brief Represents the game world and holds all entities and their components that are in the world.
-class Scene : public Recipient<SceneChangeMessage>
+class Scene
 {
 public:
+<<<<<<< HEAD
 <<<<<<< HEAD
 
 	Scene(const SceneConfig& sceneConfig);
 
 	virtual void onMessageReceived(const SceneChangeMessage& message) override;
+=======
+	Scene(const SceneConfig& sceneConfig);
+
+	/// @brief Reset and initialize the scene with this config
+	/// @param sceneConfig 
+	void changeScene(const SceneConfig& sceneConfig);
+>>>>>>> 3ef75ed (upgrade events and allow for window resizing)
 
 =======
 >>>>>>> 37c405f (activiv)
@@ -168,6 +173,10 @@ public:
 	}
 
 protected:
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3ef75ed (upgrade events and allow for window resizing)
 	void applyFunctorToSceneGraph(std::optional<int> parentEntityID, int entityID, std::function<void(Scene&, std::optional<int>, int)>& functor);
 
 	static const std::set<int> EMPTY_OWNED_SET;

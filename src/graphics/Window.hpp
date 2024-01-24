@@ -1,20 +1,23 @@
 #ifndef WINDOW_HPP
 #define WINDOW_HPP
 
+#include "src/systems/Recipient.hpp"
+#include "src/systems/MessageTypes.hpp"
 #include "src/graphics/Shader.hpp"
 #include "src/graphics/Texture.hpp"
-#include "sdl3/SDL.h"
 
 class GraphicsComponent;
 struct Vertex;
 
 /// @brief A nice wrapper for a SDL OpenGL window that provides clean interfaces to Systems that need Window access.
-class Window
+class Window : public Recipient<WindowMessage>
 {
 public:
 
 	Window();
 	~Window();
+
+	void onMessageReceived(const WindowMessage& message) override;
 
 	/// @brief GLClear the window.
 	void clear();
@@ -24,28 +27,16 @@ public:
 
 	void draw(size_t vertexCount, size_t indexCount, size_t matrixCount, GLvoid* vertices, GLvoid* indices, GLvoid* mvpMatrices);
 
-	/// @brief Mark the window for closing. No more rendering will be done.
-	void close();
-
 	/// @brief Get whether the window is open.
 	/// @return 
 	bool isOpen() const;
 
-	/// @brief Get the current window size in pixels
-	/// @return 
-	const glm::i64vec2& getWindowSize() const;
-
-	/// @brief Called when the SDL window events indicate the user resized the window
-	void markWindowSizeDirty();
-
-	/// @brief Indicates whether the window was resized since the last update
-	/// @return 
-	bool isWindowSizeDirty() const;
-
-	/// @brief Mark the window size clean
-	void markWindowSizeClean();
+	static const glm::i32vec2 DEFAULT_WINDOW_SIZE;
 
 private:
+	/// @brief Mark the window for closing. No more rendering will be done.
+	void close();
+
 	void setupOpenGL();
 
 	SDL_Window* m_window = NULL;
@@ -63,10 +54,6 @@ private:
 	size_t m_maxSSBOMatricesPerRender = 0;
 
 	bool m_open = true;
-
-	glm::i64vec2 m_windowSize = glm::i64vec2(1024, 768);
-
-	bool m_windowSizeDirty = true;
 };
 #endif
 

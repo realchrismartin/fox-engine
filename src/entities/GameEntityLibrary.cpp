@@ -42,12 +42,12 @@ namespace GameEntities
 >>>>>>> 593a9c6 (fix)
 		});
 
-	static const GameEntityConfig START_BUTTON = GameEntityConfig()
+	static const GameEntityConfig BUTTON = GameEntityConfig()
 		.whenInit([](int entityUID, auto& scene)
 		{
 <<<<<<< HEAD
 			TextConfig config;
-			config.textToDisplay = "press one to begin";
+			config.textToDisplay = "Default Button Text";
 			config.centered = true;
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -257,8 +257,8 @@ const GameEntityConfig& GameEntityLibrary::getGameEntityConfig(GameEntityEnum ga
 	{
 		case(GameEntityEnum::TITLE_TEXT):
 			return GameEntities::TITLE_TEXT;
-		case(GameEntityEnum::START_BUTTON):
-			return GameEntities::START_BUTTON;
+		case(GameEntityEnum::BUTTON):
+			return GameEntities::BUTTON;
 		case(GameEntityEnum::PLAYER):
 			return GameEntities::PLAYER;
 		case(GameEntityEnum::FLOOR):

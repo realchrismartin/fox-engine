@@ -1,15 +1,43 @@
 #include "InputComponent.hpp"
 
-void InputComponent::informOfEvent(const SDL_Event& event)
+void InputComponent::onMessageReceived(const InputMessage& message)
 {
-	//TODO: add support for mouse events
-	if (event.type != SDL_EVENT_KEY_DOWN && event.type != SDL_EVENT_KEY_UP)
+	if (!message.inputEvent.has_value())
 	{
 		return;
 	}
 
-	//Make sure to update boolean here if adding mouse events
-	markInputState(getInputActionForScancode(event.key.keysym.scancode), event.type == SDL_EVENT_KEY_DOWN);
+	SDL_Event event = message.inputEvent.value();
+
+	if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
+	{
+		markKeyInputState(getInputActionForScancode(event.key.keysym.scancode), event.type == SDL_EVENT_KEY_DOWN);
+		return;
+	}
+
+	if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN || event.type == SDL_EVENT_MOUSE_BUTTON_UP)
+	{
+		glm::vec2 mouseCoordinates = { event.button.x,event.button.y };
+
+		if (event.button.button == SDL_BUTTON_LEFT)
+		{
+			markMouseInputState(UserInputActionsEnum::LEFT_CLICKING, event.type == SDL_EVENT_MOUSE_BUTTON_DOWN, mouseCoordinates);
+		}
+		else if (event.button.button == SDL_BUTTON_RIGHT)
+		{
+			markMouseInputState(UserInputActionsEnum::RIGHT_CLICKING, event.type == SDL_EVENT_MOUSE_BUTTON_DOWN, mouseCoordinates);
+		}
+	}
+}
+
+std::optional<glm::vec2> InputComponent::getInputActionWindowCoordinates(UserInputActionsEnum action) const
+{
+	if (!m_actionCoordinates.count(action))
+	{
+		return std::nullopt;
+	}
+	
+	return m_actionCoordinates.at(action);
 }
 
 UserInputActionsEnum InputComponent::getInputActionForScancode(SDL_Scancode code)
@@ -31,7 +59,7 @@ UserInputActionsEnum InputComponent::getInputActionForScancode(SDL_Scancode code
 	return UserInputActionsEnum::NONE;
 }
 
-void InputComponent::markInputState(UserInputActionsEnum action, bool pressed)
+void InputComponent::markKeyInputState(UserInputActionsEnum action, bool pressed)
 {
 	if (pressed)
 	{
@@ -41,6 +69,30 @@ void InputComponent::markInputState(UserInputActionsEnum action, bool pressed)
 	{
 		m_activeInputs.erase(action);
 	}
+}
+
+void InputComponent::markMouseInputState(UserInputActionsEnum action, bool pressed, const glm::vec2& coordinates)
+{
+	if (pressed)
+	{
+		m_activeInputs.insert(action);
+		m_actionCoordinates.emplace(action, coordinates);
+	}
+	else 
+	{
+		m_activeInputs.erase(action);
+		m_actionCoordinates.erase(action);
+	}
+}
+
+bool InputComponent::anyInputActive() const
+{
+	return !m_activeInputs.empty();
+}
+
+const std::set<UserInputActionsEnum>& InputComponent::getActiveInputs() const
+{
+	return m_activeInputs;
 }
 
 glm::vec3 InputComponent::getTranslationGivenInput()
@@ -120,7 +172,3 @@ glm::vec3 InputComponent::getRotationGivenInput()
 }
 
 
-bool InputComponent::anyInputActive() const
-{
-	return !m_activeInputs.empty();
-}

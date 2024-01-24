@@ -44,7 +44,7 @@ public:
 		//Initialize the game elements on the stack now. 
 		Clock clock;
 		Window window;
-		Camera camera;
+		Camera camera(Window::DEFAULT_WINDOW_SIZE);
 
 		//Initialize the scene as the main menu.
 		Scene scene(SceneLibrary::getSceneConfig(SceneEnum::MAIN_MENU));
@@ -81,7 +81,6 @@ private:
 	static const void update(Window& window, Scene& scene, Camera& camera, float elapsedTime)
 	{
 		pollEventSystem(window, scene, camera);
-		updateCameraProjectionSystem(window, camera);
 		runInputProcessingSystem(scene, elapsedTime);
 		updateTriggerSystem(scene, elapsedTime);
 		runAnimationSystem(scene, elapsedTime);
@@ -111,65 +110,34 @@ private:
 		}
 	}
 
-	static const void updateCameraProjectionSystem(const Window& window, Camera& camera)
-	{
-		if (!window.isWindowSizeDirty())
-		{
-			return;
-		}
-
-		glm::i64vec2 windowSize = window.getWindowSize();
-		camera.updateOrthographicProjectionMatrix(windowSize);
-		camera.updatePerspectiveProjectionMatrix(windowSize);
-	}
-
 	static const void pollEventSystem(Window& window, Scene& scene, Camera& camera)
 	{
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
-			//Inform the window of window events
-			//TODO: inform the camera if the window size changes
-			if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED || event.type == SDL_EVENT_QUIT)
+			switch (event.type)
 			{
-				window.close();
-				break;
-			}
-
-			//If the window is resized by a user, ensure that the camera will update its projection matrices, which depend on the size of the window
-			//TODO: this is not tested
-			if (event.type == SDL_EVENT_WINDOW_RESIZED)
-			{
-				window.markWindowSizeDirty();
-			}
-
-			//Inform the input components of input events
-			//TODO: add mouse events
-			if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
-			{
-				for (auto const& entity : EntityFilter<InputComponent>(scene))
+				case(SDL_EVENT_WINDOW_CLOSE_REQUESTED):
+				case(SDL_EVENT_QUIT):
+				case(SDL_EVENT_WINDOW_RESIZED):
 				{
-					scene.getComponent<InputComponent>(entity).informOfEvent(event);
+					WindowMessage message;
+					message.windowEvent = event;
+					MessageRelay::getInstance()->sendMessage<WindowMessage>(message);
+					break;
 				}
-
-				//Also inform the scene if a change is needed, for now
-				//NOTE: This will request a reload even if the current scene is the same. Fix this later.
-
-				//For now, 0 will load the menu
-				if (event.key.keysym.scancode == SDL_SCANCODE_0)
+				case(SDL_EVENT_MOUSE_BUTTON_DOWN):
+				case(SDL_EVENT_MOUSE_BUTTON_UP):
+				case(SDL_EVENT_KEY_DOWN):
+				case(SDL_EVENT_KEY_UP):
 				{
-					SceneChangeMessage message;
-					message.requestedScene = SceneEnum::MAIN_MENU;
-					MessageRelay::getInstance()->sendMessage(message);
+					InputMessage message;
+					message.inputEvent = event;
+					MessageRelay::getInstance()->sendMessage<InputMessage>(message);
+					break;
 				}
-
-				//1 will load the level 1
-				if (event.key.keysym.scancode == SDL_SCANCODE_1)
-				{
-					SceneChangeMessage message;
-					message.requestedScene = SceneEnum::LEVEL_1;
-					MessageRelay::getInstance()->sendMessage(message);
-				}
+				default:
+					break;
 			}
 		}
 	}
@@ -177,6 +145,7 @@ private:
 	static const void runAnimationSystem(Scene& scene, float elapsedTime)
 	{
 		//World's dumbest animation system: just constantly cycle meshes at warp speed
+
 		for (auto const& entity : EntityFilter<ModelComponent>(scene))
 		{
 			ModelComponent& model = scene.getComponent<ModelComponent>(entity);
@@ -270,9 +239,6 @@ private:
 
 	static const void cleanDirtyFlagsSystem(Window& window, Scene& scene, Camera& camera)
 	{
-		//Mark the window size clean
-		window.markWindowSizeClean();
-
 		//Mark the camera transform dirty flag clean
 		camera.markViewMatrixClean();
 

@@ -18,6 +18,7 @@
 #include "extern/glm/glm/gtc/type_ptr.hpp"
 #include "extern/glm/glm/gtc/matrix_transform.hpp"
 #include "extern/glm/glm/ext/matrix_clip_space.hpp"
+#include "sdl3/SDL.h"
 
 //Utility stuff
 #include "src/util/Logger.hpp"

@@ -4,7 +4,7 @@
 enum class GameEntityEnum
 {
 	TITLE_TEXT,
-	START_BUTTON,
+	BUTTON,
 	PLAYER,
 	FLOOR,
 	BUSH,

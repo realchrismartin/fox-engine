@@ -4,6 +4,26 @@
 #include "src/scenes/Scene.hpp"
 #include "src/components/TransformComponent.hpp"
 
+Camera::Camera(const glm::i32vec2& defaultWindowSize)
+{
+	updateOrthographicProjectionMatrix(defaultWindowSize);
+	updatePerspectiveProjectionMatrix(defaultWindowSize);
+}
+
+void Camera::onMessageReceived(const WindowMessage& message)
+{
+	if (message.windowEvent.has_value())
+	{
+		if (message.windowEvent.value().type == SDL_EVENT_WINDOW_RESIZED)
+		{
+			glm::i32vec2 size = { message.windowEvent.value().window.data1, message.windowEvent.value().window.data2 };
+
+			updateOrthographicProjectionMatrix(size);
+			updatePerspectiveProjectionMatrix(size);
+		}
+	}
+}
+
 bool Camera::isViewMatrixDirty() const
 {
 	return m_viewMatrixDirty;
@@ -34,7 +54,7 @@ const glm::mat4& Camera::getOrthographicProjectionMatrix() const
 	return m_orthographicProjectionMatrix;
 }
 
-void Camera::updatePerspectiveProjectionMatrix(const glm::i64vec2& windowSize)
+void Camera::updatePerspectiveProjectionMatrix(const glm::i32vec2& windowSize)
 {
 	// Projection matrix : 45 degree Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
 
@@ -42,7 +62,7 @@ void Camera::updatePerspectiveProjectionMatrix(const glm::i64vec2& windowSize)
 	m_perspectiveProjectionMatrix = glm::perspective(glm::radians(90.0f), ratio, 1.f, 100.f);
 }
 
-void Camera::updateOrthographicProjectionMatrix(const glm::i64vec2& windowSize)
+void Camera::updateOrthographicProjectionMatrix(const glm::i32vec2& windowSize)
 {
 	float ratio = (float)windowSize.x / (float)windowSize.y;
 	m_orthographicProjectionMatrix = glm::ortho(-ratio,ratio,-1.f,1.f,1.f,-1.f);
