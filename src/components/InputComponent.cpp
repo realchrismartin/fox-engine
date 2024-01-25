@@ -1,13 +1,13 @@
 #include "InputComponent.hpp"
 
-void InputComponent::onMessageReceived(const InputMessage& message)
+void InputComponent::onEvent(const InputEvent& inputEvent)
 {
-	if (!message.inputEvent.has_value())
+	if (!inputEvent.inputEvent.has_value())
 	{
 		return;
 	}
 
-	SDL_Event event = message.inputEvent.value();
+	SDL_Event event = inputEvent.inputEvent.value();
 
 	if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
 	{

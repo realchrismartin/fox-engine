@@ -10,13 +10,13 @@ Camera::Camera(const glm::i32vec2& defaultWindowSize)
 	updatePerspectiveProjectionMatrix(defaultWindowSize);
 }
 
-void Camera::onMessageReceived(const WindowMessage& message)
+void Camera::onEvent(const WindowEvent& event)
 {
-	if (message.windowEvent.has_value())
+	if (event.windowEvent.has_value())
 	{
-		if (message.windowEvent.value().type == SDL_EVENT_WINDOW_RESIZED)
+		if (event.windowEvent.value().type == SDL_EVENT_WINDOW_RESIZED)
 		{
-			glm::i32vec2 size = { message.windowEvent.value().window.data1, message.windowEvent.value().window.data2 };
+			glm::i32vec2 size = { event.windowEvent.value().window.data1, event.windowEvent.value().window.data2 };
 
 			updateOrthographicProjectionMatrix(size);
 			updatePerspectiveProjectionMatrix(size);

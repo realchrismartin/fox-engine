@@ -1,5 +1,8 @@
 #include "TriggerComponent.hpp"
+<<<<<<< HEAD
 #include "TriggerComponent.hpp"
+=======
+>>>>>>> a31d035 (rebrand and crashy)
 
 void TriggerComponent::update(Scene& scene, int entityUID, float elapsedTime)
 {
@@ -17,19 +20,6 @@ void TriggerComponent::update(Scene& scene, int entityUID, float elapsedTime)
 void TriggerComponent::addTrigger(const Trigger& trigger)
 {
 	m_triggers.push_back(trigger);
-}
-
-void TriggerComponent::triggerDirectly(Scene& scene, int entityUID)
-{
-	for (auto const& trigger : m_triggers)
-	{
-		if (!trigger.supportsDirectExecution())
-		{
-			continue;
-		}
-
-		trigger.run(scene, entityUID);
-	}
 }
 
 void TriggerComponent::resetLifetime()

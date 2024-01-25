@@ -275,16 +275,6 @@ void Scene::applyToSceneGraph(std::function<void(Scene&, std::optional<int>, int
 	}
 }
 
-void Scene::trigger(int entityUID)
-{
-	if (!hasComponent<TriggerComponent>(entityUID))
-	{
-		return;
-	}
-
-	getComponent<TriggerComponent>(entityUID).triggerDirectly(*this, entityUID);
-}
-
 std::optional<int> Scene::getCameraEntity() const
 {
 	return m_cameraEntityId;

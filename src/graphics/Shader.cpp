@@ -110,19 +110,19 @@ unsigned int Shader::compileShader(unsigned int type, const std::string& source)
 		int length;
 		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 
-		char* errorMessages = new char[length];
-		glGetShaderInfoLog(id, length, &length, errorMessages);
+		char* errorEvents = new char[length];
+		glGetShaderInfoLog(id, length, &length, errorEvents);
 
 		if (type == GL_VERTEX_SHADER) 
 		{
-			std::cout << "ERROR: GL_VERTEX_SHADER compilation failed!\n" << errorMessages << "\n";
+			std::cout << "ERROR: GL_VERTEX_SHADER compilation failed!\n" << errorEvents << "\n";
 		}
 		else if (type == GL_FRAGMENT_SHADER) 
 		{
-			std::cout << "ERROR: GL_FRAGMENT_SHADER compilation failed!\n" << errorMessages << "\n";
+			std::cout << "ERROR: GL_FRAGMENT_SHADER compilation failed!\n" << errorEvents << "\n";
 		}
 
-		delete[] errorMessages;
+		delete[] errorEvents;
 		glDeleteShader(id);
 		return 0;
 	}
@@ -156,10 +156,10 @@ unsigned int Shader::createShader(const std::string& vertexShaderSource, const s
 	{
 		int length;
 		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
-		char* errorMessages = new char[length];
-		glGetProgramInfoLog(program, length, &length, errorMessages);
-		std::cout << "ERROR: Linking shaders failed: " << errorMessages << "\n";
-		delete[] errorMessages;
+		char* errorEvents = new char[length];
+		glGetProgramInfoLog(program, length, &length, errorEvents);
+		std::cout << "ERROR: Linking shaders failed: " << errorEvents << "\n";
+		delete[] errorEvents;
 		return 0;
 	}
 

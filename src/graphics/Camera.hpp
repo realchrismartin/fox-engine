@@ -2,6 +2,7 @@
 #define CAMERA_HPP
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 #include "glm/glm/ext/matrix_transform.hpp"
 #include "glm/glm/ext/matrix_clip_space.hpp"
@@ -9,14 +10,18 @@
 #include "src/systems/Recipient.hpp"
 #include "src/systems/MessageTypes.hpp"
 >>>>>>> 3ef75ed (upgrade events and allow for window resizing)
+=======
+#include "src/systems/Subscriber.hpp"
+#include "src/systems/EventTypes.hpp"
+>>>>>>> a31d035 (rebrand and crashy)
 
 class Scene;
 
-class Camera : public Recipient<WindowMessage>
+class Camera : public Subscriber<WindowEvent>
 {
 public:
 	Camera(const glm::i32vec2& defaultWindowSize);
-	void onMessageReceived(const WindowMessage& message) override;
+	void onEvent(const WindowEvent& event) override;
 	bool isViewMatrixDirty() const;
 	void markViewMatrixClean();
 

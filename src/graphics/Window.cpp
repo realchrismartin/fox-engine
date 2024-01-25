@@ -29,16 +29,16 @@ Window::~Window()
 	}
 }
 
-void Window::onMessageReceived(const WindowMessage & message)
+void Window::onEvent(const WindowEvent & event)
 {
-	if (message.windowEvent.has_value())
+	if (event.windowEvent.has_value())
 	{
-		if (message.windowEvent.value().type == SDL_EVENT_WINDOW_RESIZED)
+		if (event.windowEvent.value().type == SDL_EVENT_WINDOW_RESIZED)
 		{
-			glViewport(0, 0, message.windowEvent.value().window.data1, message.windowEvent.value().window.data2);
+			glViewport(0, 0, event.windowEvent.value().window.data1, event.windowEvent.value().window.data2);
 		}
 
-		if (message.windowEvent.value().type == SDL_EVENT_WINDOW_CLOSE_REQUESTED || message.windowEvent.value().type == SDL_EVENT_QUIT)
+		if (event.windowEvent.value().type == SDL_EVENT_WINDOW_CLOSE_REQUESTED || event.windowEvent.value().type == SDL_EVENT_QUIT)
 		{
 			close();
 		}

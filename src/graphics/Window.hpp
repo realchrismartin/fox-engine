@@ -1,8 +1,8 @@
 #ifndef WINDOW_HPP
 #define WINDOW_HPP
 
-#include "src/systems/Recipient.hpp"
-#include "src/systems/MessageTypes.hpp"
+#include "src/systems/Subscriber.hpp"
+#include "src/systems/EventTypes.hpp"
 #include "src/graphics/Shader.hpp"
 #include "src/graphics/Texture.hpp"
 
@@ -10,14 +10,14 @@ class GraphicsComponent;
 struct Vertex;
 
 /// @brief A nice wrapper for a SDL OpenGL window that provides clean interfaces to Systems that need Window access.
-class Window : public Recipient<WindowMessage>
+class Window : public Subscriber<WindowEvent>
 {
 public:
 
 	Window();
 	~Window();
 
-	void onMessageReceived(const WindowMessage& message) override;
+	void onEvent(const WindowEvent& event) override;
 
 	/// @brief GLClear the window.
 	void clear();

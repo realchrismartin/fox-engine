@@ -2,6 +2,7 @@
 #define TRIGGERCOMPONENT_HPP
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 #include <queue>;
 #include "src/systems/MessageTypes.hpp"
@@ -9,6 +10,8 @@
 #include "src/components/InputComponent.hpp"
 
 >>>>>>> 3ef75ed (upgrade events and allow for window resizing)
+=======
+>>>>>>> a31d035 (rebrand and crashy)
 class Scene;
 
 
@@ -26,6 +29,7 @@ struct Trigger
 	}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	/// @brief Indicates that if a message is received, this trigger should fire
 	/// @param useMessageCondition 
@@ -42,6 +46,8 @@ struct Trigger
 	}
 
 >>>>>>> 586c5df (variouse)
+=======
+>>>>>>> a31d035 (rebrand and crashy)
 	void setAction(const std::function<void(Scene&, int)>& actionFn)
 	{
 		m_actionFn = actionFn;
@@ -57,6 +63,7 @@ struct Trigger
 		m_actionFn(scene, entityUID);
 	}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 private:
 =======
@@ -77,6 +84,11 @@ private:
 	bool m_supportsDirectExecution = false;
 
 >>>>>>> 586c5df (variouse)
+=======
+
+private:
+
+>>>>>>> a31d035 (rebrand and crashy)
 	std::function<bool(Scene&,int, float,float)> m_conditionFn = [](Scene& scene, int entityUID, float lifetime, float elapsedTime) 
 	{
 		return false;
@@ -92,7 +104,6 @@ class TriggerComponent
 public:
 	void update(Scene& scene, int entityUID, float elapsedTime);
 	void addTrigger(const Trigger& trigger);
-	void triggerDirectly(Scene& scene, int entityUID);
 	void resetLifetime();
 
 private:

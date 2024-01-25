@@ -9,8 +9,17 @@
 #include "src/entities/EntityInstanceConfig.hpp"
 
 #include "src/components/config/TextConfig.hpp"
-#include "src/components/TransformComponent.hpp"
 
+#include "src/components/TransformComponent.hpp"
+<<<<<<< HEAD
+
+=======
+#include "src/components/InputComponent.hpp"
+#include "src/components/TriggerComponent.hpp"
+
+#include "src/systems/EventRelay.hpp"
+#include "src/systems/EventTypes.hpp"
+>>>>>>> a31d035 (rebrand and crashy)
 #include "src/util/Logger.hpp"
 
 namespace Scenes
@@ -82,11 +91,20 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 10.f,0.f,5.f });
 		});
 
+		//Mushroom
+		auto mushroom1 = config.addEntity(GameEntityEnum::MUSHROOM);
+		mushroom1.addInitFn([](int entityUID, Scene& scene)
+		{
+			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 10.f,0.f,5.f });
+
+		});
+
 		//Another mushroom
 		auto mushroom2 = config.addEntity(GameEntityEnum::MUSHROOM);
 		mushroom2.addInitFn([](int entityUID, auto& scene)
 		{
 			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,0.f,10.f });
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 
@@ -164,6 +182,8 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 			tc.addTrigger(messageTrigger);
 			tc.addTrigger(directTrigger);
 >>>>>>> 586c5df (variouse)
+=======
+>>>>>>> a31d035 (rebrand and crashy)
 		});
 
 <<<<<<< HEAD
@@ -259,6 +279,8 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 					std::cout << "Clicked on the start button in a manner of speaking, coords were " << coords.value().x << " " << coords.value().y << std::endl;
 				}
 
+				//TODO: this crashes right now because it doesn't delay the scene change until it's safe :(
+				//It happens mid trigger evaluation!
 				scene.changeScene(SceneLibrary::getSceneConfig(SceneEnum::LEVEL_1));
 			});
 

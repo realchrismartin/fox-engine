@@ -1,8 +1,8 @@
 #ifndef INPUTCOMPONENT_HPP
 #define INPUTCOMPONENT_HPP
 
-#include "src/systems/Recipient.hpp"
-#include "src/systems/MessageTypes.hpp"
+#include "src/systems/Subscriber.hpp"
+#include "src/systems/EventTypes.hpp"
 
 enum class UserInputActionsEnum
 {
@@ -16,10 +16,10 @@ enum class UserInputActionsEnum
 };
 
 /// @brief A component which stores events coming from sf::RenderWindow and filters out the ones we don't care about. In the end, it tracks the events that are actively occurring that are "input" related
-class InputComponent : public Recipient<InputMessage>
+class InputComponent : public Subscriber<InputEvent>
 {
 public:
-	void onMessageReceived(const InputMessage& message) override;
+	void onEvent(const InputEvent& event) override;
 
 	//TODO: remove these later
 	glm::vec3 getTranslationGivenInput();

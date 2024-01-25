@@ -19,8 +19,8 @@
 #include "src/components/MVPTransformComponent.hpp"
 #include "src/components/TriggerComponent.hpp"
 
-#include "src/systems/MessageRelay.hpp"
-#include "src/systems/MessageTypes.hpp"
+#include "src/systems/EventRelay.hpp"
+#include "src/systems/EventTypes.hpp"
 
 static const float TIMESTEP = .0167f;
 
@@ -112,18 +112,18 @@ private:
 
 	static const void pollEventSystem(Window& window, Scene& scene, Camera& camera)
 	{
-		SDL_Event event;
-		while (SDL_PollEvent(&event))
+		SDL_Event sdlEvent;
+		while (SDL_PollEvent(&sdlEvent))
 		{
-			switch (event.type)
+			switch (sdlEvent.type)
 			{
 				case(SDL_EVENT_WINDOW_CLOSE_REQUESTED):
 				case(SDL_EVENT_QUIT):
 				case(SDL_EVENT_WINDOW_RESIZED):
 				{
-					WindowMessage message;
-					message.windowEvent = event;
-					MessageRelay::getInstance()->sendMessage<WindowMessage>(message);
+					WindowEvent event;
+					event.windowEvent = sdlEvent;
+					EventRelay::getInstance()->sendEvent<WindowEvent>(event);
 					break;
 				}
 				case(SDL_EVENT_MOUSE_BUTTON_DOWN):
@@ -131,9 +131,9 @@ private:
 				case(SDL_EVENT_KEY_DOWN):
 				case(SDL_EVENT_KEY_UP):
 				{
-					InputMessage message;
-					message.inputEvent = event;
-					MessageRelay::getInstance()->sendMessage<InputMessage>(message);
+					InputEvent event;
+					event.inputEvent = sdlEvent;
+					EventRelay::getInstance()->sendEvent<InputEvent>(event);
 					break;
 				}
 				default:
