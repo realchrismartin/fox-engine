@@ -13,8 +13,11 @@
 #include "src/components/TransformComponent.hpp"
 #include "src/components/MVPTransformComponent.hpp"
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 #include "src/components/TriggerComponent.hpp"
+=======
+>>>>>>> b4eb33f (remove unneeded includes)
 #include "src/components/config/ModelConfig.hpp"
 #include "src/components/config/TextConfig.hpp"
 >>>>>>> 586c5df (variouse)

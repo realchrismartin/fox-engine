@@ -3,11 +3,9 @@
 
 #include "src/entities/GameEntity.hpp"
 #include "src/components/ComponentPool.hpp"
-#include "src/components/MVPTransformComponent.hpp" //Why is this here? TODO
 #include "src/components/ComponentTypes.hpp"
 #include "src/scenes/SceneEnum.hpp"
 
-class System;
 class TransformComponent;
 class MVPTransformComponent;
 class ModelComponent;
