@@ -74,7 +74,7 @@ public:
 
 private:
 	EventRelay();
-	static const std::shared_ptr<EventRelay> Event_RELAY_SINGLETON;
+	static const std::shared_ptr<EventRelay> EVENT_RELAY_SINGLETON;
 
 	std::unordered_map<std::type_index, std::vector<std::any>> m_channels;
 };
