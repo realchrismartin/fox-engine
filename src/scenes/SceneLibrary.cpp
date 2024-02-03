@@ -279,8 +279,6 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 					std::cout << "Clicked on the start button in a manner of speaking, coords were " << coords.value().x << " " << coords.value().y << std::endl;
 				}
 
-				//TODO: this crashes right now because it doesn't delay the scene change until it's safe :(
-				//It happens mid trigger evaluation!
 				scene.changeScene(SceneEnum::LEVEL_1);
 			});
 
