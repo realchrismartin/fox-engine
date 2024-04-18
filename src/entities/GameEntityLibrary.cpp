@@ -138,16 +138,27 @@ namespace GameEntities
 			//The emitter itself
 			ModelConfig model;
 			model.keyframeFilePaths = { "../../img/cube.obj" };
+			model.spriteOffsetOnTexture = { 1000,1000 };
 			scene.loadModel(model, entityUID);
 
-			float startDelay = 0.f;
+			//Reuse the model for da emitted stuff
+			model.spriteSize = { 1024.f,1024.f };
+			model.spriteOffsetOnTexture = { 1023.f,1476 };
+			model.frameCount = 60;
+			model.keyframeFilePaths = {
+				"../../img/mushroom/mushroom0.obj",
+				"../../img/mushroom/mushroom5.obj",
+				"../../img/mushroom/mushroom10.obj",
+				"../../img/mushroom/mushroom15.obj",
+				"../../img/mushroom/mushroom20.obj"
+			};
 
-			//The cubes that get emitted
+			float visibleDuration = 3.f;
+
+			//The stuff that get emitted
 			for (int i = 0; i < 10; i++)
 			{
-
-				startDelay += (float)i;
-				constexpr float visibleDuration = 4.f;
+				float startDelay = i * .1f;
 
 				std::optional<int> id = scene.createEntity();
 
@@ -156,23 +167,17 @@ namespace GameEntities
 					continue;
 				}
 				
+				//Small mushrooms
+				scene.loadModel(model, id.value());
+				scene.getComponent<TransformComponent>(id.value()).setScale({ .2f,.2f,.2f });
+
 				//Add this cube as a child of the emitter
 				scene.addChild(entityUID, id.value());
-
-				//Add this cube as an owned entity of the emitter
-				//We will use this later when we operate 
-
-				//Add the cube model
-				scene.loadModel(model, id.value());
-
-				//TODO: this will start out zeroed instead of this when the below is implemented
-				scene.getComponent<TransformComponent>(id.value()).setTranslation({ (float)(rand() % 4),(float)(rand() % 4),(float)(rand() % 4)});
 
 				//Set this entity as inactive
 				scene.setEntityActiveStatus(id.value(), false);
 
 				scene.addComponent<TriggerComponent>(id.value());
-
 				TriggerComponent& triggerComponent = scene.getComponent<TriggerComponent>(id.value());
 
 				//Become visible trigger
@@ -192,7 +197,7 @@ namespace GameEntities
 				Trigger moveTrigger;
 				moveTrigger.setCondition([startDelay,visibleDuration](Scene& scene, int entityUID, float lifetime, float elapsedTime)
 				{
-					return lifetime > startDelay && lifetime < visibleDuration;
+						return lifetime > startDelay && lifetime < visibleDuration + startDelay;
 				});
 				moveTrigger.setAction([](Scene& scene, int entityUID)
 				{
@@ -206,13 +211,13 @@ namespace GameEntities
 					float xDirection = (rand() % 2) > 0 ? 1.f : -1.f;
 					float zDirection = (rand() % 2) > 0 ? 1.f : -1.f;
 
-					constexpr float moveFactor = .01f;
+					constexpr float moveFactor = .05f;
 
 					float xTranslation = xDirection * (float)(rand() % 2) * moveFactor;
 					float yTranslation =  (float)(rand() % 2) * moveFactor;
 					float zTranslation = xDirection * (float)(rand() % 2) * moveFactor;
 
-					scene.getComponent<TransformComponent>(entityUID).setTranslation({ xTranslation,yTranslation,zTranslation });
+					scene.getComponent<TransformComponent>(entityUID).addTranslation({ xTranslation,yTranslation,zTranslation });
 				});
 
 				triggerComponent.addTrigger(moveTrigger);
@@ -221,7 +226,7 @@ namespace GameEntities
 				Trigger resetTrigger;
 				resetTrigger.setCondition([startDelay,visibleDuration](Scene& scene, int entityUID, float lifetime, float elapsedTime)
 				{
-					return lifetime > visibleDuration;
+					return lifetime > visibleDuration + startDelay;
 				});
 				resetTrigger.setAction([](Scene& scene, int entityUID)
 				{
@@ -232,7 +237,7 @@ namespace GameEntities
 						return;
 					}
 
-					scene.getComponent<TransformComponent>(entityUID).reset();
+					scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,0.f,0.f }); //Back to parent origin
 
 					if (!scene.hasComponent<TriggerComponent>(entityUID))
 					{

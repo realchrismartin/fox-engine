@@ -91,7 +91,16 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 <<<<<<< HEAD
 =======
 		auto emitter = config.addEntity(GameEntityEnum::BLOCK_EMITTER);
+<<<<<<< HEAD
 >>>>>>> 3607be4 (shipit)
+=======
+		emitter.addInitFn([](int entityUID, Scene& scene)
+		{
+			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,2.f,0.f });
+		});
+
+		config.addChild(player, emitter);
+>>>>>>> 5a80cce (magnificent)
 
 		break;
 	}
