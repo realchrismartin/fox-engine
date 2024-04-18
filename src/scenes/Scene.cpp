@@ -21,10 +21,22 @@
 
 Scene::Scene(const SceneConfig& sceneConfig)
 {
-	changeScene(sceneConfig);
+	init(sceneConfig);
 }
 
-void Scene::changeScene(const SceneConfig& sceneConfig)
+void Scene::doSceneChange()
+{
+	if (m_nextScene == SceneEnum::NONE)
+	{
+		return;
+	}
+
+	init(SceneLibrary::getSceneConfig(m_nextScene));
+
+	m_nextScene = SceneEnum::NONE;
+}
+
+void Scene::init(const SceneConfig& sceneConfig)
 {
 	//Dump whatever's in the existing pools, if there are any
 	for (auto& pool : m_componentPools)
@@ -283,6 +295,11 @@ std::optional<int> Scene::getCameraEntity() const
 std::optional<int> Scene::getCameraTargetEntity() const
 {
 	return m_cameraTargetEntityId;
+}
+
+void Scene::changeScene(SceneEnum newScene)
+{
+	m_nextScene = newScene;
 }
 
 void Scene::addChild(int parentEntityUID, int childEntityUID)

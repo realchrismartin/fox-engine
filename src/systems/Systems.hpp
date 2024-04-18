@@ -80,6 +80,8 @@ private:
 	//Run all of the game systems that pertain to updating
 	static const void update(Window& window, Scene& scene, Camera& camera, float elapsedTime)
 	{
+		scene.doSceneChange(); //Change the scene if needed
+
 		pollEventSystem(window, scene, camera);
 		runInputProcessingSystem(scene, elapsedTime);
 		updateTriggerSystem(scene, elapsedTime);

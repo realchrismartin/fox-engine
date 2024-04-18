@@ -29,6 +29,7 @@ public:
 =======
 	Scene(const SceneConfig& sceneConfig);
 
+<<<<<<< HEAD
 	/// @brief Reset and initialize the scene with this config
 	/// @param sceneConfig 
 	void changeScene(const SceneConfig& sceneConfig);
@@ -36,6 +37,8 @@ public:
 
 =======
 >>>>>>> 37c405f (activiv)
+=======
+>>>>>>> 054f038 (fix crashy)
 	/// @brief Get the component of the specified type T that is associated with the entity with the UID entityUID
 	/// @tparam T The type of component we are asking for
 	/// @param entityUID The entity we want to get a component for
@@ -129,6 +132,8 @@ public:
 	std::optional<int> getCameraEntity() const;
 	std::optional<int> getCameraTargetEntity() const;
 
+	void changeScene(SceneEnum newScene);
+
 	/// @brief Load the specified model, which implies adding a ModelComponent, TransformComponent, and MVPTransformComponent to the entity.
 	/// @param modelData 
 	/// @param entityUID 
@@ -168,9 +173,17 @@ public:
 		addComponentPrivate<T>(entityUID);
 	}
 
+	void doSceneChange();
+
 protected:
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+	/// @brief Reset and initialize the scene with this config
+	/// @param sceneConfig 
+	void init(const SceneConfig& sceneConfig);
+>>>>>>> 054f038 (fix crashy)
 
 >>>>>>> 3ef75ed (upgrade events and allow for window resizing)
 	void applyFunctorToSceneGraph(std::optional<int> parentEntityID, int entityID, std::function<void(Scene&, std::optional<int>, int)>& functor);
@@ -221,6 +234,8 @@ private:
 
 	std::optional<int> m_cameraEntityId;
 	std::optional<int> m_cameraTargetEntityId;
+
+	SceneEnum m_nextScene = SceneEnum::NONE;
 };
 
 #endif

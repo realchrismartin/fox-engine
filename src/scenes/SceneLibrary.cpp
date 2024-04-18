@@ -281,7 +281,7 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 
 				//TODO: this crashes right now because it doesn't delay the scene change until it's safe :(
 				//It happens mid trigger evaluation!
-				scene.changeScene(SceneLibrary::getSceneConfig(SceneEnum::LEVEL_1));
+				scene.changeScene(SceneEnum::LEVEL_1);
 			});
 
 			triggerComponent.addTrigger(trigger);
