@@ -32,7 +32,7 @@ void Texture::activate()
 	int width, height, nrChannels;
 
 	//TODO: don't hardcode the texture used.
-	unsigned char* imageData = stbi_load("../../img/sprite_sheet.png", &width, &height, &nrChannels, 0);
+	unsigned char* imageData = stbi_load("../img/sprite_sheet.png", &width, &height, &nrChannels, 0);
 
 	// Load texture data into the bound texture
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);

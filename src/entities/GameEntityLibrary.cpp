@@ -88,7 +88,7 @@ namespace GameEntities
 			ModelConfig model;
 			model.spriteSize = { 512,512 };
 			model.spriteOffsetOnTexture = { 511,1988 };
-			model.keyframeFilePaths = { "../../img/cube.obj" };
+			model.keyframeFilePaths = { "../img/cube.obj" };
 
 			scene.loadModel(model, entityUID);
 			scene.getComponent<TransformComponent>(entityUID).setScale({ 100.f,1.f,100.f });
@@ -100,7 +100,7 @@ namespace GameEntities
 			ModelConfig model;
 			model.spriteSize = { 228,228 };
 			model.spriteOffsetOnTexture = { 0,1759 };
-			model.keyframeFilePaths = { "../../img/quoteunquote-bush.obj" };
+			model.keyframeFilePaths = { "../img/quoteunquote-bush.obj" };
 
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -123,11 +123,11 @@ namespace GameEntities
 			model.spriteOffsetOnTexture = { 1023.f,1476 };
 			model.frameCount = 60;
 			model.keyframeFilePaths = {
-				"../../img/mushroom/mushroom0.obj",
-				"../../img/mushroom/mushroom5.obj",
-				"../../img/mushroom/mushroom10.obj",
-				"../../img/mushroom/mushroom15.obj",
-				"../../img/mushroom/mushroom20.obj"
+				"../img/mushroom/mushroom0.obj",
+				"../img/mushroom/mushroom5.obj",
+				"../img/mushroom/mushroom10.obj",
+				"../img/mushroom/mushroom15.obj",
+				"../img/mushroom/mushroom20.obj"
 			};
 
 			scene.loadModel(model, entityUID);
@@ -148,7 +148,7 @@ namespace GameEntities
 			model.spriteSize = { 10.f,10.f };
 			model.spriteOffsetOnTexture = { 329.f,16.f };
 			model.keyframeFilePaths = {
-				"../../img/cube.obj",
+				"../img/cube.obj",
 			};
 
 			float visibleDuration = 5.f;

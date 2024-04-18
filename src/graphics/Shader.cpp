@@ -19,8 +19,8 @@ GLuint Shader::getShaderProgramId() const
 void Shader::activate()
 {
 	//TODO: perhaps don't always hardcode the same shaders here, chief ;)
-	std::string vertexShader = loadShader("../../shaders/vert.glsl");
-	std::string fragmentShader = loadShader("../../shaders/frag.glsl");
+	std::string vertexShader = loadShader("../shaders/vert.glsl");
+	std::string fragmentShader = loadShader("../shaders/frag.glsl");
 	m_shaderProgramId = createShader(vertexShader, fragmentShader);
 }
 

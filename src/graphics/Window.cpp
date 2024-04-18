@@ -48,7 +48,7 @@ void Window::onEvent(const WindowEvent & event)
 void Window::setupOpenGL()
 {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
 	//TODO: do we need to keep this variable?
 	auto gContext = SDL_GL_CreateContext(m_window);
