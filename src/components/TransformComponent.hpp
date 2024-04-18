@@ -20,7 +20,9 @@ public:
 
 	/// @brief Update this transform's local and world matrix with the parent's world matrix, if needed
 	/// @param parentComponent The transform component of the entity that is the parent of the entity that owns this transform component
-	void updateLocalAndWorldMatrix(TransformComponent& parentComponent);
+	void updateLocalAndWorldMatrix(const TransformComponent& parentComponent);
+
+	void updateOtherTransformLocalsToMatchThis(TransformComponent& otherTransform);
 
 	/// @brief Set the local rotation for this transform
 	/// @param rotation 
@@ -37,6 +39,9 @@ public:
 	/// @brief Add the specified value to this transform's existing local translation
 	/// @param translation 
 	void addTranslation(glm::vec3 translation);
+
+	/// @brief Reset all elements of the transform and mark the local matrix dirty
+	void reset();
 
 private:
 	glm::mat4 getLocalMatrix();

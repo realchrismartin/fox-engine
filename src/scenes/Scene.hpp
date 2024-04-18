@@ -23,11 +23,14 @@ struct SceneConfig;
 class Scene : public Recipient<SceneChangeMessage>
 {
 public:
+<<<<<<< HEAD
 
 	Scene(const SceneConfig& sceneConfig);
 
 	virtual void onMessageReceived(const SceneChangeMessage& message) override;
 
+=======
+>>>>>>> 37c405f (activiv)
 	/// @brief Get the component of the specified type T that is associated with the entity with the UID entityUID
 	/// @tparam T The type of component we are asking for
 	/// @param entityUID The entity we want to get a component for
@@ -56,16 +59,6 @@ public:
 		T* pointer = static_cast<T*>(componentData);
 
 		return *pointer;
-	}
-
-	/// @brief Get the component of type T associated with this GameEntity.
-	/// @tparam T The component type we want to get
-	/// @param entity The entity we are getting a component for
-	/// @return 
-	template<typename T>
-	T& getComponent(const GameEntity& entity)
-	{
-		return getComponent<T>(entity.getUID());
 	}
 
 	template<typename T>
@@ -111,16 +104,17 @@ public:
 		return *m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)].get();
 	}
 
+	/// @brief Reset and initialize the scene with this config
+	/// @param sceneConfig 
+	void init(const SceneConfig& sceneConfig);
+
 	/// @brief Return true if the entity at this index in the entity list has registered components with the specified IDs. 
 	/// @param entityIndex  The index of the entity. This is not the entity UID.
 	/// @param componentTypeIds 
 	/// @return 
-	bool entityHasComponents(int entityIndex, std::vector<int>& componentTypeIds) const;
+	bool entityHasComponents(size_t entityIndex, std::vector<int>& componentTypeIds) const;
 
-	SceneEnum getSceneEnum() const;
-
-	GameEntity& getEntity(int entityIndex);
-	int getEntityCount() const;
+	size_t getEntityCount() const;
 
 	void applyToSceneGraph(std::function<void(Scene&, std::optional<int>, int)>& functor);
 
@@ -139,15 +133,16 @@ public:
 	void addChild(int parentEntityUID, int childEntityUID);
 
 	std::optional<int> createEntity();
+
 	void removeEntity(int uid);
 
-	bool isEntityAtIndexActive(int entityIndex) const;
+	bool isEntityAtIndexActive(size_t entityIndex) const;
 	bool isEntityActive(int entityUID) const;
+	bool entityExists(size_t entityIndex) const;
+	std::optional<int> getEntityUIDForIndex(size_t entityIndex);
+
 	void setEntityActiveStatus(int entityUID, bool state);
 
-	void addOwnedEntity(int owningEntityUID, int ownedEntity);
-	const std::set<int>& getOwnedEntities(int owningEntityUID) const;
- 
 	//Add a component to the entity specified by the ID
 	//This involves assigning an existing component from our component pools, or allocating a new one.
 	template<typename T>
@@ -208,7 +203,6 @@ private:
 
 	size_t m_maxEntities = 100; //The max number of entities we can have, mostly dictated by the size of the component pools for now
 	std::unordered_map<int, std::set<int>> m_sceneGraph;
-	std::unordered_map<int, std::set<int>> m_entityOwnerships;
 	std::set<int> m_rootNodes;
 	std::unordered_map<int, int> m_gameEntityMap; //Map of entity UIDs to the entity placement in the entity vector
 	std::unordered_map<int, int> m_componentTypeToPoolMap; //Map of component types to the pool placement in the pool vector

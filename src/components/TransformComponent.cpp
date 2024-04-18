@@ -30,8 +30,7 @@ void TransformComponent::updateLocalAndWorldMatrix()
 	}
 }
 
-
-void TransformComponent::updateLocalAndWorldMatrix(TransformComponent& parentComponent)
+void TransformComponent::updateLocalAndWorldMatrix(const TransformComponent& parentComponent)
 {
 	bool localDirty = m_localDirty;
 
@@ -48,6 +47,13 @@ void TransformComponent::updateLocalAndWorldMatrix(TransformComponent& parentCom
 		m_worldMatrix = parentComponent.getWorldMatrix() * m_localMatrix;
 		m_worldDirty = true; //If the parent's matrix is dirty, it means this transform's matrix is now too.
 	}
+}
+
+void TransformComponent::updateOtherTransformLocalsToMatchThis(TransformComponent& otherTransform)
+{
+	otherTransform.setScale(m_scale);
+	otherTransform.setTranslation(m_translation);
+	otherTransform.setRotation(m_rotation);
 }
 
 void TransformComponent::markWorldMatrixClean()
@@ -86,5 +92,13 @@ void TransformComponent::setTranslation(glm::vec3 translation)
 void TransformComponent::addTranslation(glm::vec3 translation)
 {
 	m_translation += translation;
+	m_localDirty = true;
+}
+
+void TransformComponent::reset()
+{
+	m_rotation = { 0.f,0.f,0.f };
+	m_scale = { 1.f,1.f,1.f };
+	m_translation = { 0.f,0.f,0.f };
 	m_localDirty = true;
 }

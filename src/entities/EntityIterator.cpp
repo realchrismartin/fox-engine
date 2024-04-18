@@ -3,19 +3,19 @@
 #include "src/entities/GameEntity.hpp"
 #include "src/scenes/Scene.hpp"
 
-EntityIterator::EntityIterator(Scene& scene, std::vector<int>& componentIds, int entityIndex) : m_scene(scene), m_componentIds(componentIds)
+EntityIterator::EntityIterator(Scene& scene, std::vector<int>& componentIds, size_t entityIndex) : m_scene(scene), m_componentIds(componentIds)
 {
 	m_entityIndex = entityIndex;
 }
 
-int EntityIterator::getEntityIndex() const
+size_t EntityIterator::getEntityIndex() const
 {
 	return m_entityIndex;
 }
 
-GameEntity EntityIterator::operator*() const
+int EntityIterator::operator*() const
 {
-	return m_scene.getEntity(m_entityIndex);
+	return m_scene.getEntityUIDForIndex(m_entityIndex).value(); //Assumes that the ++ and begin() methods will skip entities that don't exist
 }
 
 bool EntityIterator::operator==(const EntityIterator& other) const
@@ -30,12 +30,13 @@ bool EntityIterator::operator!=(const EntityIterator& other) const
 
 EntityIterator& EntityIterator::operator++()
 {
-	int size = m_scene.getEntityCount();
+	size_t size = m_scene.getEntityCount();
 
 	m_entityIndex++;
 
 	//Skip all inactive entities and entities that don't have the specified components
-	while (m_entityIndex < size && (!m_scene.isEntityAtIndexActive(m_entityIndex) || !m_scene.entityHasComponents(m_entityIndex,m_componentIds)))
+	//NB: entityExists is used so that we can operator* without checking the value exists
+	while (m_entityIndex < size && (!m_scene.entityExists(m_entityIndex) || !m_scene.isEntityAtIndexActive(m_entityIndex) || !m_scene.entityHasComponents(m_entityIndex,m_componentIds)))
 	{
 		m_entityIndex++;
 	}
@@ -45,12 +46,13 @@ EntityIterator& EntityIterator::operator++()
 
 const EntityIterator EntityIterator::begin() const
 {
-	int index = 0;
+	size_t index = 0;
 
-	int size = m_scene.getEntityCount();
+	size_t size = m_scene.getEntityCount();
 
 	//Skip all inactive entities and entities that don't have the specified components
-	while (index < size && (!m_scene.isEntityAtIndexActive(index) || !m_scene.entityHasComponents(index, m_componentIds)))
+	//NB: entityExists is used so that we can operator* without checking the value exists
+	while (index < (int)size && (!m_scene.entityExists(index) || !m_scene.isEntityAtIndexActive(index) || !m_scene.entityHasComponents(index, m_componentIds)))
 	{
 		index++;
 	}

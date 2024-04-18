@@ -8,16 +8,16 @@ class GameEntity;
 class EntityIterator
 {
 public:
-	EntityIterator(Scene& scene, std::vector<int>& componentIds, int entityIndex);
-	int getEntityIndex() const;
-	GameEntity operator*() const;
+	EntityIterator(Scene& scene, std::vector<int>& componentIds, size_t entityIndex);
+	size_t getEntityIndex() const;
+	int operator*() const; //Returns the UID of the entity in question
 	bool operator==(const EntityIterator& other) const;
 	bool operator!=(const EntityIterator& other) const;
 	EntityIterator& operator++();
 	const EntityIterator begin() const;
 	const EntityIterator end() const;
 private:
-	int m_entityIndex = 0;
+	size_t m_entityIndex = 0;
 	Scene& m_scene;
 	std::vector<int>& m_componentIds;
 };

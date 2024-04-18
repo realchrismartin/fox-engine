@@ -23,8 +23,6 @@ void Scene::onMessageReceived(const SceneChangeMessage& message)
 	init(SceneLibrary::getSceneConfig(message.requestedScene));
 }
 
-const std::set<int> Scene::EMPTY_OWNED_SET = {};
-
 void Scene::init(const SceneConfig& sceneConfig)
 {
 	//Dump whatever's in the existing pools, if there are any
@@ -45,6 +43,7 @@ void Scene::init(const SceneConfig& sceneConfig)
 	//Now, we make the scene.
 	//Store IDs as we make them in the prescribed order so that we can associate them in the scene graph.
 	std::vector<int> entityIds;
+	std::vector<GameEntityEnum> entityEnums;
 
 	//Get a ref to the init fn map
 <<<<<<< HEAD
@@ -53,6 +52,7 @@ void Scene::init(const SceneConfig& sceneConfig)
 	const std::unordered_map<size_t, std::function<void(int, Scene&)>>& initFnMap = sceneConfig.getSceneSpecificInitFnMap();
 >>>>>>> 2744161 (acc)
 
+	//Create the entities to begin with
 	for (auto const& entity : sceneConfig.getGameEntities())
 	{
 		//Create the entity
@@ -66,26 +66,10 @@ void Scene::init(const SceneConfig& sceneConfig)
 
 		//Store the IDs for scene graph association purposes
 		entityIds.push_back(entityId.value());
-
-		//Get the entity config from the entity library
-		const GameEntityConfig& config = GameEntityLibrary::getGameEntityConfig(entity);
-
-		//Update the activity status of the entity to whatever the config says
-		m_entityActivityMap[entityId.value()] = config.getDefaultActiveState();
-
-		size_t entityIndex = entityIds.size() - 1;
-
-		//Run the entity init
-		config.init(entityId.value(), *this);
-
-		//Now that the entity is initialized, if there's a scene-specific init for this entity too, run that now.
-		if (initFnMap.count(entityIndex))
-		{
-			initFnMap.at(entityIndex)(entityId.value(), *this);
-		}
+		entityEnums.push_back(entity);
 	}
 
-	//After everything is set up, add the scene graph mappings
+	//Add the scene graph mappings
 	for (auto const& [parent, children] : sceneConfig.getSceneGraphMap())
 	{
 		//Parent and Child ints are indices into the entityIds vector we made above.
@@ -110,11 +94,31 @@ void Scene::init(const SceneConfig& sceneConfig)
 			addChild(parentUID, entityIds[child]);
 		}
 	}
+
+	//Initialize the entities now that the scene graph is set up
+	//The initial scene graph is set up at this point
+	for (size_t index = 0;index < entityIds.size(); index++)
+	{
+		//Get the entity config from the entity library
+		const GameEntityConfig& config = GameEntityLibrary::getGameEntityConfig(entityEnums[index]);
+
+		//Update the activity status of the entity to whatever the config says
+		m_entityActivityMap[entityIds[index]] = config.getDefaultActiveState();
+
+		//Run the entity init
+		config.init(index, *this);
+
+		//Now that the entity is initialized, if there's a scene-specific init for this entity too, run that now.
+		if (initFnMap.count(index))
+		{
+			initFnMap.at(index)(entityIds[index], *this);
+		}
+	}
 }
 
 void Scene::loadText(const TextConfig& textConfig, int entityUID)
 {
-	if (textConfig.textToDisplay.size() <= 0)
+	if (textConfig.textToDisplay.empty())
 	{
 		Logger::log("No text was provided. Skipping loading text.");
 		return;
@@ -133,17 +137,14 @@ void Scene::loadText(const TextConfig& textConfig, int entityUID)
 	updateAllModelComponentAssociations();
 }
 
-bool Scene::isEntityAtIndexActive(int entityIndex) const
+bool Scene::isEntityAtIndexActive(size_t entityIndex) const
 {
-	if (entityIndex < 0 || entityIndex >= m_gameEntities.size())
+	if (!entityExists(entityIndex))
 	{
-		return false; //Entity index out of bounds failsafe
+		return false;
 	}
 
 	return m_entityActivityMap.at(m_gameEntities[entityIndex].getUID());
-
-
-	return false;
 }
 
 bool Scene::isEntityActive(int entityUID) const
@@ -154,6 +155,26 @@ bool Scene::isEntityActive(int entityUID) const
 	}
 
 	return m_entityActivityMap.at(entityUID);
+}
+
+bool Scene::entityExists(size_t entityIndex) const
+{
+	if (entityIndex < 0 || entityIndex >= m_gameEntities.size())
+	{
+		return false;
+	}
+
+	return true;
+}
+
+std::optional<int> Scene::getEntityUIDForIndex(size_t entityIndex)
+{
+	if (!entityExists(entityIndex))
+	{
+		return std::nullopt;
+	}
+
+	return m_gameEntities[entityIndex].getUID();
 }
 
 void Scene::setEntityActiveStatus(int entityUID, bool state)
@@ -236,8 +257,9 @@ void Scene::addModelComponentDependencies(int entityUID)
 >>>>>>> 05955e8 (lil ruff)
 }
 
-GameEntity& Scene::getEntity(int entityIndex)
+size_t Scene::getEntityCount() const
 {
+<<<<<<< HEAD
 	if (m_gameEntities.size() <= (size_t)entityIndex)
 	{
 		throw std::out_of_range("Asked for an entity that is out of range!");
@@ -249,6 +271,9 @@ GameEntity& Scene::getEntity(int entityIndex)
 int Scene::getEntityCount() const
 {
 	return (int)m_gameEntityMap.size();
+=======
+	return m_gameEntityMap.size();
+>>>>>>> 37c405f (activiv)
 }
 
 void Scene::applyToSceneGraph(std::function<void(Scene&, std::optional<int>, int)>& functor)
@@ -299,51 +324,6 @@ void Scene::addChild(int parentEntityUID, int childEntityUID)
 
 	//If we had the child as a root node before, remove it now - it has a parent!
 	m_rootNodes.erase(childEntityUID);
-}
-
-void Scene::addOwnedEntity(int owningEntityUID, int ownedEntity)
-{
-	if (!m_gameEntityMap.count(owningEntityUID))
-	{
-		//This entity was never registered.
-		return;
-	}
-
-	//Condition: this entity can't already be owned
-	for (auto const& [owners,owned] : m_entityOwnerships)
-	{
-		if (owned.count(ownedEntity))
-		{
-			return;
-		}
-	}
-
-	//All good - we can add this entity as a child of this parent
-	if (!m_entityOwnerships.count(owningEntityUID))
-	{
-		m_entityOwnerships.insert({ owningEntityUID , { ownedEntity } });
-	}
-	else
-	{
-		m_entityOwnerships.at(owningEntityUID).insert(ownedEntity);
-	}
-}
-
-const std::set<int>& Scene::getOwnedEntities(int owningEntityUID) const
-{
-	if (!m_gameEntityMap.count(owningEntityUID))
-	{
-		//This entity was never registered.
-		return EMPTY_OWNED_SET;
-	}
-
-	if (!m_entityOwnerships.count(owningEntityUID))
-	{
-		//The owning entity has no owned entities
-		return EMPTY_OWNED_SET;
-	}
-
-	return m_entityOwnerships.at(owningEntityUID);
 }
 
 std::optional<int> Scene::createEntity()
@@ -562,7 +542,7 @@ void Scene::updateAllModelComponentAssociations()
 		entityCount++;
 	}
 }
-bool Scene::entityHasComponents(int entityIndex, std::vector<int>& componentTypeIds) const
+bool Scene::entityHasComponents(size_t entityIndex, std::vector<int>& componentTypeIds) const
 {
 	if (componentTypeIds.empty())
 	{

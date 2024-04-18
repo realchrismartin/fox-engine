@@ -148,21 +148,28 @@ namespace GameEntities
 					continue;
 				}
 				
+				//Add this cube as a child of the emitter
 				scene.addChild(entityUID, id.value());
-				scene.addOwnedEntity(entityUID, id.value());
 
+				//Add this cube as an owned entity of the emitter
+				//We will use this later when we operate 
+
+				//Add the cube model
 				scene.loadModel(model, id.value());
-				scene.getComponent<TransformComponent>(id.value()).setScale({ .5f,.5f,.5f });
+
+				//TODO: this will start out zeroed instead of this when the below is implemented
 				scene.getComponent<TransformComponent>(id.value()).setTranslation({ (float)(rand() % 4),(float)(rand() % 4),(float)(rand() % 4)});
 
-				for (auto const& entity : scene.getOwnedEntities(entityUID))
-				{
-					scene.setEntityActiveStatus(entity,false);
-				}
+				//Set this entity as inactive
+				scene.setEntityActiveStatus(id.value(), false);
+
+				//TODO: add the trigger components fns here. 
+				//The functions should:
+				// a) set the model active at the beginning of the timer
+				// b) apply translation to the model each tick to simulate movement
+				// c) .reset() the TransformComponent and set active=false when the timer expires. moving the cube back to the emitter source
 			}
-
 		});
-
 }
 
 const GameEntityConfig& GameEntityLibrary::getGameEntityConfig(GameEntityEnum gameEntity)
