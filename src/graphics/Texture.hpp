@@ -9,9 +9,6 @@ public:
 	Texture(const std::string& filePath);
 	~Texture();
 
-	/// @brief Initialize the texture and tell the GPU about it. It will be unbound when done initializing.
-	void activate();
-
 	/// @brief Bind the loaded texture to the OpenGL context.
 	void bind();
 

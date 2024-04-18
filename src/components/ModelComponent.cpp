@@ -3,7 +3,6 @@
 #include "src/components/config/ModelConfig.hpp"
 #include "src/components/config/TextConfig.hpp"
 #include "src/util/FontMapper.hpp"
-#include "src/graphics/TextureMapper.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -96,7 +95,7 @@ void ModelComponent::loadText(const TextConfig& textConfig)
 		m_frameIndices.push_back({});
 	}
 
-	glm::vec2 textureSize = TextureMapper::getTextureDimensionsInPixels(textConfig.texture);
+	glm::vec2 textureSize = textConfig.textureSize;
 	float tallestCharacterHeight = 0.f;
 
 	std::unordered_map<size_t, glm::vec2> characterSizes;
