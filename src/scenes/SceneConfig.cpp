@@ -1,11 +1,13 @@
 #include "src/scenes/SceneConfig.hpp"
 
+#include "src/entities/GameEntityConfig.hpp"
 #include "src/entities/EntityInstanceConfig.hpp"
 
-EntityInstanceConfig SceneConfig::addEntity(GameEntityEnum entity)
+EntityInstanceConfig SceneConfig::addEntity(const GameEntityConfig& entityConfig)
 {
 	m_entities.push_back(entity);
 	EntityInstanceConfig configEntity;
+<<<<<<< HEAD
 <<<<<<< HEAD
 	configEntity.entityIndex = m_entities.size() - 1;
 	configEntity.config = this;
@@ -18,6 +20,14 @@ EntityInstanceConfig SceneConfig::addEntity(GameEntityEnum entity)
 	configEntity.config = this;
 	return configEntity; //Return a copy so we don't screw ourselves due to vector realloc
 >>>>>>> 9d1d7dd (en titty)
+=======
+	configEntity.entityConfig = entityConfig;
+	configEntity.entityUID = m_entities.size();
+	m_entities.push_back(configEntity); //Keep a copy for ourselves.
+
+	configEntity.sceneConfig = this;
+	return configEntity; //Return a copy so we don't accidentally inconvenience ourselves due to vector realloc
+>>>>>>> 94c3281 (get ready)
 }
 
 <<<<<<< HEAD

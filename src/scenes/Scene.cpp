@@ -2,11 +2,16 @@
 
 #include "src/util/Logger.hpp"
 
+<<<<<<< HEAD
 #include "src/scenes/SceneConfig.hpp"
 #include "src/entities/GameEntityConfig.hpp"
 #include "src/entities/GameEntityLibrary.hpp"
 #include "src/graphics/ModelConfig.hpp"
 #include "src/scenes/SceneLibrary.hpp"
+=======
+#include "src/entities/EntityInstanceConfig.hpp"
+#include "src/entities/GameEntityConfig.hpp"
+>>>>>>> 94c3281 (get ready)
 
 
 #include "src/components/ModelComponent.hpp"
@@ -29,14 +34,14 @@ Scene::Scene(const SceneConfig& sceneConfig)
 
 void Scene::doSceneChange()
 {
-	if (m_nextScene == SceneEnum::NONE)
+	if (!m_nextScene.has_value())
 	{
 		return;
 	}
 
-	init(SceneLibrary::getSceneConfig(m_nextScene));
+	init(m_nextScene.value());
 
-	m_nextScene = SceneEnum::NONE;
+	m_nextScene = std::nullopt;
 }
 
 void Scene::init(const SceneConfig& sceneConfig)
@@ -58,8 +63,11 @@ void Scene::init(const SceneConfig& sceneConfig)
 
 	//Now, we make the scene.
 	//Store IDs as we make them in the prescribed order so that we can associate them in the scene graph.
+<<<<<<< HEAD
 	std::vector<int> entityIds;
 	std::vector<GameEntityEnum> entityEnums;
+=======
+>>>>>>> 94c3281 (get ready)
 
 	//Get a ref to the init fn map
 <<<<<<< HEAD
@@ -115,8 +123,13 @@ void Scene::init(const SceneConfig& sceneConfig)
 	//The initial scene graph is set up at this point
 	for (size_t index = 0;index < entityIds.size(); index++)
 	{
+<<<<<<< HEAD
 		//Get the entity config from the entity library
 		const GameEntityConfig& config = GameEntityLibrary::getGameEntityConfig(entityEnums[index]);
+=======
+		//Get the entity config from the configuration 
+		const GameEntityConfig& config = entity.entityConfig;
+>>>>>>> 94c3281 (get ready)
 
 		//Update the activity status of the entity to whatever the config says
 		m_entityActivityMap[entityIds[index]] = config.getDefaultActiveState();
@@ -300,9 +313,9 @@ std::optional<int> Scene::getCameraTargetEntity() const
 	return m_cameraTargetEntityId;
 }
 
-void Scene::changeScene(SceneEnum newScene)
+void Scene::changeScene(const SceneConfig& sceneConfig)
 {
-	m_nextScene = newScene;
+	m_nextScene = sceneConfig;
 }
 
 void Scene::addChild(int parentEntityUID, int childEntityUID)

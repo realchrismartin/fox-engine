@@ -2,8 +2,6 @@
 #define SYSTEMS_HPP
 
 #include "src/scenes/Scene.hpp"
-#include "src/scenes/SceneEnum.hpp"
-#include "src/scenes/SceneLibrary.hpp"
 #include "src/util/Logger.hpp"
 
 #include "src/graphics/Window.hpp"
@@ -21,6 +19,8 @@
 
 #include "src/systems/EventRelay.hpp"
 #include "src/systems/EventTypes.hpp"
+
+#include "src/components/config/TextConfig.hpp"
 
 static const float TIMESTEP = .0167f;
 
@@ -47,7 +47,24 @@ public:
 		Camera camera(Window::DEFAULT_WINDOW_SIZE);
 
 		//Initialize the scene as the main menu.
-		Scene scene(SceneLibrary::getSceneConfig(SceneEnum::MAIN_MENU));
+
+		SceneConfig config;
+
+		GameEntityConfig titleText = GameEntityConfig()
+		.whenInit([](int entityUID, auto& scene)
+		{
+			TextConfig config;
+			config.textToDisplay = "fox n fowl";
+			config.charactersPerLine = 10;
+			config.centered = true;
+			scene.loadText(config, entityUID);
+			config.margin = { .15f,.15f };
+			config.fontSize = 15;
+			scene.loadText(config, entityUID);
+		});
+
+		config.addEntity(titleText);
+		Scene scene(config);
 
 		float currentTime = clock.getElapsedTimeInSeconds();
 		float accumulator = TIMESTEP;

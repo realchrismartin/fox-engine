@@ -146,12 +146,6 @@ public:
 		return m_data + (index * m_componentSize);
 	}
 
-	/// @brief Get the entity IDs that have registered components in this pool. This is guaranteed to be in the order the components are stored.
-	/// @return 
-	std::ranges::elements_view < std::ranges::ref_view<std::map<int, int>>, 1Ui64> getRegisteredEntityUIDs()
-	{
-		return std::views::values(m_componentToEntityMap);
-	}
 
 	void* getData() const
 	{
@@ -166,6 +160,13 @@ public:
 		m_componentToEntityMap.clear();
 	}
 
+
+	/// @brief Get the entity IDs that have registered components in this pool. This is guaranteed to be in the order the components are stored.
+	/// @return 
+	std::ranges::elements_view < std::ranges::ref_view<std::map<int, int>>, 1Ui64> getRegisteredEntityUIDs()
+	{
+		return std::views::values(m_componentToEntityMap);
+	}
 	~ComponentPool()
 	{
 		delete[] m_data;

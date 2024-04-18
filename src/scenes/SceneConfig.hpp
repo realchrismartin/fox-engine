@@ -1,18 +1,14 @@
 #ifndef SCENECONFIG_HPP
 #define SCENECONFIG_HPP
 
-#include "src/entities/GameEntityEnum.hpp"
-#include "src/scenes/SceneEnum.hpp"
+#include "src/entities/EntityInstanceConfig.hpp"
 
-struct EntityInstanceConfig;
+struct GameEntityConfig;
 class Scene;
-class GameEntity;
 
 struct SceneConfig
 {
-	SceneEnum id = SceneEnum::NONE;
-
-	EntityInstanceConfig addEntity(GameEntityEnum entity);
+	EntityInstanceConfig addEntity(const GameEntityConfig& entityConfig);
 
 	void addInitFnForEntity(size_t index, std::function<void(int, Scene&)> initFn);
 

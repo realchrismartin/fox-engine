@@ -1,10 +1,10 @@
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
+#include "src/scenes/SceneConfig.hpp"
 #include "src/entities/GameEntity.hpp"
 #include "src/components/ComponentPool.hpp"
 #include "src/components/ComponentTypes.hpp"
-#include "src/scenes/SceneEnum.hpp"
 
 class TransformComponent;
 class MVPTransformComponent;
@@ -130,7 +130,7 @@ public:
 	std::optional<int> getCameraEntity() const;
 	std::optional<int> getCameraTargetEntity() const;
 
-	void changeScene(SceneEnum newScene);
+	void changeScene(const SceneConfig& config);
 
 	/// @brief Load the specified model, which implies adding a ModelComponent, TransformComponent, and MVPTransformComponent to the entity.
 	/// @param modelData 
@@ -233,7 +233,7 @@ private:
 	std::optional<int> m_cameraEntityId;
 	std::optional<int> m_cameraTargetEntityId;
 
-	SceneEnum m_nextScene = SceneEnum::NONE;
+	std::optional<SceneConfig> m_nextScene = std::nullopt;
 };
 
 #endif

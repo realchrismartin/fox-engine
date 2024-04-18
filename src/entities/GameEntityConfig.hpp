@@ -1,12 +1,11 @@
 #ifndef GAMEENTITYCONFIG_HPP
 #define GAMEENTITYCONFIG_HPP
 
-#include "src/entities/GameEntity.hpp"
-#include "src/scenes/Scene.hpp"
-#include "src/components/ComponentTypes.hpp"
+class Scene;
 
 struct GameEntityConfig
 {
+<<<<<<< HEAD
 
 
 	/// @brief Specify a setup function that will run on the scene when this entity is built.
@@ -44,6 +43,12 @@ struct GameEntityConfig
 >>>>>>> 3607be4 (shipit)
 	}
 
+=======
+	GameEntityConfig whenInit(const std::function<void(int, Scene&)>& fn);
+	GameEntityConfig startsActive(bool state);
+	void init(int entityUID, Scene& scene) const;
+	bool getDefaultActiveState() const;
+>>>>>>> 94c3281 (get ready)
 private:
 	std::function<void(int,Scene&)> m_initFn = [](int entityUID, auto& scene) {};
 <<<<<<< HEAD
