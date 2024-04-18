@@ -82,13 +82,56 @@ const SceneConfig SceneLibrary::initSceneConfig(SceneEnum scene)
 		});
 
 		//Another mushroom
-		/*
 		auto mushroom2 = config.addEntity(GameEntityEnum::MUSHROOM);
 		mushroom2.addInitFn([](int entityUID, auto& scene)
 		{
 			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 0.f,0.f,10.f });
+<<<<<<< HEAD
+=======
+
+			//Example: when a message is received, get twice as big!
+			scene.addComponent<TriggerComponent>(entityUID);
+			TriggerComponent& tc = scene.getComponent<TriggerComponent>(entityUID);
+
+			Trigger directTrigger;
+			directTrigger.setDirectTriggerCondition(true);
+			directTrigger.setAction([](Scene& scene, int entityUID)
+			{
+				if (!scene.hasComponent<TransformComponent>(entityUID))
+				{
+					return;
+				}
+				
+				scene.getComponent<TransformComponent>(entityUID).setScale({ 5.f,2.f,2.f });
+			});
+
+			tc.addTrigger(directTrigger);
 		});
-		*/
+
+		//Mushroom
+		auto mushroom1 = config.addEntity(GameEntityEnum::MUSHROOM);
+		mushroom1.addInitFn([mushroom2](int entityUID, Scene& scene)
+		{
+			scene.getComponent<TransformComponent>(entityUID).setTranslation({ 10.f,0.f,5.f });
+
+			//Send a message when it's been alive for 5s to the other mushroom
+			scene.addComponent<TriggerComponent>(entityUID);
+			TriggerComponent& tc = scene.getComponent<TriggerComponent>(entityUID);
+
+			Trigger directTrigger;
+			directTrigger.setUpdateCondition([](Scene& scene, int entityUID, float lifetime, float elapsedTime)
+			{
+					return lifetime > 5.f;
+			});
+
+			directTrigger.setAction([mushroom2](Scene& scene, int entityUID)
+			{
+				scene.trigger(mushroom2.entityUID);
+			});
+
+			tc.addTrigger(directTrigger);
+>>>>>>> 586c5df (variouse)
+		});
 
 <<<<<<< HEAD
 =======

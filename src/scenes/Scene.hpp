@@ -121,6 +121,10 @@ public:
 	void setCameraEntity(int uid);
 	void setCameraTargetEntity(int uid);
 
+	/// @brief Trigger all of the triggered behaviors for the target entity that allow direct triggering
+	/// @param entityUID 
+	void trigger(int entityUID);
+
 	std::optional<int> getCameraEntity() const;
 	std::optional<int> getCameraTargetEntity() const;
 

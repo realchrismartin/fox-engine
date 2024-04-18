@@ -18,6 +18,19 @@ void TriggerComponent::addTrigger(const Trigger& trigger)
 	m_triggers.push_back(trigger);
 }
 
+void TriggerComponent::triggerDirectly(Scene& scene, int entityUID)
+{
+	for (auto const& trigger : m_triggers)
+	{
+		if (!trigger.supportsDirectExecution())
+		{
+			continue;
+		}
+
+		trigger.run(scene, entityUID);
+	}
+}
+
 void TriggerComponent::resetLifetime()
 {
 	m_lifetime = 0.f;

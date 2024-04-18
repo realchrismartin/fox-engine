@@ -12,6 +12,12 @@
 #include "src/components/ModelComponent.hpp"
 #include "src/components/TransformComponent.hpp"
 #include "src/components/MVPTransformComponent.hpp"
+<<<<<<< HEAD
+=======
+#include "src/components/TriggerComponent.hpp"
+#include "src/components/config/ModelConfig.hpp"
+#include "src/components/config/TextConfig.hpp"
+>>>>>>> 586c5df (variouse)
 
 Scene::Scene(const SceneConfig& sceneConfig)
 {
@@ -272,6 +278,16 @@ void Scene::applyToSceneGraph(std::function<void(Scene&, std::optional<int>, int
 	{
 		applyFunctorToSceneGraph(std::nullopt,entityId,functor);
 	}
+}
+
+void Scene::trigger(int entityUID)
+{
+	if (!hasComponent<TriggerComponent>(entityUID))
+	{
+		return;
+	}
+
+	getComponent<TriggerComponent>(entityUID).triggerDirectly(*this, entityUID);
 }
 
 std::optional<int> Scene::getCameraEntity() const
