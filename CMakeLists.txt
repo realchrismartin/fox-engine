@@ -5,7 +5,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-project(FnF LANGUAGES C CXX)
+project(FOX_ENGINE_LIB LANGUAGES C CXX)
 
 set (BUILD_SHARED_LIBS OFF)
 
@@ -30,9 +30,9 @@ set(GAME_SOURCES
     ${GAME_HEADERS}
 )
 
-add_executable(FnF "${GAME_SOURCES}")
+add_library(FOX_ENGINE_LIB ${GAME_SOURCES})
 
-target_include_directories(FnF PUBLIC "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/src")
+target_include_directories(FOX_ENGINE_LIB PUBLIC "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/src")
 
 set(DEPEND_LIBRARIES
     SDL3::SDL3
@@ -41,6 +41,14 @@ set(DEPEND_LIBRARIES
     glew_s
 )
 
-target_link_libraries(FnF PRIVATE ${DEPEND_LIBRARIES})
+target_link_libraries(FOX_ENGINE_LIB PRIVATE ${DEPEND_LIBRARIES})
 
-target_precompile_headers(FnF PRIVATE "${CMAKE_SOURCE_DIR}/pch.hpp")
+target_precompile_headers(FOX_ENGINE_LIB PRIVATE "${CMAKE_SOURCE_DIR}/pch.hpp")
+
+install(TARGETS FOX_ENGINE_LIB
+        EXPORT FOX_ENGINE_LIB_TARGET
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        INCLUDES DESTINATION include
+)
