@@ -18,25 +18,8 @@ struct SceneConfig;
 class Scene
 {
 public:
-<<<<<<< HEAD
-<<<<<<< HEAD
-
 	Scene(const SceneConfig& sceneConfig);
 
-	virtual void onMessageReceived(const SceneChangeMessage& message) override;
-=======
-	Scene(const SceneConfig& sceneConfig);
-
-<<<<<<< HEAD
-	/// @brief Reset and initialize the scene with this config
-	/// @param sceneConfig 
-	void changeScene(const SceneConfig& sceneConfig);
->>>>>>> 3ef75ed (upgrade events and allow for window resizing)
-
-=======
->>>>>>> 37c405f (activiv)
-=======
->>>>>>> 054f038 (fix crashy)
 	/// @brief Get the component of the specified type T that is associated with the entity with the UID entityUID
 	/// @tparam T The type of component we are asking for
 	/// @param entityUID The entity we want to get a component for
@@ -110,10 +93,6 @@ public:
 		return *m_componentPools[m_componentTypeToPoolMap.at(componentTypeId)].get();
 	}
 
-	/// @brief Reset and initialize the scene with this config
-	/// @param sceneConfig 
-	void init(const SceneConfig& sceneConfig);
-
 	/// @brief Return true if the entity at this index in the entity list has registered components with the specified IDs. 
 	/// @param entityIndex  The index of the entity. This is not the entity UID.
 	/// @param componentTypeIds 
@@ -141,7 +120,6 @@ public:
 	void addChild(int parentEntityUID, int childEntityUID);
 
 	std::optional<int> createEntity();
-
 	void removeEntity(int uid);
 
 	bool isEntityActive(int entityUID) const;
@@ -174,21 +152,12 @@ public:
 	void doSceneChange();
 
 protected:
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
 	/// @brief Reset and initialize the scene with this config
 	/// @param sceneConfig 
 	void init(const SceneConfig& sceneConfig);
->>>>>>> 054f038 (fix crashy)
 
->>>>>>> 3ef75ed (upgrade events and allow for window resizing)
 	void applyFunctorToSceneGraph(std::optional<int> parentEntityID, int entityID, std::function<void(Scene&, std::optional<int>, int)>& functor);
 
-	static const std::set<int> EMPTY_OWNED_SET;
-
-private:
 	void addModelComponentDependencies(int entityUID);
 	void updateAllModelComponentAssociations();
 

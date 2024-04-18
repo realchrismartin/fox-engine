@@ -5,85 +5,54 @@
 
 EntityInstanceConfig SceneConfig::addEntity(const GameEntityConfig& entityConfig)
 {
-	m_entities.push_back(entity);
 	EntityInstanceConfig configEntity;
-<<<<<<< HEAD
-<<<<<<< HEAD
-	configEntity.entityIndex = m_entities.size() - 1;
-	configEntity.config = this;
-	return configEntity;
-=======
-	configEntity.entityEnum = entity;
-	configEntity.entityUID = m_entities.size();
-	m_entities.push_back(configEntity); //Keep a copy for ourselves.
-
-	configEntity.config = this;
-	return configEntity; //Return a copy so we don't screw ourselves due to vector realloc
->>>>>>> 9d1d7dd (en titty)
-=======
 	configEntity.entityConfig = entityConfig;
 	configEntity.entityUID = m_entities.size();
 	m_entities.push_back(configEntity); //Keep a copy for ourselves.
 
 	configEntity.sceneConfig = this;
 	return configEntity; //Return a copy so we don't accidentally inconvenience ourselves due to vector realloc
->>>>>>> 94c3281 (get ready)
 }
 
-<<<<<<< HEAD
 void SceneConfig::addInitFnForEntity(const EntityInstanceConfig& entity, const std::function<void(int,Scene&)>& initFn)
-=======
-void SceneConfig::addInitFnForEntity(size_t index, std::function<void(int,Scene&)> initFn)
->>>>>>> 3607be4 (shipit)
 {
-	m_sceneSpecificInitFnMap[entity.entityIndex] = initFn;
+	m_sceneSpecificInitFnMap[entity.entityUID] = initFn;
 }
 
 void SceneConfig::addChild(const EntityInstanceConfig& parent, const EntityInstanceConfig& child) 
 {
-	size_t parentIndex = parent.entityIndex;
-	size_t childIndex = child.entityIndex;
+	int parentUID = parent.entityUID;
+	int childUID = child.entityUID;
 
-	if (m_entities.size() < parentIndex || m_entities.size() < childIndex)
-	{
-		//Can't do this.
-		Logger::log("Can't add scene graph child config, not enough configs in the list.");
-		return;
-	}
-
-	if (m_existingChildren.count(childIndex))
+	if (m_existingChildren.count(childUID))
 	{
 		Logger::log("Can't add a child that is already a child of another parent.");
 		return;
 	}
 
-	m_existingChildren.insert(childIndex);
+	m_existingChildren.insert(childUID);
 
-	if (m_sceneGraphConfig.count(parentIndex))
+	if (m_sceneGraphConfig.count(parentUID))
 	{
-		m_sceneGraphConfig.at(parentIndex).insert(childIndex);
+		m_sceneGraphConfig.at(parentUID).insert(childUID);
 	}
 	else 
 	{
-		m_sceneGraphConfig[parentIndex] = { childIndex };
+		m_sceneGraphConfig[parentUID] = { childUID };
 	}
 }
 
-const std::vector<GameEntityEnum>& SceneConfig::getGameEntities() const
+const std::vector<EntityInstanceConfig>& SceneConfig::getGameEntities() const
 {
 	return m_entities;
 }
 
-const std::unordered_map<size_t, std::set<size_t>>& SceneConfig::getSceneGraphMap() const
+const std::unordered_map<int, std::set<int>>& SceneConfig::getSceneGraphMap() const
 {
 	return m_sceneGraphConfig;
 }
 
-<<<<<<< HEAD
-const std::unordered_map<size_t, std::function<void(int, Scene&)>>& SceneConfig::getSceneSpecificInitFnMap() const
-=======
 const std::unordered_map<int, std::function<void(int, Scene&)>>& SceneConfig::getSceneSpecificInitFnMap() const
->>>>>>> 3607be4 (shipit)
 {
 	return m_sceneSpecificInitFnMap;
 }

@@ -2,30 +2,14 @@
 
 #include "src/util/Logger.hpp"
 
-<<<<<<< HEAD
-#include "src/scenes/SceneConfig.hpp"
-#include "src/entities/GameEntityConfig.hpp"
-#include "src/entities/GameEntityLibrary.hpp"
-#include "src/graphics/ModelConfig.hpp"
-#include "src/scenes/SceneLibrary.hpp"
-=======
 #include "src/entities/EntityInstanceConfig.hpp"
 #include "src/entities/GameEntityConfig.hpp"
->>>>>>> 94c3281 (get ready)
-
 
 #include "src/components/ModelComponent.hpp"
 #include "src/components/TransformComponent.hpp"
 #include "src/components/MVPTransformComponent.hpp"
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-#include "src/components/TriggerComponent.hpp"
-=======
->>>>>>> b4eb33f (remove unneeded includes)
 #include "src/components/config/ModelConfig.hpp"
 #include "src/components/config/TextConfig.hpp"
->>>>>>> 586c5df (variouse)
 
 Scene::Scene(const SceneConfig& sceneConfig)
 {
@@ -57,90 +41,60 @@ void Scene::init(const SceneConfig& sceneConfig)
 	m_rootNodes.clear();
 	m_gameEntityMap.clear();
 	m_gameEntities.clear();
-	m_availableEntityUID = 0;
 	m_cameraEntityId = std::nullopt;
 	m_cameraTargetEntityId = std::nullopt;
+	m_availableEntityUID = 0;
 
 	//Now, we make the scene.
 	//Store IDs as we make them in the prescribed order so that we can associate them in the scene graph.
-<<<<<<< HEAD
-	std::vector<int> entityIds;
-	std::vector<GameEntityEnum> entityEnums;
-=======
->>>>>>> 94c3281 (get ready)
 
 	//Get a ref to the init fn map
-<<<<<<< HEAD
 	const std::unordered_map<int, std::function<void(int, Scene&)>>& initFnMap = sceneConfig.getSceneSpecificInitFnMap();
-=======
-	const std::unordered_map<size_t, std::function<void(int, Scene&)>>& initFnMap = sceneConfig.getSceneSpecificInitFnMap();
->>>>>>> 2744161 (acc)
 
 	//Create the entities to begin with
 	for (auto const& entity : sceneConfig.getGameEntities())
 	{
 		//Create the entity
-		std::optional<int> entityId = createEntity();
-
-		if (!entityId.has_value())
+		if (m_gameEntities.size() >= m_maxEntities)
 		{
-			Logger::log("Could not create entity during init");
+			Logger::log("There are too many entities in the scene in init! Stopping init now. Remove some entities from config...");
 			return;
 		}
 
-		//Store the IDs for scene graph association purposes
-		entityIds.push_back(entityId.value());
-		entityEnums.push_back(entity);
+		m_gameEntities.emplace_back(entity.entityUID);
+		m_gameEntityMap[entity.entityUID] = (int)m_gameEntities.size() - 1; //Map the UID to the slot we're using for the entity
+		m_rootNodes.insert(entity.entityUID); //By default, the entity has no parents, so it is a root node.
+		m_entityActivityMap[entity.entityUID] = true; //By default, the entity is active. init() might override this imemdiately.
+
+		m_availableEntityUID = std::max(entity.entityUID + 1, m_availableEntityUID + 1);
 	}
 
 	//Add the scene graph mappings
-	for (auto const& [parent, children] : sceneConfig.getSceneGraphMap())
+	for (auto const& [parentUID, children] : sceneConfig.getSceneGraphMap())
 	{
-		//Parent and Child ints are indices into the entityIds vector we made above.
-
-		if (parent >= entityIds.size())
+		for (auto const& childUID : children)
 		{
-
-			Logger::log("Somehow we have a parent that's out of range, skipping");
-			continue;
-		}
-		
-		int parentUID = entityIds[parent];
-
-		for (auto const& child : children)
-		{
-			if (child > entityIds.size())
-			{
-				Logger::log("Somehow we have a child that's out of range, skipping");
-				continue;
-			}
-
-			addChild(parentUID, entityIds[child]);
+			addChild(parentUID, childUID);
 		}
 	}
 
 	//Initialize the entities now that the scene graph is set up
 	//The initial scene graph is set up at this point
-	for (size_t index = 0;index < entityIds.size(); index++)
+	for (auto const& entity : sceneConfig.getGameEntities())
 	{
-<<<<<<< HEAD
-		//Get the entity config from the entity library
-		const GameEntityConfig& config = GameEntityLibrary::getGameEntityConfig(entityEnums[index]);
-=======
 		//Get the entity config from the configuration 
 		const GameEntityConfig& config = entity.entityConfig;
->>>>>>> 94c3281 (get ready)
 
 		//Update the activity status of the entity to whatever the config says
-		m_entityActivityMap[entityIds[index]] = config.getDefaultActiveState();
+		m_entityActivityMap[entity.entityUID] = config.getDefaultActiveState();
 
 		//Run the entity init
-		config.init(index, *this);
+		config.init(entity.entityUID, *this);
 
 		//Now that the entity is initialized, if there's a scene-specific init for this entity too, run that now.
-		if (initFnMap.count(index))
+		if (initFnMap.count(entity.entityUID))
 		{
-			initFnMap.at(index)(entityIds[index], *this);
+			initFnMap.at(entity.entityUID)(entity.entityUID, *this);
 		}
 	}
 }
@@ -235,7 +189,6 @@ void Scene::addModelComponentDependencies(int entityUID)
 		return;
 	}
 
-
 	//Since these pools are de facto protected from being added to any other way, the indices for this entity UID match across them. This is important!
 	addComponentPrivate<ModelComponent>(entityUID);
 	addComponentPrivate<TransformComponent>(entityUID);
@@ -262,44 +215,18 @@ void Scene::addModelComponentDependencies(int entityUID)
 	{
 		assert(false); //Something broke!
 	}
-<<<<<<< HEAD
-
-	//Now that we have all of the components, get access to them and load them up
-	ModelComponent& modelComponent = getComponent<ModelComponent>(entityUID);
-
-	//Load the model with the local indices and the vertices component with the local vertices
-	modelComponent.loadModel(modelData);
-
-	//TODO: later, this specific call could be cheaper than the one in removeEntity since it's adding to the end of the pool always.
-	updateAllModelComponentAssociations();
-=======
->>>>>>> 05955e8 (lil ruff)
 }
 
 size_t Scene::getEntityCount() const
 {
-<<<<<<< HEAD
-	if (m_gameEntities.size() <= (size_t)entityIndex)
-	{
-		throw std::out_of_range("Asked for an entity that is out of range!");
-	}
-	
-	return m_gameEntities[entityIndex];
-}
-
-int Scene::getEntityCount() const
-{
-	return (int)m_gameEntityMap.size();
-=======
 	return m_gameEntityMap.size();
->>>>>>> 37c405f (activiv)
 }
 
 void Scene::applyToSceneGraph(std::function<void(Scene&, std::optional<int>, int)>& functor)
 {
 	for (auto entityId : m_rootNodes)
 	{
-		applyFunctorToSceneGraph(std::nullopt,entityId,functor);
+		applyFunctorToSceneGraph(std::nullopt, entityId, functor);
 	}
 }
 
@@ -341,7 +268,7 @@ void Scene::addChild(int parentEntityUID, int childEntityUID)
 	{
 		m_sceneGraph.insert({ parentEntityUID, { childEntityUID } });
 	}
-	else 
+	else
 	{
 		m_sceneGraph.at(parentEntityUID).insert(childEntityUID);
 	}
@@ -528,7 +455,7 @@ void Scene::applyFunctorToSceneGraph(std::optional<int> parentEntityID, int enti
 	//Run the functor on the node.
 	if (parentEntityID.has_value())
 	{
-		functor(*this, parentEntityID.value(),entityID);
+		functor(*this, parentEntityID.value(), entityID);
 	}
 	else
 	{
@@ -540,7 +467,7 @@ void Scene::applyFunctorToSceneGraph(std::optional<int> parentEntityID, int enti
 	{
 		for (auto child : m_sceneGraph.at(entityID))
 		{
-			applyFunctorToSceneGraph(entityID,child,functor);
+			applyFunctorToSceneGraph(entityID, child, functor);
 		}
 	}
 }
@@ -587,7 +514,7 @@ bool Scene::entityHasComponents(size_t entityIndex, std::vector<int>& componentT
 		{
 			return false; //Something is wrong. There is no pool for this type.
 		}
-		
+
 		auto const& pool = m_componentPools[m_componentTypeToPoolMap.at(id)];
 
 		//If any specified component pool hasn't registered this entity, return false

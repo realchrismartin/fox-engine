@@ -2,6 +2,7 @@
 #define TEXTURE_HPP
 
 /// @brief A wrapper for an image which is loaded into the GPU memory and sampled from to color fragments.
+
 class Texture
 {
 public:

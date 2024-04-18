@@ -288,8 +288,9 @@ void ModelComponent::loadModel(const ModelConfig& modelData)
 	
 	//Ensure frame count is >= mesh count
 	size_t frameCount = modelData.keyframeFilePaths.size() > modelData.frameCount ? modelData.keyframeFilePaths.size() : modelData.frameCount;
+	int castFrameCount = (int)std::round((float)frameCount / (float)modelData.keyframeFilePaths.size());
 
-	size_t framesPerMesh = (float)frameCount / (float)modelData.keyframeFilePaths.size();
+	size_t framesPerMesh = castFrameCount > 0 ? (size_t)castFrameCount : 1;
 
 	if (framesPerMesh < 1)
 	{

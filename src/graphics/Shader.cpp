@@ -4,13 +4,10 @@
 
 Shader::Shader()
 {
-<<<<<<< HEAD
-=======
 	//TODO: fix paths
 	std::string vertexShader = loadShader("../extern/fox-engine/shaders/vert.glsl");
 	std::string fragmentShader = loadShader("../extern/fox-engine/shaders/frag.glsl");
 	m_shaderProgramId = createShader(vertexShader, fragmentShader);
->>>>>>> df440ab (Move content up)
 }
 
 Shader::~Shader()

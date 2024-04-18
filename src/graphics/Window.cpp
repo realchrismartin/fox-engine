@@ -16,7 +16,6 @@ Window::Window()
 
 	SDL_SetWindowTitle(m_window, "FnF");
 
-
 	//Set up the OpenGL context in the window
 	setupOpenGL();
 }

@@ -1,22 +1,7 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-#include "glm/glm/ext/matrix_transform.hpp"
-#include "glm/glm/ext/matrix_clip_space.hpp"
-=======
-#include "src/systems/Recipient.hpp"
-#include "src/systems/MessageTypes.hpp"
->>>>>>> 3ef75ed (upgrade events and allow for window resizing)
-=======
 #include "src/systems/Subscriber.hpp"
-<<<<<<< HEAD
-#include "src/systems/EventTypes.hpp"
->>>>>>> a31d035 (rebrand and crashy)
-=======
->>>>>>> 5257765 (remove imports)
 
 class Scene;
 
@@ -41,12 +26,10 @@ public:
 
 	void informOfSceneChange();
 private:
+	glm::mat4 m_viewMatrix;
+	glm::mat4 m_perspectiveProjectionMatrix; //The matrix used for all things in the world that render using perspective
+	glm::mat4 m_orthographicProjectionMatrix; //The matrix used for all UI elements that render orthographically
 
-	glm::mat4 m_viewMatrix = glm::mat4(1.f);
-	glm::mat4 m_perspectiveProjectionMatrix = glm::mat4(1.f); //The matrix used for all things in the world that render using perspective
-	glm::mat4 m_orthographicProjectionMatrix = glm::mat4(1.f); //The matrix used for all UI elements that render orthographically
-
- 
 	bool m_viewMatrixEverSet = false;
 	bool m_viewMatrixDirty = true;
 
