@@ -2,7 +2,6 @@
 #define INPUTCOMPONENT_HPP
 
 #include "src/systems/Subscriber.hpp"
-#include "src/systems/EventTypes.hpp"
 
 enum class UserInputActionsEnum
 {

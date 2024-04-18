@@ -2,7 +2,6 @@
 #define WINDOW_HPP
 
 #include "src/systems/Subscriber.hpp"
-#include "src/systems/EventTypes.hpp"
 #include "src/graphics/Shader.hpp"
 #include "src/graphics/Texture.hpp"
 

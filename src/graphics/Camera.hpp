@@ -12,8 +12,11 @@
 >>>>>>> 3ef75ed (upgrade events and allow for window resizing)
 =======
 #include "src/systems/Subscriber.hpp"
+<<<<<<< HEAD
 #include "src/systems/EventTypes.hpp"
 >>>>>>> a31d035 (rebrand and crashy)
+=======
+>>>>>>> 5257765 (remove imports)
 
 class Scene;
 
