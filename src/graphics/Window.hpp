@@ -2,8 +2,6 @@
 #define WINDOW_HPP
 
 #include "src/systems/Subscriber.hpp"
-#include "src/graphics/Shader.hpp"
-#include "src/graphics/Texture.hpp"
 
 class GraphicsComponent;
 struct Vertex;
@@ -39,9 +37,6 @@ private:
 	void setupOpenGL();
 
 	SDL_Window* m_window = NULL;
-
-	Texture m_texture;
-	Shader m_shader;
 
 	GLuint m_VAOId = 0; //Not correct. Need to set it.
 	GLuint m_vertexBufferObject = 1;

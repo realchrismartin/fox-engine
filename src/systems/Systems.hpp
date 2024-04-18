@@ -5,6 +5,8 @@
 #include "src/util/Logger.hpp"
 
 #include "src/graphics/Window.hpp"
+#include "src/graphics/Texture.hpp"
+#include "src/graphics/Shader.hpp"
 #include "src/graphics/Camera.hpp"
 #include "src/Clock.hpp"
 
@@ -21,6 +23,7 @@
 #include "src/systems/EventTypes.hpp"
 
 #include "src/components/config/TextConfig.hpp"
+#include "src/scenes/SceneConfig.hpp"
 
 static const float TIMESTEP = .0167f;
 
@@ -30,7 +33,7 @@ class Systems
 {
 public:
 
-	static const void runGame()
+	static const void runGame(const SceneConfig& firstScene, const std::string& texturePath)
 	{
 		//Try to initialize our windowing library.
 		//If we can't, bomb out here.
@@ -46,25 +49,16 @@ public:
 		Window window;
 		Camera camera(Window::DEFAULT_WINDOW_SIZE);
 
-		//Initialize the scene as the main menu.
+		Shader shader;
 
-		SceneConfig config;
+		shader.bind();
+		shader.updateIntUniform("textureSampler", 0);
+		shader.unbind();
 
-		GameEntityConfig titleText = GameEntityConfig()
-		.whenInit([](int entityUID, auto& scene)
-		{
-			TextConfig config;
-			config.textToDisplay = "fox n fowl";
-			config.charactersPerLine = 10;
-			config.centered = true;
-			scene.loadText(config, entityUID);
-			config.margin = { .15f,.15f };
-			config.fontSize = 15;
-			scene.loadText(config, entityUID);
-		});
+		Texture texture(texturePath);
 
-		config.addEntity(titleText);
-		Scene scene(config);
+		//Initialize the scene as the first scene
+		Scene scene(firstScene);
 
 		float currentTime = clock.getElapsedTimeInSeconds();
 		float accumulator = TIMESTEP;
@@ -86,7 +80,7 @@ public:
 				accumulator -= TIMESTEP;
 			}
 
-			render(window, scene, camera);
+			render(window, texture, shader, scene, camera);
 		}
 
 		Logger::log("See you next time, space fox boy...");
@@ -109,12 +103,12 @@ private:
 
 	//Run all of the game systems that pertain to rendering
 	//Assumes we called update first.
-	static const void render(Window& window, Scene& scene, Camera& camera)
+	static const void render(Window& window, Texture& texture, Shader& shader, Scene& scene, Camera& camera)
 	{
 		window.clear();
 
 		//Draw stuff to the window
-		runRenderSystem(window, scene, camera);
+		runRenderSystem(window, texture, shader, scene, camera);
 
 		window.display();
 	};
@@ -294,7 +288,7 @@ private:
 		}
 	}
 
-	static const void runRenderSystem(Window& window, Scene& scene, Camera& camera)
+	static const void runRenderSystem(Window& window, Texture& texture, Shader& shader, Scene& scene, Camera& camera)
 	{
 		std::vector<Vertex> vertices;
 		std::vector<GLuint> indices;
@@ -330,9 +324,16 @@ private:
 			vertices.insert(vertices.end(), model.getVertices().begin(), model.getVertices().end());
 		}
 
+		//For now we assume everything uses the same texture
+		texture.bind();
+		shader.bind();
+
 		//Send vertices, indices, and MVPs, then draw them.
 		//NB: as above, we send all of the MVP data even if we're not drawing everything in the scene
 		window.draw(vertices.size(), indices.size(), mvpTransformComponentPool.getComponentsInUse(), &vertices[0], &indices[0], (GLvoid*)mvpTransformComponentPool.getData());
+
+		shader.unbind();
+		texture.unbind();
 	}
 };
 

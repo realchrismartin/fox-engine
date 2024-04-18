@@ -4,6 +4,13 @@
 
 Shader::Shader()
 {
+<<<<<<< HEAD
+=======
+	//TODO: fix paths
+	std::string vertexShader = loadShader("../extern/fox-engine/shaders/vert.glsl");
+	std::string fragmentShader = loadShader("../extern/fox-engine/shaders/frag.glsl");
+	m_shaderProgramId = createShader(vertexShader, fragmentShader);
+>>>>>>> df440ab (Move content up)
 }
 
 Shader::~Shader()
@@ -14,14 +21,6 @@ Shader::~Shader()
 GLuint Shader::getShaderProgramId() const
 {
 	return m_shaderProgramId;
-}
-
-void Shader::activate()
-{
-	//TODO: perhaps don't always hardcode the same shaders here, chief ;)
-	std::string vertexShader = loadShader("../shaders/vert.glsl");
-	std::string fragmentShader = loadShader("../shaders/frag.glsl");
-	m_shaderProgramId = createShader(vertexShader, fragmentShader);
 }
 
 void Shader::bind()

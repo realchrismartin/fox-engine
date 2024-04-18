@@ -12,9 +12,6 @@ public:
 	Shader();
 	~Shader();
 
-	/// @brief Initialize the shader. This will compile the GLSL code and update the OpenGL context.
-	void activate();
-
 	/// @brief Bind the shader to the OpenGL context.
 	void bind();
 

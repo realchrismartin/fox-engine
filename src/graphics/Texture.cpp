@@ -2,19 +2,7 @@
 
 #include "extern/stb_image.h"
 
-Texture::Texture()
-{
-}
-
-Texture::~Texture()
-{
-	if (m_textureID > 0)
-	{
-		glDeleteTextures(1, &m_textureID);
-	}
-}
-
-void Texture::activate()
+Texture::Texture(const std::string& filePath) 
 {
 	// Create a texture object
 	glGenTextures(1, &m_textureID);
@@ -31,8 +19,7 @@ void Texture::activate()
 
 	int width, height, nrChannels;
 
-	//TODO: don't hardcode the texture used.
-	unsigned char* imageData = stbi_load("../img/sprite_sheet.png", &width, &height, &nrChannels, 0);
+	unsigned char* imageData = stbi_load(filePath.data(), &width, &height, &nrChannels, 0);
 
 	// Load texture data into the bound texture
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
@@ -41,6 +28,14 @@ void Texture::activate()
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	stbi_image_free(imageData);
+}
+
+Texture::~Texture()
+{
+	if (m_textureID > 0)
+	{
+		glDeleteTextures(1, &m_textureID);
+	}
 }
 
 void Texture::bind()

@@ -112,15 +112,6 @@ void Window::setupOpenGL()
 
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, m_shaderStorageBufferObject);
 
-	m_texture.activate();
-	m_texture.bind();
-
-	m_shader.activate();
-
-	m_shader.bind();
-	m_shader.updateIntUniform("textureSampler", 0);
-	m_shader.unbind();
-
 	//un-bind
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -159,9 +150,6 @@ void Window::draw(size_t vertexCount, size_t indexCount, size_t matrixCount, GLv
 		return;
 	}
 
-	m_shader.bind();
-	m_texture.bind();
-
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferObject);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementArrayBufferObject);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_shaderStorageBufferObject);
@@ -175,10 +163,6 @@ void Window::draw(size_t vertexCount, size_t indexCount, size_t matrixCount, GLv
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-	m_shader.unbind();
-	m_texture.unbind();
-
 }
 
 void Window::close()
