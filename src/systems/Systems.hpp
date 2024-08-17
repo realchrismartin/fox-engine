@@ -95,9 +95,9 @@ private:
 
 		pollEventSystem(window, scene, camera);
 		runInputProcessingSystem(scene, elapsedTime);
-		updateTriggerSystem(scene, elapsedTime);
 		runAnimationSystem(scene, elapsedTime);
 		runSceneGraphUpdateSystem(scene, camera);
+		updateTriggerSystem(scene, elapsedTime); //Runs after scene graph update so that positions are accurate.
 		cleanDirtyFlagsSystem(window, scene, camera);
 	};
 
@@ -157,8 +157,7 @@ private:
 
 	static const void runAnimationSystem(Scene& scene, float elapsedTime)
 	{
-		//World's dumbest animation system: just constantly cycle meshes at warp speed
-
+		//TODO: update the animation system to handle elapsed time
 		for (auto const& entity : EntityFilter<ModelComponent>(scene))
 		{
 			ModelComponent& model = scene.getComponent<ModelComponent>(entity);
@@ -169,6 +168,20 @@ private:
 			{
 				continue;
 			}
+
+			//If this entity has an input component, only animate if there is input (for now, for the player)
+			//TODO: this will make text animations not function properly if we want a text animation that can be interacted with.
+			if(scene.hasComponent<InputComponent>(entity))
+			{
+				InputComponent& component = scene.getComponent<InputComponent>(entity);
+				
+				if(!component.anyInputActive())
+				{
+					model.setActiveMesh(0);
+					continue;
+				}
+			}
+
 
 			size_t nextMesh = model.getActiveMeshIndex() + 1;
 
