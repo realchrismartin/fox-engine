@@ -100,9 +100,9 @@ void Window::setupOpenGL()
 	glEnableVertexAttribArray(texCoordLocation);
 	glEnableVertexAttribArray(mvpIndexLocation);
 
-	m_maxVerticesPerRender = 900000;
-	m_maxIndicesPerRender = 900000;
-	m_maxSSBOMatricesPerRender = 1000;
+	m_maxVerticesPerRender = 9000000;
+	m_maxIndicesPerRender = 9000000;
+	m_maxSSBOMatricesPerRender = 5000;
 
 	//Initialize the buffers with null data and their max sizes.
 	glBufferData(GL_ARRAY_BUFFER,m_maxVerticesPerRender * sizeof(Vertex), nullptr, GL_STATIC_DRAW);

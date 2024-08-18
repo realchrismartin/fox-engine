@@ -59,7 +59,7 @@ void Camera::updatePerspectiveProjectionMatrix(const glm::i32vec2& windowSize)
 	// Projection matrix : 45 degree Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
 
 	float ratio = (float)windowSize.x / (float)windowSize.y;
-	m_perspectiveProjectionMatrix = glm::perspective(glm::radians(90.0f), ratio, 1.f, 100.f);
+	m_perspectiveProjectionMatrix = glm::perspective(glm::radians(90.0f), ratio, 1.f, 500.f);
 }
 
 void Camera::updateOrthographicProjectionMatrix(const glm::i32vec2& windowSize)
@@ -118,7 +118,7 @@ void Camera::updateViewMatrix(Scene& scene)
 
 	if (cameraChanged || targetChanged || !m_viewMatrixEverSet)
 	{
-		m_viewMatrix = glm::lookAt(m_cameraCenter, m_cameraTarget, m_defaultCameraUpVector); //TODO: are these backward?
+		m_viewMatrix = glm::lookAt(m_cameraCenter, m_cameraTarget, m_defaultCameraUpVector); 
 
 		if (!m_viewMatrixEverSet)
 		{

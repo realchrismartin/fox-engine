@@ -13,7 +13,7 @@ struct ModelConfig
 
 	size_t frameCount = 1; //How many frames are in the animation.
 
-	std::vector<std::string> keyframeFilePaths = { "../img/mushroom/mushroom0.obj" };
+	std::vector<std::string> keyframeFilePaths = { "../img/cube.obj" };
 };
 
 #endif

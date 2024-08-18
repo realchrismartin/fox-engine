@@ -83,7 +83,7 @@ public:
 			render(window, texture, shader, scene, camera);
 		}
 
-		Logger::log("See you next time, space fox boy...");
+		Logger::log("See you next time!");
 	}
 
 private:
