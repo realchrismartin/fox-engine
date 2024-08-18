@@ -44,7 +44,7 @@ private:
 
 	std::set<UserInputActionsEnum> m_activeInputs;
 	std::unordered_map<UserInputActionsEnum, glm::vec2> m_actionCoordinates;
-	float m_translationFactor = .25f; //TODO
+	float m_translationFactor = .15f; //TODO
 };
 
 #endif
