@@ -31,11 +31,11 @@ TODO!
 
 ### Features
 
-- Entity-Component Architecture: `fox-engine` leverages generics to allow for the creation of arbitrary `Components` that are allocated at load-time and maintained in Memory Arenas. Localization of data allows for more efficient operations on batches of component data (e.g. when copying MVP Transform data to the GPU)
-- Scene Graph: `fox-engine` scenes are constructed as logical Graphs - entities with `TransformComponent`s can be transformed relative to one another.
-- Event Relay: synchronous message broker allows for sending and receiving arbitrary data without coupling elements directly.
-- Statically allocated content configuration: `Scene` configuration and `GameEntity` configuration can both be specified at compile-time and used/reused as needed. (For an example, see [Fox n' Fowl](https://github.com/realchrismartin/fnf))
-- Keyframe Animation (tweening): Supports animation of 3D Models using vertex linear interpolation
+- **Entity-Component Architecture**: `fox-engine` leverages generics to allow for the creation of arbitrary `Components` that are allocated at load-time and maintained in Memory Arenas. Localization of data allows for more efficient operations on batches of component data (e.g. when copying MVP Transform data to the GPU)
+- **Scene Graph**: `fox-engine` scenes are constructed as logical Graphs - entities with `TransformComponent`s can be transformed relative to one another.
+- **Event Relay**: synchronous message broker allows for sending and receiving arbitrary data without coupling elements directly.
+- **Statically allocated content**: `Scene` configuration and `GameEntity` configuration can both be specified at compile-time and used/reused as needed. 
+- **Keyframe Animation (tweening)**: Supports animation of 3D Models using vertex linear interpolation
 
 ### Usage 
 
