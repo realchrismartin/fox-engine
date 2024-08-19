@@ -3,7 +3,7 @@
   <h1>fox-engine</h1>
   
   <p>
-  3D Entity-Component Architecture Game Engine
+  3D Entity-Component-System Architecture Game Engine
   </p>
 
 </div>
@@ -19,9 +19,11 @@
 
 ## About the Project
 
-TODO!
+`fox-engine` is a game engine / C++ library that provides scaffolding for building a 3D game. The current version of the engine provides an efficient real-time rendering and content-building framework.
 
-[Fox n' Fowl](https://github.com/realchrismartin/fox-n-fowl).
+`fox-engine` uses an Entity-Component-System architecture to organize data and provide a series of extensible interfaces for content development purposes.
+
+For examples of the engine in action, see [Fox n' Fowl](https://github.com/realchrismartin/fox-n-fowl).
 
 ### Tech Stack
 
@@ -39,9 +41,8 @@ TODO!
 
 ### Usage 
 
-Head over to [Fox n' Fowl](https://github.com/realchrismartin/fox-n-fowl) for an example of the engine in action!
-
 `fox-engine` must be built and run on Windows for now. 
 
 - Recursively checkout this repository to obtain its dependencies.
 - Build the project using `cmake`.
+- `fox-engine` can be included as a static library in a `cmake` project.
