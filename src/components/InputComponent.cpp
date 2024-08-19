@@ -103,8 +103,6 @@ glm::vec3 InputComponent::getTranslationGivenInput()
 	{
 		switch (enumValue)
 		{
-			//TODO: remove
-			/*
 			case(UserInputActionsEnum::PRESSING_W):
 			{
 				vector += glm::vec3(0.f, 0.f, m_translationFactor);
@@ -115,7 +113,6 @@ glm::vec3 InputComponent::getTranslationGivenInput()
 				vector += glm::vec3(0.f,0.f,-1.f * m_translationFactor);
 				break;
 			}
-			*/
 			case(UserInputActionsEnum::PRESSING_A):
 			{
 				vector += glm::vec3(m_translationFactor, 0.f, 0.f);
@@ -144,8 +141,6 @@ glm::vec3 InputComponent::getRotationGivenInput()
 	{
 		switch (enumValue)
 		{
-			//TODO: remove
-			/*
 			case(UserInputActionsEnum::PRESSING_W):
 			{
 				vector = glm::vec3(0.f, 270.f, 0.f);
@@ -156,7 +151,6 @@ glm::vec3 InputComponent::getRotationGivenInput()
 				vector = glm::vec3(0.f, 90.f, 0.f);
 				break;
 			}
-			*/
 			case(UserInputActionsEnum::PRESSING_A):
 			{
 				vector = glm::vec3(0.f, 0.f, 0.f);
