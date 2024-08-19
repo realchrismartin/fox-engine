@@ -6,9 +6,10 @@
   3D Entity-Component-System Architecture Game Engine
   </p>
 
+  ![screenshot](img/preview.gif)
+
 </div>
 
-![screenshot](https://github.com/realchrismartin/fnf/blob/master/img/preview.gif)
 
 # Table of Contents
 
