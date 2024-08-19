@@ -35,7 +35,7 @@ TODO!
 - **Scene Graph**: `fox-engine` scenes are constructed as logical Graphs - entities with `TransformComponent`s can be transformed relative to one another.
 - **Event Relay**: synchronous message broker allows for sending and receiving arbitrary data without coupling elements directly.
 - **Statically allocated content**: `Scene` configuration and `GameEntity` configuration can both be specified at compile-time and used/reused as needed. 
-- **Keyframe Animation (tweening)**: Supports animation of 3D Models using vertex linear interpolation
+- **Keyframe Animation (tweening)**: Supports animation of 3D Models using linear interpolation of vertex data
 
 ### Usage 
 

@@ -2,7 +2,5 @@
 
 int main()
 {
-	Systems::runGame();
-
-	return 0;
+	return Systems::runGame();
 }

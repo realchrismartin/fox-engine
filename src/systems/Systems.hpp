@@ -33,7 +33,7 @@ class Systems
 {
 public:
 
-	static const void runGame(const SceneConfig& firstScene, const std::string& texturePath)
+	static const int runGame(const SceneConfig& firstScene, const std::string& texturePath)
 	{
 		//Try to initialize our windowing library.
 		//If we can't, bomb out here.
@@ -41,7 +41,7 @@ public:
 		{
 			SDL_Log("SDL_Init_VIDEO failed (%s)", SDL_GetError());
 			SDL_Quit();
-			return;
+			return 1;
 		}
 
 		//Initialize the game elements on the stack now. 
@@ -49,12 +49,16 @@ public:
 		Window window;
 		Camera camera(Window::DEFAULT_WINDOW_SIZE);
 
+		//For now, we only have one shader.
+		//Later, we should initialize all shaders/shader uniforms here
+		//Moreover, shaders should be provided by the client of this library.
 		Shader shader;
-
 		shader.bind();
 		shader.updateIntUniform("textureSampler", 0);
 		shader.unbind();
 
+		//For now, we have only one texture atlas.
+		//Later, if we need more, they should be initialized here.
 		Texture texture(texturePath);
 
 		//Initialize the scene as the first scene
@@ -84,6 +88,7 @@ public:
 		}
 
 		Logger::log("See you next time!");
+		return 0;
 	}
 
 private:
